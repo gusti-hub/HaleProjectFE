@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    font-family: "Poppins", sans-serif;
+}
 
 .textured-bg {
     background-color: #ffffff;
