@@ -1,4 +1,6 @@
+import axios from 'axios';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -28,7 +30,7 @@ const Login = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = { email: '', password: '' };
 
@@ -42,7 +44,18 @@ const Login = () => {
         setErrors(newErrors);
 
         if (!newErrors.email && !newErrors.password) {
-            console.log('Form submitted:', formData);
+            try {
+                const response = await axios.post('http://localhost:5000/api/signin', formData);
+                console.log('Token:', response.data.token);
+            } catch (error) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    setErrors({ ...newErrors, form: error.response.data.message });
+                    toast.error(error.response.data.message);
+                } else {
+                    setErrors({ ...newErrors, form: 'An error occurred. Please try again.' });
+                    toast.error('An error occurred. Please try again.');
+                }
+            }
         }
     };
 

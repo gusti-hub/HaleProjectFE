@@ -1,5 +1,7 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const Signup = () => {
 
@@ -13,6 +15,7 @@ const Signup = () => {
 
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [errors, setErrors] = useState({ name: '', email: '', password: '' });
+    const [successMessage, setSuccessMessage] = useState('');
 
     const validateName = (name) => {
         const nameRegex = /^[A-Za-z]+$/;
@@ -33,7 +36,7 @@ const Signup = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = { name: '', email: '', password: '' };
 
@@ -50,7 +53,15 @@ const Signup = () => {
         setErrors(newErrors);
 
         if (!newErrors.name && !newErrors.email && !newErrors.password) {
-            console.log('Form submitted:', formData);
+            try {
+                const response = await axios.post('http://localhost:5000/api/signup', formData);
+                setSuccessMessage(response.data.message);
+                console.log(successMessage);
+            } catch (error) {
+                setErrors({ ...newErrors, form: error.response.data.message });
+                console.log(error.response.data.message);
+                toast.error(error.response.data.message);
+            }
         }
     };
 
