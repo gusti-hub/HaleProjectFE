@@ -10,3 +10,7 @@ html {
     background-color: #ffffff;
     background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
 }
+
+table th, td {
+    padding: 0.5rem;
+}

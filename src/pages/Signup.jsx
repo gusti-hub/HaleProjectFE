@@ -56,10 +56,8 @@ const Signup = () => {
             try {
                 const response = await axios.post('http://localhost:5000/api/signup', formData);
                 setSuccessMessage(response.data.message);
-                console.log(successMessage);
             } catch (error) {
                 setErrors({ ...newErrors, form: error.response.data.message });
-                console.log(error.response.data.message);
                 toast.error(error.response.data.message);
             }
         }

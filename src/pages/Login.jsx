@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { backendServer } from '../utils/info';
 
 const Login = () => {
 
@@ -45,8 +46,9 @@ const Login = () => {
 
         if (!newErrors.email && !newErrors.password) {
             try {
-                const response = await axios.post('http://localhost:5000/api/signin', formData);
-                console.log('Token:', response.data.token);
+                const response = await axios.post(`${backendServer}/api/signin`, formData);
+                localStorage.setItem('token', response.data.token);
+                navigate("/admin-panel");
             } catch (error) {
                 if (error.response && error.response.data && error.response.data.message) {
                     setErrors({ ...newErrors, form: error.response.data.message });
@@ -113,11 +115,6 @@ const Login = () => {
                         </div>
                         <div className="w-full flex items-center justify-center">
                             <button className='w-full bg-main p-2 text-white text-base font-medium rounded-lg'>Continue</button>
-                        </div>
-                        <div className="w-full flex items-center justify-center text-sm">
-                            <div>Don't have an account? <span
-                                onClick={() => navigate("/sign-up")}
-                                className='text-main font-medium cursor-pointer'>Sign up</span></div>
                         </div>
                     </form>
                 </div>
