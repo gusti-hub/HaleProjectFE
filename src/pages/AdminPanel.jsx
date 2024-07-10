@@ -14,6 +14,8 @@ const AdminPanel = () => {
 
     const { menuID, handleMenuID } = useContext(AppContext);
 
+    const loggedInUser = localStorage.getItem('name');
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/');
@@ -51,6 +53,9 @@ const AdminPanel = () => {
 
                 <div className="w-full flex flex-col items-center justify-center">
                     <div className="w-full h-2 bg-main"></div>
+                    <div className="w-full flex items-center justify-start px-6 pt-4 text-lg">
+                        Welcome {loggedInUser},
+                    </div>
                     <div
                         onClick={handleLogout}
                         className="w-full flex items-center justify-start gap-4 p-6 py-4 cursor-pointer">

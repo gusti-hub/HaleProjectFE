@@ -48,6 +48,7 @@ const Login = () => {
             try {
                 const response = await axios.post(`${backendServer}/api/signin`, formData);
                 localStorage.setItem('token', response.data.token);
+                localStorage.setItem('name', response.data.name);
                 navigate("/admin-panel");
             } catch (error) {
                 if (error.response && error.response.data && error.response.data.message) {
