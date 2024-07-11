@@ -1,34 +1,146 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { IoPersonAdd } from 'react-icons/io5';
 import { Dialog } from '@material-tailwind/react';
+import axios from 'axios';
+import { backendServer } from '../../utils/info';
+import { IoMdAddCircle } from 'react-icons/io';
+import toast from 'react-hot-toast';
+import { FaEdit } from 'react-icons/fa';
+import { MdDeleteOutline } from 'react-icons/md';
 
 const ForEmployee = () => {
-
     const [users, setUsers] = useState([]);
+    const [options, setOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState('');
+    const [customOption, setCustomOption] = useState('');
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '', role: 'Designer' });
+    const [isChecked, setIsChecked] = useState(false);
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen((cur) => !cur);
+    const [initialSelectedOption, setInitialSelectedOption] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingUserId, setEditingUserId] = useState(null);
 
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '', role: '' });
+    const handleOpen = () => {
+        setOpen((cur) => !cur);
+        if (!cur) {
+            resetForm();
+        }
+    };
+
+    const resetForm = () => {
+        setFormData({ name: '', email: '', password: '', title: '', role: '' });
+        setSelectedOption('');
+        setIsEditing(false);
+        setEditingUserId(null);
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const [isChecked, setIsChecked] = useState(false);
-
     const handleCheckboxChange = (event) => {
         setIsChecked(event.target.checked);
     };
 
-    // if (loading) return (
-    //     <div className='w-full flex items-center justify-center'>
-    //         <CircularProgress />
-    //     </div>
-    // )
+    const handleSelectChange = (event) => {
+        setSelectedOption(event.target.value);
+        setFormData({ ...formData, role: event.target.value });
+    };
+
+    const handleCustomOptionChange = (event) => {
+        setCustomOption(event.target.value);
+    };
+
+    const handleAddCustomOption = () => {
+        if (customOption.trim() !== '') {
+            const newOption = { id: customOption, name: customOption };
+            setOptions(prevOptions => [...prevOptions, newOption]);
+            setSelectedOption(customOption);
+            setFormData({ ...formData, role: customOption });
+            setCustomOption('');
+        }
+    };
+
+    const fetchOptions = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/roleOptions`);
+            if (Array.isArray(response.data)) {
+                setOptions(response.data);
+            } else {
+                throw new Error('Response data is not an array');
+            }
+            setLoading(false);
+        } catch (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/employees`);
+            setUsers(response.data.users);
+            setLoading(false);
+        } catch (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+        fetchOptions();
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (formData.name.length > 0 && formData.email.length > 0 && (isEditing || formData.password.length >= 8) && formData.role.length > 0) {
+            try {
+                const response = isEditing
+                    ? await axios.put(`${backendServer}/api/employee/${editingUserId}`, formData)
+                    : await axios.post(`${backendServer}/api/empreg`, formData);
+                toast.success(response.data.message);
+                resetForm();
+                setOpen(false);
+                fetchUsers();
+            } catch (error) {
+                toast.error(error.response.data.message);
+                resetForm();
+                setOpen(false);
+                fetchUsers();
+            }
+        }
+    };
+
+    const handleEditClick = (user) => {
+        setFormData({ ...user, password: '' });
+        setSelectedOption(user.role);
+        setIsEditing(true);
+        setEditingUserId(user._id);
+        setOpen(true);
+    };
+
+    const handleDeleteClick = async (userId) => {
+        try {
+            const response = await axios.delete(`${backendServer}/api/employee/${userId}`);
+            toast.success(response.data.message);
+            fetchUsers();
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message);
+        }
+    };
+
+    if (loading) return (
+        <div className='w-full flex items-center justify-center'>
+            <CircularProgress />
+        </div>
+    );
 
     if (error) return (
         <div className="w-full flex items-center justify-center text-red-600 font-medium">
@@ -37,14 +149,14 @@ const ForEmployee = () => {
     );
 
     return (
-        <div className="w-full flex lg:hidden flex-col items-center justify-start bg-white p-4 rounded-lg gap-8">
+        <div className="w-full flex flex-col items-center justify-start bg-white p-4 rounded-lg gap-8">
             <Dialog
                 size="sm"
                 open={open}
                 handler={handleOpen}
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
-                <form
+                <form onSubmit={handleSubmit}
                     className='w-full flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <label htmlFor="name">Name:</label>
@@ -52,7 +164,7 @@ const ForEmployee = () => {
                             value={formData.name}
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="name" id="" />
+                            type="text" placeholder='Type here...' name="name" id="name" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <label htmlFor="email">Email:</label>
@@ -60,23 +172,23 @@ const ForEmployee = () => {
                             value={formData.email}
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="email" placeholder='Type here...' name="email" id="" />
+                            type="email" placeholder='Type here...' name="email" id="email" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="password">Password: (Minimum of 8 characters)</label>
+                        <label htmlFor="password">Password: {isEditing ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
                         {
                             isChecked ?
                                 <input
                                     value={formData.password}
                                     onChange={handleInputChange}
                                     className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                                    type="text" placeholder='Type here...' name="password" id="" />
+                                    type="text" placeholder='Type here...' name="password" id="password" />
                                 :
                                 <input
                                     value={formData.password}
                                     onChange={handleInputChange}
                                     className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                                    type="password" placeholder='Type here...' name="password" id="" />
+                                    type="password" placeholder='Type here...' name="password" id="password" />
                         }
                     </div>
                     <div className="w-full flex items-center justify-start gap-2">
@@ -84,7 +196,7 @@ const ForEmployee = () => {
                             type="checkbox"
                             checked={isChecked}
                             onChange={handleCheckboxChange}
-                            name="" id="" />
+                            name="showPassword" id="showPassword" />
                         <div className='text-sm'>Show password</div>
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
@@ -93,16 +205,39 @@ const ForEmployee = () => {
                             value={formData.title}
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="title" id="" />
+                            type="text" placeholder='Type here...' name="title" id="title" />
                     </div>
-                    <div className="w-full flex items-center justify-start gap-4 text-base">
-                        <label htmlFor="role">Role:</label>
-                        <select className='p-1' name="role">
-                            <option value="">Director</option>
-                        </select>
+                    <div className="w-full flex items-center justify-between">
+                        <div className="w-full flex items-center justify-start gap-2 text-base">
+                            <label htmlFor="role">Role:</label>
+                            <select value={selectedOption} onChange={handleSelectChange}
+                                className='p-1 outline-none' name="role" id="role">
+                                <option value="" disabled>Select an option</option>
+                                {options.map(option => (
+                                    <option key={option.id} value={option.name}>
+                                        {option.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className='flex items-center justify-center gap-2'>
+                            <input
+                                className='w-[8rem] p-1 border-solid border-b-black border-b-2 outline-none'
+                                type="text"
+                                value={customOption}
+                                onChange={handleCustomOptionChange}
+                                placeholder="Add custom role"
+                            />
+                            <div onClick={handleAddCustomOption} className="flex items-center justify-center p-1 bg-main rounded-md cursor-pointer">
+                                <IoMdAddCircle className='text-white text-2xl' />
+                            </div>
+                        </div>
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <button className='w-full bg-main p-2 text-white text-base font-medium rounded-lg'>Register</button>
+                        <button onClick={handleSubmit}
+                            type="button" className='w-full bg-main p-2 text-white text-base font-medium rounded-lg'>
+                            {isEditing ? 'Update' : 'Register'}
+                        </button>
                     </div>
                 </form>
             </Dialog>
@@ -113,6 +248,43 @@ const ForEmployee = () => {
                     <div>ADD</div>
                 </button>
             </div>
+            {
+                users.length === 0 ?
+                    <div className="w-full flex items-center justify-start text-lg font-medium">
+                        No records found!
+                    </div> :
+                    <table className='border-collapse w-full'>
+                        <thead>
+                            <tr className='text-main text-lg font-medium'>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Title</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                users.map(user => {
+                                    return (
+                                        <tr key={user._id} className='font-normal text-base text-center'>
+                                            <td>{user.name}</td>
+                                            <td>{user.email}</td>
+                                            <td>{user.title}</td>
+                                            <td>{user.role}</td>
+                                            <td className='w-full flex items-center justify-center gap-4'>
+                                                <FaEdit onClick={() => handleEditClick(user)}
+                                                    className='text-xl cursor-pointer' />
+                                                <MdDeleteOutline onClick={() => handleDeleteClick(user._id)}
+                                                    className='text-2xl text-red-600 cursor-pointer' />
+                                            </td>
+                                        </tr>
+                                    )
+                                })
+                            }
+                        </tbody>
+                    </table>
+            }
         </div>
     );
 };

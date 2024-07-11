@@ -16,6 +16,8 @@ const AdminPanel = () => {
 
     const loggedInUser = localStorage.getItem('name');
 
+    const userType = localStorage.getItem('type');
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/');
@@ -54,7 +56,7 @@ const AdminPanel = () => {
                 <div className="w-full flex flex-col items-center justify-center">
                     <div className="w-full h-2 bg-main"></div>
                     <div className="w-full flex items-center justify-start px-6 pt-4 text-lg">
-                        Welcome {loggedInUser},
+                        Welcome {loggedInUser} ({userType}),
                     </div>
                     <div
                         onClick={handleLogout}
