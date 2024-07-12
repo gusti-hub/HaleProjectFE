@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { FaEdit } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
 import { backendServer } from '../../utils/info';
+import { FiSearch } from 'react-icons/fi';
 
 const ForClient = () => {
     const [users, setUsers] = useState([]);
@@ -18,6 +19,7 @@ const ForClient = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '' });
     const [editMode, setEditMode] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleCheckboxChange = (event) => {
         setIsChecked(event.target.checked);
@@ -91,9 +93,17 @@ const ForClient = () => {
         }
     };
 
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     if (loading) return (
         <div className='w-full flex items-center justify-center'>
@@ -167,55 +177,62 @@ const ForClient = () => {
                             type="text" placeholder='Type here...' name="title" id="title" />
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <button className='w-full bg-main p-2 text-white text-base font-medium rounded-lg'>
+                        <button className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
                             {editMode ? 'Update' : 'Register'}
                         </button>
                     </div>
                 </form>
             </Dialog>
 
-            <div className="w-full flex items-center justify-end">
-                <button
-                    onClick={handleOpen}
-                    className='flex items-center justify-center gap-2 px-4 py-2 rounded-[25px] bg-main text-white text-lg'>
+            <div className="w-full flex items-center justify-between">
+                <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
+                    <FiSearch className='text-xl text-gray-600 ml-2' />
+                    <input
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        className='outline-none p-2 mr-1 text-gray-600'
+                        type="search" placeholder='Search by name' />
+                </div>
+                <button onClick={handleOpen}
+                    className='flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
                     <IoPersonAdd />
                     <div>ADD</div>
                 </button>
             </div>
 
             {
-                users.length === 0 ?
+                filteredUsers.length === 0 ?
                     <div className="w-full flex items-center justify-start text-lg font-medium">
                         No records found!
                     </div> :
                     <table className='border-collapse w-full'>
                         <thead>
-                            <tr className='text-main text-lg font-medium'>
+                            <tr className='text-gray-700 text-lg'>
+                                <th>Actions</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Title</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                users.map(user => {
-                                    return (
-                                        <tr key={user._id} className='font-normal text-base text-center'>
-                                            <td>{user.name}</td>
-                                            <td>{user.email}</td>
-                                            <td>{user.title}</td>
-                                            <td className='w-full flex items-center justify-center gap-4'>
+                                filteredUsers.map(user => (
+                                    <tr key={user._id} className='text-base text-center text-gray-700'>
+                                        <td>
+                                            <div className='w-full flex items-center justify-center gap-4'>
                                                 <FaEdit
                                                     className='text-xl cursor-pointer'
                                                     onClick={() => handleEditClick(user)} />
                                                 <MdDeleteOutline
                                                     className='text-2xl text-red-600 cursor-pointer'
                                                     onClick={() => handleDeleteClick(user._id)} />
-                                            </td>
-                                        </tr>
-                                    )
-                                })
+                                            </div>
+                                        </td>
+                                        <td>{user.name}</td>
+                                        <td>{user.email}</td>
+                                        <td>{user.title}</td>
+                                    </tr>
+                                ))
                             }
                         </tbody>
                     </table>

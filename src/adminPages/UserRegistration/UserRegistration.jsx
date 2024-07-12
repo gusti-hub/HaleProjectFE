@@ -11,9 +11,9 @@ const UserRegistration = () => {
         handleUserReg(e.target.value);
     }
     return (
-        <div className="w-full flex flex-col items-start justify-center gap-4">
-            <div className="w-full text-left text-white text-3xl font-medium">User Registration</div>
-            <div className="w-full h-[2px] bg-white"></div>
+        <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
+            <div className="w-full text-left text-gray-900 text-2xl font-medium">User Registration</div>
+            <div className="w-full h-[2px] bg-gray-300"></div>
             <div className="w-full flex items-center justify-start gap-16">
                 <div className="flex items-center justify-center gap-2">
                     <input 
@@ -22,7 +22,7 @@ const UserRegistration = () => {
                     value="emp"
                     checked={userReg === "emp"}
                     onChange={handleChange} />
-                    <div className="text-white text-lg">Employee</div>
+                    <div className="text-gray-800 text-lg">Employee</div>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                     <input 
@@ -31,7 +31,7 @@ const UserRegistration = () => {
                     value="clt"
                     checked={userReg === "clt"}
                     onChange={handleChange} />
-                    <div className="text-white text-lg">Client</div>
+                    <div className="text-gray-800 text-lg">Client</div>
                 </div>
             </div>
             {

@@ -11,6 +11,17 @@ html {
     background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
 }
 
-table th, td {
+table th, td, tr {
     padding: 0.5rem;
+    border: 2px solid #e0e0e0;
 }
+
+table th {
+    background: #F9FAFC;
+}
+
+.minHeight {
+    min-height: calc(100vh - 3.5rem);
+}
+
+

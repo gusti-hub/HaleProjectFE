@@ -8,6 +8,7 @@ import { IoMdAddCircle } from 'react-icons/io';
 import toast from 'react-hot-toast';
 import { FaEdit } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
+import { FiSearch } from 'react-icons/fi';
 
 const ForEmployee = () => {
     const [users, setUsers] = useState([]);
@@ -22,6 +23,7 @@ const ForEmployee = () => {
     const [initialSelectedOption, setInitialSelectedOption] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleOpen = () => {
         setOpen((cur) => !cur);
@@ -136,6 +138,14 @@ const ForEmployee = () => {
         }
     };
 
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     if (loading) return (
         <div className='w-full flex items-center justify-center'>
             <CircularProgress />
@@ -228,56 +238,67 @@ const ForEmployee = () => {
                                 onChange={handleCustomOptionChange}
                                 placeholder="Add custom role"
                             />
-                            <div onClick={handleAddCustomOption} className="flex items-center justify-center p-1 bg-main rounded-md cursor-pointer">
+                            <div onClick={handleAddCustomOption} className="flex items-center justify-center p-1 bg-[#7F55DE] rounded-md cursor-pointer">
                                 <IoMdAddCircle className='text-white text-2xl' />
                             </div>
                         </div>
                     </div>
                     <div className="w-full flex items-center justify-center">
                         <button onClick={handleSubmit}
-                            type="button" className='w-full bg-main p-2 text-white text-base font-medium rounded-lg'>
+                            type="button" className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
                             {isEditing ? 'Update' : 'Register'}
                         </button>
                     </div>
                 </form>
             </Dialog>
-            <div className="w-full flex items-center justify-end">
+            <div className="w-full flex items-center justify-between">
+                <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
+                    <FiSearch className='text-xl text-gray-600 ml-2' />
+                    <input
+                        className='outline-none p-2 mr-1 text-gray-600'
+                        type="search" placeholder='Search by name'
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                    />
+                </div>
                 <button onClick={handleOpen}
-                    className='flex items-center justify-center gap-2 px-4 py-2 rounded-[25px] bg-main text-white text-lg'>
+                    className='flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
                     <IoPersonAdd />
                     <div>ADD</div>
                 </button>
             </div>
             {
-                users.length === 0 ?
+                filteredUsers.length === 0 ?
                     <div className="w-full flex items-center justify-start text-lg font-medium">
                         No records found!
                     </div> :
-                    <table className='border-collapse w-full'>
+                    <table className='w-full border-collapse'>
                         <thead>
-                            <tr className='text-main text-lg font-medium'>
+                            <tr className='text-gray-700 text-lg'>
+                                <th>Actions</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Title</th>
                                 <th>Role</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {
-                                users.map(user => {
+                                filteredUsers.map(user => {
                                     return (
-                                        <tr key={user._id} className='font-normal text-base text-center'>
+                                        <tr key={user._id} className='text-base text-center text-gray-700'>
+                                            <td>
+                                                <div className='w-full flex items-center justify-center gap-4'>
+                                                    <FaEdit onClick={() => handleEditClick(user)}
+                                                        className='text-xl cursor-pointer' />
+                                                    <MdDeleteOutline onClick={() => handleDeleteClick(user._id)}
+                                                        className='text-2xl text-red-600 cursor-pointer' />
+                                                </div>
+                                            </td>
                                             <td>{user.name}</td>
                                             <td>{user.email}</td>
                                             <td>{user.title}</td>
                                             <td>{user.role}</td>
-                                            <td className='w-full flex items-center justify-center gap-4'>
-                                                <FaEdit onClick={() => handleEditClick(user)}
-                                                    className='text-xl cursor-pointer' />
-                                                <MdDeleteOutline onClick={() => handleDeleteClick(user._id)}
-                                                    className='text-2xl text-red-600 cursor-pointer' />
-                                            </td>
                                         </tr>
                                     )
                                 })
