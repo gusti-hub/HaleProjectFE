@@ -9,6 +9,7 @@ import UserRegistration from '../adminPages/UserRegistration/UserRegistration';
 import { FaArrowLeft, FaArrowRight, FaRegUser, FaUserCircle, FaUsers } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiUsers } from 'react-icons/fi';
+import SalesOrder from '../adminPages/SalesOrder/SalesOrder';
 
 const AdminPanel = () => {
 
@@ -28,7 +29,7 @@ const AdminPanel = () => {
     const [isExpanded, setExpanded] = useState(true);
 
     return (
-        <div className="w-full flex items-center justify-center bg-bgmain p-4">
+        <div className="w-full flex items-center justify-center">
             <div className="w-full flex items-start justify-center border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg">
                 <div className={`${isExpanded ? "w-[20%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
                     <div className="w-full flex flex-col items-center justify-start px-2">
@@ -80,6 +81,7 @@ const AdminPanel = () => {
                 <div className="w-full minHeight flex items-start justify-center bg-white p-4">
                     {
                         menuID === 1 ? <Dashboard />
+                        : menuID === 2 ? <SalesOrder /> 
                             : menuID === 3 ? <UserRegistration /> : ""
                     }
                 </div>

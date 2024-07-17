@@ -15,7 +15,7 @@ const ForEmployee = () => {
     const [options, setOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState('');
     const [customOption, setCustomOption] = useState('');
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '', role: 'Designer' });
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '', role: '' });
     const [isChecked, setIsChecked] = useState(false);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -262,8 +262,8 @@ const ForEmployee = () => {
                     />
                 </div>
                 <button onClick={handleOpen}
-                    className='flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
-                    <IoPersonAdd />
+                    className='flex items-center justify-center gap-3 px-5 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
+                    <IoPersonAdd className='text-base' />
                     <div>ADD</div>
                 </button>
             </div>
@@ -290,9 +290,9 @@ const ForEmployee = () => {
                                             <td>
                                                 <div className='w-full flex items-center justify-center gap-4'>
                                                     <FaEdit onClick={() => handleEditClick(user)}
-                                                        className='text-xl cursor-pointer' />
+                                                        className='text-lg cursor-pointer' />
                                                     <MdDeleteOutline onClick={() => handleDeleteClick(user._id)}
-                                                        className='text-2xl text-red-600 cursor-pointer' />
+                                                        className='text-xl text-red-600 cursor-pointer' />
                                                 </div>
                                             </td>
                                             <td>{user.name}</td>

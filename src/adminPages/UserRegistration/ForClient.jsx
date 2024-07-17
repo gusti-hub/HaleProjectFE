@@ -194,8 +194,8 @@ const ForClient = () => {
                         type="search" placeholder='Search by name' />
                 </div>
                 <button onClick={handleOpen}
-                    className='flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
-                    <IoPersonAdd />
+                    className='flex items-center justify-center gap-3 px-5 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
+                    <IoPersonAdd className='text-base' />
                     <div>ADD</div>
                 </button>
             </div>
@@ -221,10 +221,10 @@ const ForClient = () => {
                                         <td>
                                             <div className='w-full flex items-center justify-center gap-4'>
                                                 <FaEdit
-                                                    className='text-xl cursor-pointer'
+                                                    className='text-lg cursor-pointer'
                                                     onClick={() => handleEditClick(user)} />
                                                 <MdDeleteOutline
-                                                    className='text-2xl text-red-600 cursor-pointer'
+                                                    className='text-xl text-red-600 cursor-pointer'
                                                     onClick={() => handleDeleteClick(user._id)} />
                                             </div>
                                         </td>

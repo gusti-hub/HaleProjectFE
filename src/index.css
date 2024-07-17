@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html {
-    font-family: "Poppins", sans-serif;
+    font-family: "Inter", sans-serif;
 }
 
 .textured-bg {
@@ -11,9 +11,13 @@ html {
     background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
 }
 
-table th, td, tr {
+table th,
+td,
+tr {
     padding: 0.5rem;
     border: 2px solid #e0e0e0;
+    font-size: 14px;
+    text-align: center;
 }
 
 table th {
@@ -21,7 +25,5 @@ table th {
 }
 
 .minHeight {
-    min-height: calc(100vh - 3.5rem);
+    min-height: calc(100vh - 1.5rem);
 }
-
-
