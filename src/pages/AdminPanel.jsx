@@ -19,6 +19,8 @@ const AdminPanel = () => {
 
     const loggedInUser = localStorage.getItem('name');
 
+    const loggedInUserID = localStorage.getItem('userId');
+
     const userType = localStorage.getItem('type');
 
     const handleLogout = () => {
@@ -27,6 +29,8 @@ const AdminPanel = () => {
     }
 
     const [isExpanded, setExpanded] = useState(true);
+
+    console.log();
 
     return (
         <div className="w-full flex items-center justify-center">

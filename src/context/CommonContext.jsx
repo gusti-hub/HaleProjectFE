@@ -16,9 +16,15 @@ const AppProvider = ({ children }) => {
         setUserReg(val);
     }
 
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = () => {
+        setOpen((cur) => !cur);
+    };
+
     return (
         <AppContext.Provider
-            value={{menuID, handleMenuID, userReg, handleUserReg}}
+            value={{menuID, handleMenuID, userReg, handleUserReg, open, handleOpen}}
         >
             {children}
         </AppContext.Provider>
