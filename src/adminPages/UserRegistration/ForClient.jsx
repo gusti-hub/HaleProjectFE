@@ -65,6 +65,10 @@ const ForClient = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (formData.name.length === 0 || formData.email.length === 0) {
+            toast.error("Can't submit empty form or check password!"); setOpen(false);
+        }
+
         if (formData.name.length > 0 && formData.email.length > 0 && (editMode || formData.password.length >= 8)) {
             try {
                 const response = editMode
@@ -128,7 +132,10 @@ const ForClient = () => {
                 <form onSubmit={handleSubmit}
                     className='w-full flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="name">Name:</label>
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="name">Name:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         <input
                             value={formData.name}
                             onChange={handleInputChange}
@@ -136,7 +143,10 @@ const ForClient = () => {
                             type="text" placeholder='Type here...' name="name" id="name" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="email">Email:</label>
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="email">Email:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         <input
                             value={formData.email}
                             onChange={handleInputChange}
@@ -144,7 +154,10 @@ const ForClient = () => {
                             type="email" placeholder='Type here...' name="email" id="email" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="password">Password: {editMode ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="password">Password: {editMode ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         {
                             isChecked ?
                                 <input

@@ -38,12 +38,17 @@ const Comments = ({ id }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (newComment.body.length === 0) {
+            toast.error("Can't submit empty comment!");
+        }
         try {
-            const response = await axios.post(`${backendServer}/api/newComment`, newComment);
-            setLoading(false);
-            toast.success(response.data.message);
-            fetchAllComments();
-            resetForm();
+            if (newComment.body.length > 0) {
+                const response = await axios.post(`${backendServer}/api/newComment`, newComment);
+                setLoading(false);
+                toast.success(response.data.message);
+                fetchAllComments();
+                resetForm();
+            }
         } catch (error) {
             setLoading(false);
             setError(error.message);
@@ -51,8 +56,6 @@ const Comments = ({ id }) => {
             resetForm();
         }
     }
-
-    console.log(comment);
 
     if (loading) return (
         <div className='w-full flex items-center justify-center p-4'>

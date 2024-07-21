@@ -101,6 +101,10 @@ const ForEmployee = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (formData.name.length === 0 || formData.email.length === 0 || formData.role.length === 0) {
+            toast.error("Can't submit empty form or check password!"); setOpen(false);
+        }
+
         if (formData.name.length > 0 && formData.email.length > 0 && (isEditing || formData.password.length >= 8) && formData.role.length > 0) {
             try {
                 const response = isEditing
@@ -169,7 +173,10 @@ const ForEmployee = () => {
                 <form onSubmit={handleSubmit}
                     className='w-full flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="name">Name:</label>
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="name">Name:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         <input
                             value={formData.name}
                             onChange={handleInputChange}
@@ -177,7 +184,10 @@ const ForEmployee = () => {
                             type="text" placeholder='Type here...' name="name" id="name" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="email">Email:</label>
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="email">Email:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         <input
                             value={formData.email}
                             onChange={handleInputChange}
@@ -185,7 +195,11 @@ const ForEmployee = () => {
                             type="email" placeholder='Type here...' name="email" id="email" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="password">Password: {isEditing ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
+
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="password">Password: {isEditing ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         {
                             isChecked ?
                                 <input
@@ -220,6 +234,7 @@ const ForEmployee = () => {
                     <div className="w-full flex items-center justify-between">
                         <div className="w-full flex items-center justify-start gap-2 text-base">
                             <label htmlFor="role">Role:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                             <select value={selectedOption} onChange={handleSelectChange}
                                 className='p-1 outline-none' name="role" id="role">
                                 <option value="" disabled>Select an option</option>

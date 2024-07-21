@@ -113,15 +113,20 @@ const Project = () => {
 
     const addSection = async (e) => {
         e.preventDefault();
-        try {
-            const response = await axios.post(`${backendServer}/api/addSection`, section);
-            setSection({ projectId: address.id, secname: '' });
-            toast.success(response.data.message);
+        if (section.secname.length === 0) {
+            toast.error("Fill the mandatory field!");
             setOpenForm(false);
-            fetchSections();
-        } catch (error) {
-            toast.error(error.response.data.message);
-            setOpenForm(false);
+        } else {
+            try {
+                const response = await axios.post(`${backendServer}/api/addSection`, section);
+                setSection({ projectId: address.id, secname: '' });
+                toast.success(response.data.message);
+                setOpenForm(false);
+                fetchSections();
+            } catch (error) {
+                toast.error(error.response.data.message);
+                setOpenForm(false);
+            }
         }
     }
 
@@ -234,6 +239,7 @@ const Project = () => {
                                     <div className="w-full flex items-center justify-between">
                                         <div className="flex items-center justify-center gap-2">
                                             <label htmlFor="secname" className='font-medium'>Section:</label>
+                                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                                             <input value={section.secname} onChange={handleInputChange}
                                                 className='outline-none p-1 border-b border-solid border-black' type="text" name="secname" />
                                         </div>
@@ -246,13 +252,15 @@ const Project = () => {
                             {
                                 sections.length == 0 ? <div className="w-full items-center justify-start font-medium py-2">Add new section to begin.</div> :
                                     sections.map(section => (
-                                        <ProjectItem 
-                                            key={section._id} 
-                                            name={section.secname} 
-                                            id={section._id} 
-                                            isOpen={dialogOpen && activeProjectId === section._id} 
+                                        <ProjectItem
+                                            key={section._id}
+                                            name={section.secname}
+                                            id={section._id}
+                                            isOpen={dialogOpen && activeProjectId === section._id}
                                             handleOpen={() => handleOpen(section._id)}
                                             handleClose={handleClose}
+                                            addressID={address.id}
+                                            fetchSections={fetchSections}
                                         />
                                     ))
                             }

@@ -1,4 +1,6 @@
+import axios from 'axios';
 import React, { createContext, useState } from 'react';
+import { backendServer } from '../utils/info';
 
 const AppContext = createContext();
 
@@ -24,7 +26,7 @@ const AppProvider = ({ children }) => {
 
     return (
         <AppContext.Provider
-            value={{menuID, handleMenuID, userReg, handleUserReg, open, handleOpen}}
+            value={{ menuID, handleMenuID, userReg, handleUserReg, open, handleOpen }}
         >
             {children}
         </AppContext.Provider>

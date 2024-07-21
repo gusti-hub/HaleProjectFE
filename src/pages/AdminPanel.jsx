@@ -56,7 +56,7 @@ const AdminPanel = () => {
                                 onClick={() => handleMenuID(2)}
                                 className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 2 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
                                 <AiOutlineProduct className={`text-2xl ${menuID === 2 ? 'text-black' : 'text-gray-800'}`} />
-                                <div className={`font-medium text-base text-nowrap ${menuID === 2 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Sales Order</div>
+                                <div className={`font-medium text-base text-nowrap ${menuID === 2 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Project Management</div>
                             </div>
                             <div
                                 onClick={() => handleMenuID(3)}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FiSearch } from 'react-icons/fi';
+import { FiMinusCircle, FiSearch } from 'react-icons/fi';
 import { IoMdAdd, IoMdAddCircleOutline } from 'react-icons/io';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Dialog } from '@material-tailwind/react';
@@ -89,6 +89,10 @@ const SalesOrder = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.name.length === 0 && formData.owner.length === 0 && formData.client.length === 0) {
+            toast.error("Can't submit empty fields!");
+            setOpen(false);
+        }
         try {
             if (formData.name.length > 0 && formData.owner.length > 0 && formData.client.length > 0) {
                 const response = await axios.post(`${backendServer}/api/productreg`, formData);
@@ -117,7 +121,6 @@ const SalesOrder = () => {
             const response = await axios.get(`${backendServer}/api/project/${_id}`);
             setCurrProject(response.data);
             setUserList(response.data.invitedUsers);
-            console.log(userList);
         } catch (error) {
 
         }
@@ -140,6 +143,17 @@ const SalesOrder = () => {
         }
     }
 
+    const removeInvitedUser = async (name) => {
+        try {
+            const response = await axios.put(`${backendServer}/api//removeinviteduser/${currProject._id}`, { name: name });
+            toast.success(response.data.message);
+            await getUserListHandler(currProject._id);
+        } catch (error) {
+            toast.error(error.message);
+            await getUserListHandler(currProject._id);
+        }
+    }
+
     //button actions
     const progressButtonClick = async (_id, status) => {
         try {
@@ -153,6 +167,16 @@ const SalesOrder = () => {
             setMenuOpen(null);
         }
     }
+
+    const handleDeleteProject = async (_id) => {
+        try {
+            const response = await axios.delete(`${backendServer}/api/project/${_id}`);
+            toast.success(response.data.message);
+            fetchSalesData();
+        } catch (error) {
+            toast.error(error.response.data.message);
+        }
+    };
 
     const filteredSales = allSales.filter(sale =>
         sale.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -172,7 +196,7 @@ const SalesOrder = () => {
 
     return (
         <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
-            <div className="w-full text-left text-gray-900 text-2xl font-medium">Sales Order</div>
+            <div className="w-full text-left text-gray-900 text-2xl font-medium">Project Management</div>
             <div className="w-full h-[2px] bg-gray-300"></div>
 
             <Dialog
@@ -188,7 +212,10 @@ const SalesOrder = () => {
                             className='cursor-pointer text-xl' />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="name">Project Name:</label>
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="name">Project Name:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         <input
                             value={formData.name}
                             onChange={handleInputChange}
@@ -196,7 +223,10 @@ const SalesOrder = () => {
                             type="text" placeholder='Type here...' name="name" id="name" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="desc">Project Description:</label>
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="desc">Project Description:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
                         <input
                             value={formData.desc}
                             onChange={handleInputChange}
@@ -205,6 +235,7 @@ const SalesOrder = () => {
                     </div>
                     <div className="w-full flex items-center justify-start gap-2 text-base">
                         <label htmlFor="owner">Project Owner:</label>
+                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                         <select
                             value={formData.owner}
                             onChange={handleInputChange}
@@ -217,6 +248,7 @@ const SalesOrder = () => {
                     </div>
                     <div className="w-full flex items-center justify-start gap-2 text-base">
                         <label htmlFor="client">For Client:</label>
+                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                         <select
                             value={formData.client}
                             onChange={handleInputChange}
@@ -290,36 +322,41 @@ const SalesOrder = () => {
 
                                                         <button onClick={() => progressButtonClick(pdt._id, "In progress")}
                                                             disabled={pdt.progress === "In progress" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='font-normal text-nowrap'>Initiate</button>
+                                                            className='w-full text-left font-normal text-nowrap'>Initiate</button>
 
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
 
                                                         <button onClick={() => handleInviteMenu(pdt._id)}
                                                             disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='font-normal text-nowrap'>Invite User</button>
+                                                            className='w-full text-left font-normal text-nowrap'>Invite User</button>
 
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
 
                                                         <button onClick={() => progressButtonClick(pdt._id, "Request for Approval")}
                                                             disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='font-normal text-nowrap'>Request for Approval</button>
+                                                            className='w-full text-left font-normal text-nowrap'>Request for Approval</button>
 
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
 
                                                         <button onClick={() => progressButtonClick(pdt._id, "Approved")}
                                                             disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='font-normal text-nowrap'>Approve</button>
+                                                            className='w-full text-left font-normal text-nowrap'>Approve</button>
 
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
 
                                                         <button onClick={() => progressButtonClick(pdt._id, "Rejected")}
                                                             disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='font-normal text-nowrap'>Reject</button>
+                                                            className='w-full text-left font-normal text-nowrap'>Reject</button>
 
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
 
                                                         <button disabled={pdt.progress === "Not Started"}
-                                                            className='font-normal text-nowrap'>Download Summary</button>
+                                                            className='w-full text-left font-normal text-nowrap'>Download Summary</button>
+
+                                                        <div className="w-full h-[2px] bg-gray-300"></div>
+
+                                                        <button onClick={() => handleDeleteProject(pdt._id)} disabled={pdt.progress != "Not Started"}
+                                                            className='w-full text-left font-normal text-nowrap text-red-600'>Delete project</button>
 
                                                     </div>
                                                 </div>
@@ -403,7 +440,12 @@ const SalesOrder = () => {
                                                 userList.map(user => {
                                                     return (
                                                         currProject.owner === user ?
-                                                            <div>{user} (Owner)</div> : <div>{user}</div>
+                                                            <div>{user} (Owner)</div> :
+                                                            <div className="w-full flex items-center justify-between">
+                                                                <div>{user}</div>
+                                                                <FiMinusCircle onClick={() => removeInvitedUser(user)}
+                                                                    className='cursor-pointer text-base' />
+                                                            </div>
                                                     )
                                                 })
                                             }
