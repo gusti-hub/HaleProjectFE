@@ -18,6 +18,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: |
         npm i
-        cd frontend
+        cd HALEPROJECTFE
         npm i
         npm run build
