@@ -1,21 +1,29 @@
-# Dockerfile for React App
-FROM node:14-alpine
+# Use an official Node.js runtime as the base image
+FROM node:16 as build-stage
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package.json ./
-RUN npm install
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json ./
 
-# Copy the rest of the application code
+# Install dependencies
+RUN npm install - force
+
+# Copy app source code to the working directory
 COPY . .
 
-# Build the React app
+# Build the app
 RUN npm run build
 
-# Use serve to serve the app
-CMD ["npx", "serve", "-s", "build"]
+# Use NGINX as the production server
+FROM nginx:1.21-alpine
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Copy the build output from the build stage to NGINX
+COPY - from=build-stage /app/build /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]
