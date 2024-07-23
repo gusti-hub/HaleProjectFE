@@ -1,15 +1,17 @@
 import React, { useContext, useState } from 'react';
-import { MdDashboard, MdOutlineDashboard } from "react-icons/md";
+import { MdDashboard, MdOutlineDashboard, MdOutlineInventory2 } from "react-icons/md";
 import { TbLogout2 } from "react-icons/tb";
 import { AiFillProduct, AiOutlineProduct } from "react-icons/ai";
 import { AppContext } from '../context/CommonContext';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../adminPages/Dashboard';
-import UserRegistration from '../adminPages/UserRegistration/UserRegistration';
-import { FaArrowLeft, FaArrowRight, FaRegUser, FaUserCircle, FaUsers } from "react-icons/fa";
+import { ClientRegistration, UserRegistration, VendorRegistration } from '../adminPages/UserRegistration/UserRegistration';
+import { FaArrowLeft, FaArrowRight, FaRegBuilding, FaRegUser, FaUserCircle, FaUsers } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiUsers } from 'react-icons/fi';
 import SalesOrder from '../adminPages/SalesOrder/SalesOrder';
+import { RiShieldUserLine, RiUserSettingsLine } from 'react-icons/ri';
+import { GrBusinessService } from 'react-icons/gr';
 
 const AdminPanel = () => {
 
@@ -49,20 +51,50 @@ const AdminPanel = () => {
                             <div
                                 onClick={() => handleMenuID(1)}
                                 className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 1 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
-                                <MdOutlineDashboard className={`text-2xl ${menuID === 1 ? 'text-black' : 'text-gray-800'}`} />
+                                <MdOutlineDashboard className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 1 ? 'text-black' : 'text-gray-800'}`} />
                                 <div className={`font-medium text-base text-nowrap ${menuID === 1 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Dashboard</div>
                             </div>
                             <div
                                 onClick={() => handleMenuID(2)}
                                 className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 2 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
-                                <AiOutlineProduct className={`text-2xl ${menuID === 2 ? 'text-black' : 'text-gray-800'}`} />
+                                <AiOutlineProduct className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 2 ? 'text-black' : 'text-gray-800'}`} />
                                 <div className={`font-medium text-base text-nowrap ${menuID === 2 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Project Management</div>
                             </div>
                             <div
                                 onClick={() => handleMenuID(3)}
                                 className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 3 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
-                                <FiUsers className={`text-2xl ${menuID === 3 ? 'text-black' : 'text-gray-800'}`} />
-                                <div className={`font-medium text-base text-nowrap ${menuID === 3 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>User Registration</div>
+                                <RiUserSettingsLine className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 3 ? 'text-black' : 'text-gray-800'}`} />
+                                <div className={`font-medium text-base text-nowrap ${menuID === 3 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Employee Registration</div>
+                            </div>
+                            <div
+                                onClick={() => handleMenuID(4)}
+                                className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 4 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                <FaRegBuilding className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 4 ? 'text-black' : 'text-gray-800'}`} />
+                                <div className={`font-medium text-base text-nowrap ${menuID === 4 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Vendor Registration</div>
+                            </div>
+                            <div
+                                onClick={() => handleMenuID(5)}
+                                className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 5 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                <FiUsers className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 5 ? 'text-black' : 'text-gray-800'}`} />
+                                <div className={`font-medium text-base text-nowrap ${menuID === 5 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Client Registration</div>
+                            </div>
+                            <div
+                                onClick={() => handleMenuID(6)}
+                                className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 6 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                <RiShieldUserLine className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 6 ? 'text-black' : 'text-gray-800'}`} />
+                                <div className={`font-medium text-base text-nowrap ${menuID === 6 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Role Authorization</div>
+                            </div>
+                            <div
+                                onClick={() => handleMenuID(7)}
+                                className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 7 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                <GrBusinessService className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 7 ? 'text-black' : 'text-gray-800'}`} />
+                                <div className={`font-medium text-base text-nowrap ${menuID === 7 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Procurement</div>
+                            </div>
+                            <div
+                                onClick={() => handleMenuID(8)}
+                                className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 8 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                <MdOutlineInventory2 className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 8 ? 'text-black' : 'text-gray-800'}`} />
+                                <div className={`font-medium text-base text-nowrap ${menuID === 8 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Inventory</div>
                             </div>
                         </div>
                     </div>
@@ -85,8 +117,10 @@ const AdminPanel = () => {
                 <div className="w-full minHeight flex items-start justify-center bg-white p-4">
                     {
                         menuID === 1 ? <Dashboard />
-                        : menuID === 2 ? <SalesOrder /> 
-                            : menuID === 3 ? <UserRegistration /> : ""
+                            : menuID === 2 ? <SalesOrder />
+                                : menuID === 3 ? <UserRegistration />
+                                    : menuID === 4 ? <VendorRegistration />
+                                        : menuID === 5 ? <ClientRegistration /> : ""
                     }
                 </div>
             </div>

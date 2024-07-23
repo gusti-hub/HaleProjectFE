@@ -9,21 +9,16 @@ import { MdDeleteOutline } from 'react-icons/md';
 import { backendServer } from '../../utils/info';
 import { FiSearch } from 'react-icons/fi';
 
-const ForClient = () => {
+const ForVendor = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const [open, setOpen] = useState(false);
-    const [isChecked, setIsChecked] = useState(false);
-    const [formData, setFormData] = useState({ name: '', code: '', email: '', password: '', title: '', address: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', email: '', title: '', address: '' });
     const [editMode, setEditMode] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-
-    const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked);
-    };
 
     const handleOpen = () => {
         setOpen(!open);
@@ -33,8 +28,7 @@ const ForClient = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', code: '', email: '', password: '', title: '', address: '' });
-        setIsChecked(false);
+        setFormData({ name: '', code: '', email: '', title: '', address: '' });
         setEditMode(false);
         setCurrentUserId(null);
     };
@@ -46,7 +40,7 @@ const ForClient = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/clients`);
+            const response = await axios.get(`${backendServer}/api/vendors`);
             setUsers(response.data.users);
             setLoading(false);
         } catch (error) {
@@ -56,7 +50,7 @@ const ForClient = () => {
     };
 
     const handleEditClick = (user) => {
-        setFormData({ name: user.name, code: user.code, email: user.email, password: '', title: user.title, address: user.address });
+        setFormData({ name: user.name, code: user.code, email: user.email, title: user.title, address: user.address });
         setCurrentUserId(user._id);
         setEditMode(true);
         setOpen(true);
@@ -66,14 +60,14 @@ const ForClient = () => {
         e.preventDefault();
 
         if (formData.name.length === 0 || formData.code.length === 0 || formData.email.length === 0) {
-            toast.error("Can't submit empty form or check password!"); setOpen(false);
+            toast.error("Can't submit empty form!"); setOpen(false);
         }
 
-        if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0 && (editMode || formData.password.length >= 8)) {
+        if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0) {
             try {
                 const response = editMode
-                    ? await axios.put(`${backendServer}/api/clients/${currentUserId}`, formData)
-                    : await axios.post(`${backendServer}/api/clientreg`, formData);
+                    ? await axios.put(`${backendServer}/api/vendors/${currentUserId}`, formData)
+                    : await axios.post(`${backendServer}/api/vendorreg`, formData);
                 toast.success(response.data.message);
                 fetchUsers();
                 resetForm();
@@ -88,7 +82,7 @@ const ForClient = () => {
 
     const handleDeleteClick = async (userId) => {
         try {
-            const response = await axios.delete(`${backendServer}/api/clients/${userId}`);
+            const response = await axios.delete(`${backendServer}/api/vendors/${userId}`);
             toast.success(response.data.message);
             fetchUsers();
         } catch (error) {
@@ -163,34 +157,6 @@ const ForClient = () => {
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="email" placeholder='Type here...' name="email" id="email" />
-                    </div>
-                    <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="password">Password: {editMode ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                        </div>
-                        {
-                            isChecked ?
-                                <input
-                                    value={formData.password}
-                                    onChange={handleInputChange}
-                                    className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                                    type="text" placeholder='Type here...' name="password" id="password" />
-                                :
-                                <input
-                                    value={formData.password}
-                                    onChange={handleInputChange}
-                                    className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                                    type="password" placeholder='Type here...' name="password" id="password" />
-                        }
-                    </div>
-                    <div className="w-full flex items-center justify-start gap-2">
-                        <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={handleCheckboxChange}
-                            name="showPassword" id="showPassword" />
-                        <div className='text-sm'>Show password</div>
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <label htmlFor="title">Title:</label>
@@ -277,4 +243,4 @@ const ForClient = () => {
     );
 };
 
-export default ForClient;
+export default ForVendor;
