@@ -10,9 +10,27 @@ import { FaEdit, FaUserCircle } from 'react-icons/fa';
 const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     const initialFormData = isEditMode ? editItem : { projectId: id, type: 'Reference', title: '', desc: '' };
     const [formData, setFormData] = useState(initialFormData);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [imageUrl, setImageUrl] = useState(isEditMode ? editItem.imageUrl : '');
+    const [fileName, setFileName] = useState(isEditMode ? editItem.imageUrl.split('/').pop() : '');
+
+    useEffect(() => {
+        if (isEditMode) {
+            setImageUrl(editItem.imageUrl);
+            setFileName(editItem.imageUrl.split('/').pop());
+        }
+    }, [isEditMode, editItem]);
+
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+        setFileName(event.target.files[0].name);
+    };
 
     const resetForm = () => {
         setFormData({ projectId: id, type: 'Reference', title: '', desc: '' });
+        setSelectedFile(null);
+        setImageUrl('');
+        setFileName('');
     };
 
     const handleInputChange = (e) => {
@@ -20,18 +38,44 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
+    const handleUpload = async () => {
+        if (!selectedFile) return imageUrl;
+
+        const uploadData = new FormData();
+        uploadData.append('image', selectedFile);
+
+        try {
+            const response = await axios.post(`${backendServer}/api/upload`, uploadData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data.imageUrl;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Error uploading image');
+            return null;
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.title.length === 0 || formData.desc.length === 0) {
+        if (isEditMode ? (formData.title.length === 0 || formData.desc.length === 0) : (formData.title.length === 0 || formData.desc.length === 0 || !selectedFile)) {
             toast.error("Fill the mandatory fields!");
             handleClose();
         } else {
             try {
+                const uploadedImageUrl = await handleUpload();
+
+                if (!uploadedImageUrl) return;
+
+                const finalFormData = { ...formData, imageUrl: uploadedImageUrl };
+
                 if (isEditMode) {
-                    const response = await axios.put(`${backendServer}/api/product/${formData._id}`, formData);
+                    const response = await axios.put(`${backendServer}/api/product/${formData._id}`, finalFormData);
                     toast.success(response.data.message);
                 } else {
-                    const response = await axios.post(`${backendServer}/api/newProduct`, formData);
+                    const response = await axios.post(`${backendServer}/api/newProduct`, finalFormData);
                     toast.success(response.data.message);
                 }
                 handleClose();
@@ -59,6 +103,12 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                     className='w-full outline-none border border-solid border-gray-500 p-1 rounded-md'
                     name="desc" rows="2" placeholder='Type here...'></textarea>
             </div>
+            <div className="w-full flex items-start justify-start gap-2 text-black">
+                <label htmlFor="file">Attachment:</label>
+                <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                <input className='w-fit' type="file" onChange={handleFileChange} name='file' />
+            </div>
+            {fileName && <div className="w-full text-left text-sm">Uploaded file: {fileName}</div>}
             <button type="submit" className='w-full p-1.5 rounded-lg bg-[#7F55DE] text-white font-medium'>
                 {isEditMode ? 'Update Item' : 'Add Item'}
             </button>
@@ -67,26 +117,26 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 };
 
 const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
-
     const initialFormData = isEditMode && editItem ? {
         projectId: id,
         type: 'Product',
         name: editItem.title || '',
         code: editItem.productDetails?.code || '',
         unit: editItem.productDetails?.unit || '',
-        len: editItem.productDetails?.len || null,
-        wid: editItem.productDetails?.wid || null,
-        dia: editItem.productDetails?.dia || null,
+        len: editItem.productDetails?.len || '',
+        wid: editItem.productDetails?.wid || '',
+        dia: editItem.productDetails?.dia || '',
         color: editItem.productDetails?.color || '',
         material: editItem.productDetails?.material || '',
         insert: editItem.productDetails?.insert || '',
         finish: editItem.productDetails?.finish || '',
-        qty: editItem.productDetails?.qty || null,
+        qty: editItem.productDetails?.qty || '',
         vendor: editItem.productDetails?.vendor || '',
-        budget: editItem.productDetails?.budget || null,
-        buyCost: editItem.productDetails?.buyCost || null,
-        sellCost: editItem.productDetails?.sellCost || null,
-        desc: editItem.desc || ''
+        budget: editItem.productDetails?.budget || '',
+        buyCost: editItem.productDetails?.buyCost || '',
+        sellCost: editItem.productDetails?.sellCost || '',
+        desc: editItem.desc || '',
+        imageUrl: editItem.imageUrl || ''
     } : {
         projectId: id,
         type: 'Product',
@@ -105,10 +155,15 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         budget: null,
         buyCost: null,
         sellCost: null,
-        desc: ''
+        desc: '',
+        imageUrl: ''
     };
 
     const [formData, setFormData] = useState(initialFormData);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [fileName, setFileName] = useState(isEditMode && editItem ? editItem.imageUrl.split('/').pop() : '');
+    const [vendors, setVendors] = useState([]);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (isEditMode && editItem) {
@@ -130,10 +185,71 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 budget: editItem.productDetails?.budget || '',
                 buyCost: editItem.productDetails?.buyCost || '',
                 sellCost: editItem.productDetails?.sellCost || '',
-                desc: editItem.desc || ''
+                desc: editItem.desc || '',
+                imageUrl: editItem.imageUrl || ''
             });
+            setFileName(editItem.imageUrl.split('/').pop());
         }
     }, [editItem, isEditMode, id]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
+    };
+
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+        setFileName(event.target.files[0].name);
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return formData.imageUrl;
+
+        const uploadData = new FormData();
+        uploadData.append('image', selectedFile);
+
+        try {
+            const response = await axios.post(`${backendServer}/api/upload`, uploadData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data.imageUrl;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Error uploading image');
+            return null;
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (isEditMode ? (formData.name.length === 0 || formData.code.length === 0 || formData.qty.length === 0) : (formData.name.length === 0 || formData.code.length === 0 || formData.qty.length === 0 || !selectedFile)) {
+            toast.error("Fill the mandatory fields");
+            handleClose();
+        } else {
+            try {
+                const uploadedImageUrl = await handleUpload();
+
+                if (uploadedImageUrl !== null) {
+                    const finalFormData = { ...formData, imageUrl: uploadedImageUrl };
+
+                    if (isEditMode) {
+                        const response = await axios.put(`${backendServer}/api/newProductItem/${editItem._id}`, finalFormData);
+                        toast.success(response.data.message);
+                    } else {
+                        const response = await axios.post(`${backendServer}/api/newProductItem`, finalFormData);
+                        toast.success(response.data.message);
+                    }
+                    handleClose();
+                    fetchDetails();
+                    resetForm();
+                }
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+    };
 
     const resetForm = () => {
         setFormData({
@@ -154,37 +270,31 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             budget: null,
             buyCost: null,
             sellCost: null,
-            desc: ''
+            desc: '',
+            imageUrl: ''
         });
+        setSelectedFile(null);
+        setFileName('');
     };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (formData.name.length === 0 || formData.code.length === 0 || formData.qty === null) {
-            toast.error("Fill the mandatory fields");
-            handleClose();
-        } else {
-            try {
-                if (isEditMode) {
-                    const response = await axios.put(`${backendServer}/api/newProductItem/${editItem._id}`, formData);
-                    toast.success(response.data.message);
-                } else {
-                    const response = await axios.post(`${backendServer}/api/newProductItem`, formData);
-                    toast.success(response.data.message);
-                }
-                handleClose();
-                fetchDetails();
-                resetForm();
-            } catch (error) {
-                toast.error(error.message);
-            }
+    const fetchVendorsNames = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/getvendornames`);
+            setVendors(response.data);
+        } catch (err) {
+            setError(err.message);
         }
     };
+
+    useEffect(() => {
+        fetchVendorsNames();
+    }, []);
+
+    if (error) return (
+        <div className="w-full flex items-center justify-center text-red-600 font-medium">
+            Error: {error}
+        </div>
+    );
 
     return (
         <form onSubmit={handleSubmit} className='w-full flex flex-col items-center gap-4'>
@@ -267,7 +377,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 </div>
             </div>
 
-            <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
                 <label htmlFor="qty">Quantity:</label>
                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                 <input value={formData.qty} onChange={handleInputChange}
@@ -283,7 +393,9 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                         onChange={handleInputChange}
                         className='w-full p-1 outline-none' name="vendor">
                         <option value="" disabled>Select an option</option>
-                        {/* Populate vendor options dynamically if needed */}
+                        {vendors.map((vendor) => (
+                            <option key={vendor.id} value={vendor.name}>{vendor.name}</option>
+                        ))}
                     </select>
                 </div>
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
@@ -316,13 +428,20 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                     name="desc" rows="2" placeholder='Type here...'></textarea>
             </div>
 
+            <div className="w-full flex items-start justify-start gap-2 text-black">
+                <label htmlFor="file">Attachment:</label>
+                <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                <input type="file" onChange={handleFileChange} name='file' />
+            </div>
+
+            {fileName && <div className="w-full text-left text-sm">Uploaded file: {fileName}</div>}
+
             <button type="submit" className='w-full p-1.5 rounded-lg bg-[#7F55DE] text-white font-medium'>
                 {isEditMode ? 'Update Item' : 'Add Item'}
             </button>
         </form>
     );
 };
-
 
 const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fetchSections }) => {
     const loggedInUser = localStorage.getItem('name');
@@ -454,6 +573,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                             <span>{pdt.title}</span>
                                                         </div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
+                                                        <img src={pdt.imageUrl} alt="" />
                                                     </div>
                                                     <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
                                                         <div className="w-full flex items-center justify-start font-semibold">Description</div>
@@ -505,14 +625,21 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                             <span>{pdt.title} ({pdt.productDetails.code})</span>
                                                         </div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
+                                                        <img src={pdt.imageUrl} alt="" />
                                                     </div>
 
                                                     <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
                                                         <div className="w-full flex items-center justify-start font-semibold">Description</div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                                         <div className="w-full flex items-center justify-start">{pdt.desc}</div>
+                                                        <div className="w-full h-[1.5px] bg-gray-300"></div>
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>Dimension:</div>
+                                                            <div className="w-full flex flex-wrap items-center justify-start gap-2">
+                                                                {pdt.productDetails.len ? <div><span className='text-black font-medium'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                {pdt.productDetails.wid ? <div><span className='text-black font-medium'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                {pdt.productDetails.dia ? <div><span className='text-black font-medium'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                            </div>
                                                         </div>
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>Color:</div>

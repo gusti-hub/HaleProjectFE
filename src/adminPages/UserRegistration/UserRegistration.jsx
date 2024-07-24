@@ -1,44 +1,39 @@
 import React, { useContext } from 'react';
-import { AppContext } from '../../context/CommonContext';
 import ForEmployee from './ForEmployee';
 import ForClient from './ForClient';
+import ForVendor from './ForVendor';
 
 const UserRegistration = () => {
 
-    const {userReg, handleUserReg} = useContext(AppContext);
-
-    const handleChange = (e) => {
-        handleUserReg(e.target.value);
-    }
     return (
         <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
-            <div className="w-full text-left text-gray-900 text-2xl font-medium">User Registration</div>
+            <div className="w-full text-left text-gray-900 text-2xl font-medium">Employee Registration</div>
             <div className="w-full h-[2px] bg-gray-300"></div>
-            <div className="w-full flex items-center justify-start gap-16">
-                <div className="flex items-center justify-center gap-2">
-                    <input 
-                    className=''
-                    type="checkbox"
-                    value="emp"
-                    checked={userReg === "emp"}
-                    onChange={handleChange} />
-                    <div className="text-gray-800 text-lg">Employee</div>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                    <input 
-                    className=''
-                    type="checkbox"
-                    value="clt"
-                    checked={userReg === "clt"}
-                    onChange={handleChange} />
-                    <div className="text-gray-800 text-lg">Client</div>
-                </div>
-            </div>
-            {
-                userReg === "emp" ? <ForEmployee /> : <ForClient />
-            }
+            <ForEmployee />
         </div>
     );
 };
 
-export default UserRegistration;
+const ClientRegistration = () => {
+
+    return (
+        <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
+            <div className="w-full text-left text-gray-900 text-2xl font-medium">Client Registration</div>
+            <div className="w-full h-[2px] bg-gray-300"></div>
+            <ForClient />
+        </div>
+    );
+};
+
+const VendorRegistration = () => {
+
+    return (
+        <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
+            <div className="w-full text-left text-gray-900 text-2xl font-medium">Vendor Registration</div>
+            <div className="w-full h-[2px] bg-gray-300"></div>
+            <ForVendor />
+        </div>
+    );
+};
+
+export { UserRegistration, ClientRegistration, VendorRegistration };
