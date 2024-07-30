@@ -4,7 +4,7 @@ import { TbLogout2 } from "react-icons/tb";
 import { AiFillProduct, AiOutlineProduct } from "react-icons/ai";
 import { AppContext } from '../context/CommonContext';
 import { useNavigate } from 'react-router-dom';
-import Dashboard from '../adminPages/Dashboard';
+import Dashboard from '../adminPages/Dashboard/Dashboard';
 import { ClientRegistration, UserRegistration, VendorRegistration, RoleAuthorization, RoleRegistration } from '../adminPages/UserRegistration/UserRegistration';
 import { FaArrowLeft, FaArrowRight, FaRegBuilding, FaRegUser, FaUserCircle, FaUsers } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
@@ -13,6 +13,7 @@ import SalesOrder from '../adminPages/SalesOrder/SalesOrder';
 import { RiShieldUserLine, RiUserSettingsLine, RiSafeLine } from 'react-icons/ri';
 import { GrBusinessService } from 'react-icons/gr';
 import GlobalVariable from '../utils/GlobalVariable';
+import Procurement from '../adminPages/Procurement/Procurement';
 
 const AdminPanel = () => {
 
@@ -149,7 +150,8 @@ const AdminPanel = () => {
                                     : menuID === 4 ? <VendorRegistration />
                                         : menuID === 5 ? <ClientRegistration />
                                             : menuID === 6 ? <RoleAuthorization />
-                                                : menuID === 9 ? <RoleRegistration /> : ""
+                                                : menuID === 7 ? <Procurement />
+                                                    : menuID === 9 ? <RoleRegistration /> : ""
                     }
                 </div>
             </div>

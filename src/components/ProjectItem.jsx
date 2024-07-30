@@ -117,6 +117,8 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 };
 
 const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
+    const token = localStorage.getItem('token');
+
     const initialFormData = isEditMode && editItem ? {
         projectId: id,
         type: 'Product',
@@ -279,7 +281,9 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
     const fetchVendorsNames = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/getvendornames`);
+            const response = await axios.get(`${backendServer}/api/getvendornames`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setVendors(response.data);
         } catch (err) {
             setError(err.message);
@@ -446,6 +450,8 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fetchSections }) => {
     const loggedInUser = localStorage.getItem('name');
 
+    const token = localStorage.getItem('token');
+
     const [type, setType] = useState('ref');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -481,7 +487,9 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
 
     const fetchProductDetails = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/allProducts/${id}`);
+            const response = await axios.get(`${backendServer}/api/allProducts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setLoading(false);
             setProducts(response.data.allProducts);
         } catch (error) {

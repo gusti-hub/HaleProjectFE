@@ -15,6 +15,8 @@ const SalesOrder = () => {
 
     const navigate = useNavigate();
 
+    const token = localStorage.getItem('token');
+
     const [formData, setFormData] = useState({ name: '', desc: '', owner: '', client: '' });
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -34,7 +36,9 @@ const SalesOrder = () => {
 
     const fetchEmployeesNames = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/getemployeenames`);
+            const response = await axios.get(`${backendServer}/api/getemployeenames`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setEmployees(response.data);
             setLoading(false);
         } catch (err) {
@@ -45,7 +49,9 @@ const SalesOrder = () => {
 
     const fetchClientsNames = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/getclientnames`);
+            const response = await axios.get(`${backendServer}/api/getclientnames`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setClients(response.data);
             setLoading(false);
         } catch (err) {
@@ -56,7 +62,9 @@ const SalesOrder = () => {
 
     const fetchSalesData = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/sales`);
+            const response = await axios.get(`${backendServer}/api/sales`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setAllSales(response.data.salesData);
             setLoading(false);
         } catch (error) {
@@ -118,7 +126,9 @@ const SalesOrder = () => {
 
     const getUserListHandler = async (_id) => {
         try {
-            const response = await axios.get(`${backendServer}/api/project/${_id}`);
+            const response = await axios.get(`${backendServer}/api/project/${_id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setCurrProject(response.data);
             setUserList(response.data.invitedUsers);
         } catch (error) {
@@ -196,7 +206,7 @@ const SalesOrder = () => {
 
     return (
         <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
-            <div className="w-full text-left text-gray-900 text-2xl font-medium">Project Management</div>
+            <div className="w-full text-left text-gray-900 text-2xl font-medium">Project Management</div>
             <div className="w-full h-[2px] bg-gray-300"></div>
 
             <Dialog

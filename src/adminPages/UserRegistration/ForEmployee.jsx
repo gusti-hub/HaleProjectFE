@@ -11,6 +11,8 @@ import { MdDeleteOutline } from 'react-icons/md';
 import { FiSearch } from 'react-icons/fi';
 
 const ForEmployee = () => {
+    const token = localStorage.getItem('token');
+    
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '', role_id: '', role_name: '', role_code: '' });
@@ -55,10 +57,47 @@ const ForEmployee = () => {
         setIsChecked(event.target.checked);
     };
 
+    const handleSelectChange = (event) => {
+        setSelectedOption(event.target.value);
+        setFormData({ ...formData, role: event.target.value });
+    };
+
+    const handleCustomOptionChange = (event) => {
+        setCustomOption(event.target.value);
+    };
+
+    const handleAddCustomOption = () => {
+        if (customOption.trim() !== '') {
+            const newOption = { id: customOption, name: customOption };
+            setOptions(prevOptions => [...prevOptions, newOption]);
+            setSelectedOption(customOption);
+            setFormData({ ...formData, role: customOption });
+            setCustomOption('');
+        }
+    };
+
+    const fetchOptions = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/roleOptions`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (Array.isArray(response.data)) {
+                setOptions(response.data);
+            } else {
+                throw new Error('Response data is not an array');
+            }
+            setLoading(false);
+        } catch (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/employees`);
+            const response = await axios.get(`${backendServer}/api/employees`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setUsers(response.data.users);
             setLoading(false);
         } catch (error) {
