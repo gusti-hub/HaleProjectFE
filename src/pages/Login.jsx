@@ -52,6 +52,7 @@ const Login = () => {
                 localStorage.setItem('name', response.data.name);
                 localStorage.setItem('type', response.data.type);
                 localStorage.setItem('userId', response.data._id);
+                localStorage.setItem('action', response.data.action);
                 navigate("/admin-panel");
             } catch (error) {
                 if (error.response && error.response.data && error.response.data.message) {

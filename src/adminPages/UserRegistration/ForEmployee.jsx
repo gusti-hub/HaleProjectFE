@@ -12,75 +12,49 @@ import { FiSearch } from 'react-icons/fi';
 
 const ForEmployee = () => {
     const [users, setUsers] = useState([]);
-    const [options, setOptions] = useState([]);
-    const [selectedOption, setSelectedOption] = useState('');
-    const [customOption, setCustomOption] = useState('');
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '', role: '' });
+    const [roles, setRoles] = useState([]);
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', title: '', role_id: '', role_name: '', role_code: '' });
     const [isChecked, setIsChecked] = useState(false);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [initialSelectedOption, setInitialSelectedOption] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleOpen = () => {
-        setOpen((cur) => !cur);
-        if (!cur) {
+        setOpen(!open);
+        if (!open) {
             resetForm();
         }
     };
 
     const resetForm = () => {
-        setFormData({ name: '', email: '', password: '', title: '', role: '' });
-        setSelectedOption('');
+        setFormData({ name: '', email: '', password: '', title: '', role_id: '', role_name: '', role_code: '' });
         setIsEditing(false);
         setEditingUserId(null);
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+
+        if(name == 'role_name'){
+            const  role = roles.find(item => item.name == value)
+            if (role){
+                setFormData({ ...formData, role_id: role._id, role_code: role.code, [name]: value });
+            }else{
+                setFormData({ ...formData, role_id: '', role_code: '', role_name: '' });
+            }            
+        }
+        else{
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleCheckboxChange = (event) => {
         setIsChecked(event.target.checked);
     };
 
-    const handleSelectChange = (event) => {
-        setSelectedOption(event.target.value);
-        setFormData({ ...formData, role: event.target.value });
-    };
-
-    const handleCustomOptionChange = (event) => {
-        setCustomOption(event.target.value);
-    };
-
-    const handleAddCustomOption = () => {
-        if (customOption.trim() !== '') {
-            const newOption = { id: customOption, name: customOption };
-            setOptions(prevOptions => [...prevOptions, newOption]);
-            setSelectedOption(customOption);
-            setFormData({ ...formData, role: customOption });
-            setCustomOption('');
-        }
-    };
-
-    const fetchOptions = async () => {
-        try {
-            const response = await axios.get(`${backendServer}/api/roleOptions`);
-            if (Array.isArray(response.data)) {
-                setOptions(response.data);
-            } else {
-                throw new Error('Response data is not an array');
-            }
-            setLoading(false);
-        } catch (error) {
-            setError(error.message);
-            setLoading(false);
-        }
-    };
 
     const fetchUsers = async () => {
         try {
@@ -93,19 +67,28 @@ const ForEmployee = () => {
         }
     };
 
+    const fetchRoles = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/roles`);
+            setRoles(response.data.roles);
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+
     useEffect(() => {
         fetchUsers();
-        fetchOptions();
+        fetchRoles();
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (formData.name.length === 0 || formData.email.length === 0 || formData.role.length === 0) {
+        if (formData.name.length === 0 || formData.email.length === 0 || formData.role_name.length === 0) {
             toast.error("Can't submit empty form or check password!"); setOpen(false);
         }
 
-        if (formData.name.length > 0 && formData.email.length > 0 && (isEditing || formData.password.length >= 8) && formData.role.length > 0) {
+        if (formData.name.length > 0 && formData.email.length > 0 && (isEditing || formData.password.length >= 8) && formData.role_name.length > 0) {
             try {
                 const response = isEditing
                     ? await axios.put(`${backendServer}/api/employee/${editingUserId}`, formData)
@@ -125,7 +108,6 @@ const ForEmployee = () => {
 
     const handleEditClick = (user) => {
         setFormData({ ...user, password: '' });
-        setSelectedOption(user.role);
         setIsEditing(true);
         setEditingUserId(user._id);
         setOpen(true);
@@ -231,32 +213,25 @@ const ForEmployee = () => {
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="title" id="title" />
                     </div>
-                    <div className="w-full flex items-center justify-between">
-                        <div className="w-full flex items-center justify-start gap-2 text-base">
-                            <label htmlFor="role">Role:</label>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="code">Role:</label>
                             <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                            <select value={selectedOption} onChange={handleSelectChange}
-                                className='p-1 outline-none' name="role" id="role">
-                                <option value="" disabled>Select an option</option>
-                                {options.map(option => (
-                                    <option key={option.id} value={option.name}>
-                                        {option.name}
-                                    </option>
-                                ))}
-                            </select>
                         </div>
-                        <div className='flex items-center justify-center gap-2'>
-                            <input
-                                className='w-[8rem] p-1 border-solid border-b-black border-b-2 outline-none'
-                                type="text"
-                                value={customOption}
-                                onChange={handleCustomOptionChange}
-                                placeholder="Add custom role"
-                            />
-                            <div onClick={handleAddCustomOption} className="flex items-center justify-center p-1 bg-[#7F55DE] rounded-md cursor-pointer">
-                                <IoMdAddCircle className='text-white text-2xl' />
-                            </div>
-                        </div>
+                        <select
+                            value={formData.role_name}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            name="role_name"
+                            id="role_id"
+                        >
+                            <option value="">Select role...</option>
+                            {roles.map(option => (
+                                <option key={option._id} value={option.role_name}>
+                                    {option.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="w-full flex items-center justify-center">
                         <button onClick={handleSubmit}
@@ -313,7 +288,7 @@ const ForEmployee = () => {
                                             <td>{user.name}</td>
                                             <td>{user.email}</td>
                                             <td>{user.title}</td>
-                                            <td>{user.role}</td>
+                                            <td>{user.role_name}</td>
                                         </tr>
                                     )
                                 })
