@@ -11,6 +11,8 @@ import { MdDeleteOutline } from 'react-icons/md';
 import { FiSearch } from 'react-icons/fi';
 
 const ForEmployee = () => {
+    const token = localStorage.getItem('token');
+    
     const [users, setUsers] = useState([]);
     const [options, setOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState('');
@@ -69,7 +71,9 @@ const ForEmployee = () => {
 
     const fetchOptions = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/roleOptions`);
+            const response = await axios.get(`${backendServer}/api/roleOptions`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             if (Array.isArray(response.data)) {
                 setOptions(response.data);
             } else {
@@ -84,7 +88,9 @@ const ForEmployee = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/employees`);
+            const response = await axios.get(`${backendServer}/api/employees`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setUsers(response.data.users);
             setLoading(false);
         } catch (error) {

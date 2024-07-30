@@ -8,6 +8,8 @@ import { FaUserCircle } from 'react-icons/fa';
 const Comments = ({ id }) => {
     const loggedInUser = localStorage.getItem('name');
 
+    const token = localStorage.getItem('token');
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [comment, setComment] = useState([]);
@@ -28,7 +30,9 @@ const Comments = ({ id }) => {
     }
 
     const fetchAllComments = async () => {
-        const response = await axios.get(`${backendServer}/api/getComments/${id}`);
+        const response = await axios.get(`${backendServer}/api/getComments/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
         setComment(response.data);
     }
 

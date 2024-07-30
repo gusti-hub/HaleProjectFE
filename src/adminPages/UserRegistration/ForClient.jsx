@@ -10,6 +10,8 @@ import { backendServer } from '../../utils/info';
 import { FiSearch } from 'react-icons/fi';
 
 const ForClient = () => {
+    const token = localStorage.getItem('token');
+
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -46,7 +48,9 @@ const ForClient = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/clients`);
+            const response = await axios.get(`${backendServer}/api/clients`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setUsers(response.data.users);
             setLoading(false);
         } catch (error) {
