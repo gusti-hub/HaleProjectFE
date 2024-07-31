@@ -10,14 +10,16 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaDownload } from 'react-icons/fa';
 import { IoCloseSharp } from 'react-icons/io5';
+import * as XLSX from 'xlsx';
 
 const SalesOrder = () => {
 
     const navigate = useNavigate();
 
     const token = localStorage.getItem('token');
+    const name = localStorage.getItem('name');
 
-    const [formData, setFormData] = useState({ name: '', desc: '', owner: '', client: '' });
+    const [formData, setFormData] = useState({ name: '', desc: '', owner: name, client: '' });
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -87,7 +89,7 @@ const SalesOrder = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', desc: '', owner: '', client: '' });
+        setFormData({ name: '', desc: '', owner: name, client: '' });
     };
 
     const handleInputChange = (e) => {
@@ -188,9 +190,52 @@ const SalesOrder = () => {
         }
     };
 
-    const filteredSales = allSales.filter(sale =>
+    const sales = allSales.filter(sale => sale.owner === name);
+
+    const filteredSales = sales.filter(sale =>
         sale.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const [products, setProducts] = useState([]);
+
+    const flattenData = (data) => {
+        return data.map(item => ({
+            title: item.title,
+            code: item.productDetails.code,
+            desc: item.desc,
+            unit: item.productDetails.unit,
+            length: item.productDetails.len ? item.productDetails.len.toString() : '',
+            width: item.productDetails.wid ? item.productDetails.wid.toString() : '',
+            diameter: item.productDetails.dia ? item.productDetails.dia.toString() : '',
+            color: item.productDetails.color,
+            material: item.productDetails.material,
+            insert: item.productDetails.insert,
+            finish: item.productDetails.finish,
+            quantity: item.productDetails.qty.toString(),
+            vendor: item.productDetails.vendor,
+            budget: item.productDetails.budget ? item.productDetails.budget.toString() : '',
+            buyCost: item.productDetails.buyCost ? item.productDetails.buyCost.toString() : '',
+            sellCost: item.productDetails.sellCost ? item.productDetails.sellCost.toString() : '',
+            // createdAt: item.createdAt.split('T')[0],
+            status: item.status
+        }));
+    };
+
+    const handleDownload = async (id) => {
+        const response = await axios.get(`${backendServer}/api/products/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        setProducts(response.data.products);
+        const prods = products.filter(prod => prod.type === "Product");
+
+        const flattenedData = flattenData(prods);
+
+        const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+        XLSX.writeFile(workbook, 'table_data.xlsx');
+    };
 
     if (loading) return (
         <div className='w-full flex items-center justify-center'>
@@ -242,19 +287,6 @@ const SalesOrder = () => {
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="desc" id="desc" />
-                    </div>
-                    <div className="w-full flex items-center justify-start gap-2 text-base">
-                        <label htmlFor="owner">Project Owner:</label>
-                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                        <select
-                            value={formData.owner}
-                            onChange={handleInputChange}
-                            className='p-1 outline-none' name="owner" id="owner">
-                            <option value="" disabled>Select an option</option>
-                            {employees.map((employee) => (
-                                <option key={employee.id} value={employee.name}>{employee.name}</option>
-                            ))}
-                        </select>
                     </div>
                     <div className="w-full flex items-center justify-start gap-2 text-base">
                         <label htmlFor="client">For Client:</label>
@@ -360,7 +392,8 @@ const SalesOrder = () => {
 
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                        <button disabled={pdt.progress === "Not Started"}
+                                                        <button onClick={() => handleDownload(pdt._id)}
+                                                            disabled={pdt.progress === "Not Started"}
                                                             className='w-full text-left font-normal text-nowrap'>Download Summary</button>
 
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
