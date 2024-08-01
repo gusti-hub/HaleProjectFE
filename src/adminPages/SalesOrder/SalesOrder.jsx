@@ -226,7 +226,7 @@ const SalesOrder = () => {
             headers: { Authorization: `Bearer ${token}` },
         });
         setProducts(response.data.products);
-        const prods = products.filter(prod => prod.type === "Product");
+        const prods = response.data.products.filter(prod => prod.type === "Product");
 
         const flattenedData = flattenData(prods);
 
