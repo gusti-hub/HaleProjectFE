@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { backendServer } from '../utils/info';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 const Login = () => {
@@ -17,6 +18,8 @@ const Login = () => {
 
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState({ email: '', password: '' });
+
+    const [loading, setLoading] = useState(false);
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,6 +50,7 @@ const Login = () => {
 
         if (!newErrors.email && !newErrors.password) {
             try {
+                setLoading(true);
                 const response = await axios.post(`${backendServer}/api/signin`, formData);
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('name', response.data.name);
@@ -55,6 +59,7 @@ const Login = () => {
                 localStorage.setItem('action', response.data.action);
                 navigate("/admin-panel");
             } catch (error) {
+                setLoading(false);
                 if (error.response && error.response.data && error.response.data.message) {
                     setErrors({ ...newErrors, form: error.response.data.message });
                     toast.error(error.response.data.message);
@@ -119,7 +124,13 @@ const Login = () => {
                                 <div className='text-sm'>Show password</div>
                             </div>
                             <div className="w-full flex items-center justify-center">
-                                <button className='w-full bg-main p-2 text-white text-base font-medium rounded-lg'>Continue</button>
+                                {
+                                    loading ?
+                                        <div className='w-full flex items-center justify-center p-4'>
+                                            <CircularProgress />
+                                        </div> :
+                                        <button className='w-full bg-main p-2 text-white text-base font-medium rounded-lg'>Continue</button>
+                                }
                             </div>
                         </form>
                     </div>

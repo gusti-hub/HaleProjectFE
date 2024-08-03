@@ -1,36 +1,42 @@
-import axios from 'axios';
-import React, { useState } from 'react';
-import { backendServer } from './utils/info';
+import React from 'react';
+import * as XLSX from 'xlsx';
 
 const Test = () => {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [imageUrl, setImageUrl] = useState('');
+    const tableData = [
+        { id: 1, name: 'John Doe', age: 28 },
+        { id: 2, name: 'Jane Smith', age: 34 },
+        // Add more rows as needed
+    ];
 
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-    };
+    const handleDownload = () => {
+        const worksheet = XLSX.utils.json_to_sheet(tableData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
-    const handleUpload = async () => {
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-
-        try {
-            const response = await axios.post(`${backendServer}/api/upload`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            setImageUrl(response.data.imageUrl);
-        } catch (error) {
-            console.error('Error uploading image:', error);
-        }
+        XLSX.writeFile(workbook, 'table_data.xlsx');
     };
 
     return (
         <div>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleUpload}>Upload</button>
-            {imageUrl && <img src={imageUrl} alt="Uploaded" />}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {tableData.map((row) => (
+                        <tr key={row.id}>
+                            <td>{row.id}</td>
+                            <td>{row.name}</td>
+                            <td>{row.age}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <button onClick={handleDownload}>Download as Excel</button>
         </div>
     );
 };

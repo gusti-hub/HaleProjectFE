@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AppProvider } from './context/CommonContext';
 import Project from './pages/Project';
 import Products from './adminPages/Procurement/Products';
+import Test from './Test';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/admin-panel" element={<ProtectedRoute element={<AdminPanel />} />} />
         <Route path="/project/:id" element={<ProtectedRoute element={<Project />} />} />
         <Route path="/products/:id" element={<ProtectedRoute element={<Products />} />} />
+        <Route path="/test" element={<ProtectedRoute element={<Test />} />} />
       </Routes>
     </AppProvider>
   );
