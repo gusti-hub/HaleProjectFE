@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { IoPersonAdd } from 'react-icons/io5';
 import CircularProgress from '@mui/material/CircularProgress';
 import { FaEdit } from 'react-icons/fa';
-import { MdDeleteOutline } from 'react-icons/md';
+import { MdDeleteOutline, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
 import { backendServer } from '../../utils/info';
 import { FiSearch } from 'react-icons/fi';
 
@@ -112,6 +112,18 @@ const ForClient = () => {
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const current = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
 
     if (loading) return (
         <div className='w-full flex items-center justify-center'>
@@ -241,41 +253,58 @@ const ForClient = () => {
                     <div className="w-full flex items-center justify-start text-lg font-medium">
                         No records found!
                     </div> :
-                    <table className='border-collapse w-full'>
-                        <thead>
-                            <tr className='text-gray-700 text-lg'>
-                                <th>Actions</th>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Title</th>
-                                <th>Address</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                filteredUsers.map(user => (
-                                    <tr key={user._id} className='text-base text-center text-gray-700'>
-                                        <td>
-                                            <div className='w-full flex items-center justify-center gap-4'>
-                                                <FaEdit
-                                                    className='text-lg cursor-pointer'
-                                                    onClick={() => handleEditClick(user)} />
-                                                <MdDeleteOutline
-                                                    className='text-xl text-red-600 cursor-pointer'
-                                                    onClick={() => handleDeleteClick(user._id)} />
-                                            </div>
-                                        </td>
-                                        <td>{user.code}</td>
-                                        <td>{user.name}</td>
-                                        <td>{user.email}</td>
-                                        <td>{user.title}</td>
-                                        <td>{user.address}</td>
-                                    </tr>
-                                ))
-                            }
-                        </tbody>
-                    </table>
+                    <div className="w-full flex flex-col items-center">
+                        <table className='border-collapse w-full'>
+                            <thead>
+                                <tr className='text-gray-700 text-lg'>
+                                    <th>Actions</th>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Title</th>
+                                    <th>Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    current.map(user => (
+                                        <tr key={user._id} className='text-base text-center text-gray-700'>
+                                            <td>
+                                                <div className='w-full flex items-center justify-center gap-4'>
+                                                    <FaEdit
+                                                        className='text-lg cursor-pointer'
+                                                        onClick={() => handleEditClick(user)} />
+                                                    <MdDeleteOutline
+                                                        className='text-xl text-red-600 cursor-pointer'
+                                                        onClick={() => handleDeleteClick(user._id)} />
+                                                </div>
+                                            </td>
+                                            <td>{user.code}</td>
+                                            <td>{user.name}</td>
+                                            <td>{user.email}</td>
+                                            <td>{user.title}</td>
+                                            <td>{user.address}</td>
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+                        </table>
+                        <div className='w-full flex items-center justify-end gap-2 mt-4'>
+
+                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
+                                <MdOutlineKeyboardArrowLeft className='text-xl' />
+                            </button>
+
+                            <div className='text-gray-700'>
+                                Page {currentPage} of {totalPages}
+                            </div>
+
+                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
+                                <MdOutlineKeyboardArrowRight className='text-xl' />
+                            </button>
+
+                        </div>
+                    </div>
             }
         </div>
     );

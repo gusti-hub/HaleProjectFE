@@ -3,7 +3,7 @@ import { FiMinusCircle, FiSearch } from 'react-icons/fi';
 import { IoMdAdd, IoMdAddCircleOutline } from 'react-icons/io';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Dialog } from '@material-tailwind/react';
-import { MdClose, MdOutlineMoreVert } from 'react-icons/md';
+import { MdClose, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight, MdOutlineMoreVert } from 'react-icons/md';
 import { backendServer } from '../../utils/info';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -237,6 +237,18 @@ const SalesOrder = () => {
         XLSX.writeFile(workbook, 'table_data.xlsx');
     };
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentSales = filteredSales.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
     if (loading) return (
         <div className='w-full flex items-center justify-center'>
             <CircularProgress />
@@ -329,111 +341,130 @@ const SalesOrder = () => {
                     <div className="w-full flex items-center justify-start text-lg font-medium mt-4">
                         No records found!
                     </div> :
-                    <table className='w-full border-collapse mt-4'>
-                        <thead>
-                            <tr className='text-gray-700 text-lg text-nowrap'>
-                                <th>Action</th>
-                                <th>Project Id</th>
-                                <th>Project Name</th>
-                                <th>Description</th>
-                                <th>Project Owner</th>
-                                <th>Client Name</th>
-                                <th>Progress</th>
-                                <th>Date Created</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                filteredSales.map(pdt => {
-                                    return (
-                                        <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                            <td>
-                                                <div className="w-full flex items-start justify-center gap-2 relative">
-                                                    {
-                                                        menuOpen != pdt._id ?
-                                                            <MdOutlineMoreVert
-                                                                onClick={() => openMenu(pdt._id)}
-                                                                className='cursor-pointer text-xl' />
-                                                            :
-                                                            <IoCloseSharp
-                                                                onClick={() => openMenu(pdt._id)}
-                                                                className='cursor-pointer text-xl' />
-                                                    }
-                                                    <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                        className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[12rem] flex flex-col items-start justify-start gap-1 p-2 fixed bg-white ml-[14rem] -mt-[0.5rem]`}>
+                    <div className="w-full flex flex-col items-center">
+                        <table className='w-full border-collapse mt-4'>
+                            <thead>
+                                <tr className='text-gray-700 text-lg text-nowrap'>
+                                    <th>#</th>
+                                    <th>Action</th>
+                                    <th>Project Id</th>
+                                    <th>Project Name</th>
+                                    <th>Description</th>
+                                    <th>Project Owner</th>
+                                    <th>Client Name</th>
+                                    <th>Progress</th>
+                                    <th>Date Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    currentSales.map((pdt, index) => {
+                                        return (
+                                            <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                <td>{indexOfFirstItem + index + 1}</td>
+                                                <td>
+                                                    <div className="w-full flex items-start justify-center gap-2 relative">
+                                                        {
+                                                            menuOpen != pdt._id ?
+                                                                <MdOutlineMoreVert
+                                                                    onClick={() => openMenu(pdt._id)}
+                                                                    className='cursor-pointer text-xl' />
+                                                                :
+                                                                <IoCloseSharp
+                                                                    onClick={() => openMenu(pdt._id)}
+                                                                    className='cursor-pointer text-xl' />
+                                                        }
+                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[12rem] flex flex-col items-start justify-start gap-1 p-2 fixed bg-white ml-[14rem] -mt-[0.5rem]`}>
 
-                                                        <button onClick={() => progressButtonClick(pdt._id, "In progress")}
-                                                            disabled={pdt.progress === "In progress" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='w-full text-left font-normal text-nowrap'>Initiate</button>
+                                                            <button onClick={() => progressButtonClick(pdt._id, "In progress")}
+                                                                disabled={pdt.progress === "In progress" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
+                                                                className='w-full text-left font-normal text-nowrap'>Initiate</button>
 
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                        <button onClick={() => handleInviteMenu(pdt._id)}
-                                                            disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='w-full text-left font-normal text-nowrap'>Invite User</button>
+                                                            <button onClick={() => handleInviteMenu(pdt._id)}
+                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
+                                                                className='w-full text-left font-normal text-nowrap'>Invite User</button>
 
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                        <button onClick={() => progressButtonClick(pdt._id, "Request for Approval")}
-                                                            disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='w-full text-left font-normal text-nowrap'>Request for Approval</button>
+                                                            <button onClick={() => progressButtonClick(pdt._id, "Request for Approval")}
+                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
+                                                                className='w-full text-left font-normal text-nowrap'>Request for Approval</button>
 
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                        <button onClick={() => progressButtonClick(pdt._id, "Approved")}
-                                                            disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='w-full text-left font-normal text-nowrap'>Approve</button>
+                                                            <button onClick={() => progressButtonClick(pdt._id, "Approved")}
+                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
+                                                                className='w-full text-left font-normal text-nowrap'>Approve</button>
 
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                        <button onClick={() => progressButtonClick(pdt._id, "Rejected")}
-                                                            disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                            className='w-full text-left font-normal text-nowrap'>Reject</button>
+                                                            <button onClick={() => progressButtonClick(pdt._id, "Rejected")}
+                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
+                                                                className='w-full text-left font-normal text-nowrap'>Reject</button>
 
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                        <button onClick={() => handleDownload(pdt._id)}
-                                                            disabled={pdt.progress === "Not Started"}
-                                                            className='w-full text-left font-normal text-nowrap'>Download Summary</button>
+                                                            <button onClick={() => handleDownload(pdt._id)}
+                                                                disabled={pdt.progress === "Not Started"}
+                                                                className='w-full text-left font-normal text-nowrap'>Download Summary</button>
 
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                        <button onClick={() => handleDeleteProject(pdt._id)} disabled={pdt.progress != "Not Started"}
-                                                            className='w-full text-left font-normal text-nowrap text-red-600'>Delete project</button>
+                                                            <button onClick={() => handleDeleteProject(pdt._id)} disabled={pdt.progress != "Not Started"}
+                                                                className='w-full text-left font-normal text-nowrap text-red-600'>Delete project</button>
 
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
-                                                    {pdt._id}
-                                                </div>
-                                            </td>
-                                            <td>{pdt.name}</td>
-                                            <td>{pdt.desc}</td>
-                                            <td>{pdt.owner}</td>
-                                            <td>{pdt.client}</td>
-                                            <td>
-                                                {
-                                                    pdt.progress === "Not Started" ?
-                                                        <div className='p-1 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                        pdt.progress === "In progress" ?
-                                                            <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                            pdt.progress === "Request for Approval" ?
-                                                                <div className='p-1 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                pdt.progress === "Approved" ?
-                                                                    <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                    pdt.progress === "Rejected" ?
-                                                                        <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> : ""
-                                                }
-                                            </td>
-                                            <td>{pdt.createdAt.split('T')[0]}</td>
-                                        </tr>
-                                    )
-                                })
-                            }
-                        </tbody>
-                    </table>
+                                                </td>
+                                                <td>
+                                                    <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
+                                                        {pdt._id}
+                                                    </div>
+                                                </td>
+                                                <td>{pdt.name}</td>
+                                                <td>{pdt.desc}</td>
+                                                <td>{pdt.owner}</td>
+                                                <td>{pdt.client}</td>
+                                                <td>
+                                                    {
+                                                        pdt.progress === "Not Started" ?
+                                                            <div className='p-1 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                            pdt.progress === "In progress" ?
+                                                                <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                                pdt.progress === "Request for Approval" ?
+                                                                    <div className='p-1 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                                    pdt.progress === "Approved" ?
+                                                                        <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                                        pdt.progress === "Rejected" ?
+                                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> : ""
+                                                    }
+                                                </td>
+                                                <td>{pdt.createdAt.split('T')[0]}</td>
+                                            </tr>
+                                        )
+                                    })
+                                }
+                            </tbody>
+                        </table>
+                        <div className='w-full flex items-center justify-end gap-2 mt-4'>
+
+                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
+                                <MdOutlineKeyboardArrowLeft className='text-xl' />
+                            </button>
+
+                            <div className='text-gray-700'>
+                                Page {currentPage} of {totalPages}
+                            </div>
+
+                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
+                                <MdOutlineKeyboardArrowRight className='text-xl' />
+                            </button>
+
+                        </div>
+                    </div>
             }
 
             <Dialog

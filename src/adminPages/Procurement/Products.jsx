@@ -4,6 +4,7 @@ import { IoArrowBack } from 'react-icons/io5';
 import { useNavigate, useParams } from 'react-router-dom';
 import { backendServer } from '../../utils/info';
 import CircularProgress from '@mui/material/CircularProgress';
+import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
 
 const Products = () => {
 
@@ -18,7 +19,7 @@ const Products = () => {
 
     const fetchAllProducts = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/products/${address.id}`,{
+            const response = await axios.get(`${backendServer}/api/products/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setProducts(response.data.products);
@@ -34,6 +35,18 @@ const Products = () => {
     useEffect(() => {
         fetchAllProducts();
     }, []);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const current = onlyProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(onlyProducts.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
 
     return (
         <div className="w-full flex items-center justify-center">
@@ -64,43 +77,60 @@ const Products = () => {
                                         <div className="w-full flex items-center justify-start text-lg font-medium mt-6">
                                             No products found!
                                         </div> :
-                                        <table className='w-full border-collapse mt-6'>
-                                            <thead>
-                                                <tr className='text-gray-700 text-lg text-nowrap'>
-                                                    <th>Project ID</th>
-                                                    <th>Project Name</th>
-                                                    <th>Qty</th>
-                                                    <th>Vendor</th>
-                                                    <th>Item Status</th>
-                                                    <th>RFQ Sent Date</th>
-                                                    <th>RFQ Receive Date</th>
-                                                    <th>RFQ Number</th>
-                                                    <th>PO Number</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    onlyProducts.map(pdt => {
-                                                        return (
-                                                            <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                                                <td>{pdt.productDetails.code}</td>
-                                                                <td>{pdt.title}</td>
-                                                                <td>{pdt.productDetails.qty}</td>
-                                                                <td>{pdt.productDetails.vendor}</td>
-                                                                {
-                                                                    pdt.status === "Pending" ?
-                                                                        <td>Approval pending</td> : ''
-                                                                }
-                                                                <td></td>
-                                                                <td></td>
-                                                                <td></td>
-                                                                <td></td>
-                                                            </tr>
-                                                        )
-                                                    })
-                                                }
-                                            </tbody>
-                                        </table>
+                                        <div className="w-full flex flex-col items-center">
+                                            <table className='w-full border-collapse mt-6'>
+                                                <thead>
+                                                    <tr className='text-gray-700 text-lg text-nowrap'>
+                                                        <th>Project ID</th>
+                                                        <th>Project Name</th>
+                                                        <th>Qty</th>
+                                                        <th>Vendor</th>
+                                                        <th>Item Status</th>
+                                                        <th>RFQ Sent Date</th>
+                                                        <th>RFQ Receive Date</th>
+                                                        <th>RFQ Number</th>
+                                                        <th>PO Number</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        current.map(pdt => {
+                                                            return (
+                                                                <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                    <td>{pdt.productDetails.code}</td>
+                                                                    <td>{pdt.title}</td>
+                                                                    <td>{pdt.productDetails.qty}</td>
+                                                                    <td>{pdt.productDetails.vendor}</td>
+                                                                    {
+                                                                        pdt.status === "Pending" ?
+                                                                            <td>Approval pending</td> : ''
+                                                                    }
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                    <td></td>
+                                                                </tr>
+                                                            )
+                                                        })
+                                                    }
+                                                </tbody>
+                                            </table>
+                                            <div className='w-full flex items-center justify-end gap-2 mt-4'>
+
+                                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
+                                                    <MdOutlineKeyboardArrowLeft className='text-xl' />
+                                                </button>
+
+                                                <div className='text-gray-700'>
+                                                    Page {currentPage} of {totalPages}
+                                                </div>
+
+                                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
+                                                    <MdOutlineKeyboardArrowRight className='text-xl' />
+                                                </button>
+
+                                            </div>
+                                        </div>
                                 }
                             </div>
                 }
