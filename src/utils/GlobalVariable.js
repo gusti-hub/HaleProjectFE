@@ -10,5 +10,12 @@ export default class GlobalVariable {
         AuthorizationRoleNavigation: 'Authorization Role Navigation',
         ProcurementNavigation: 'Procurement Navigation',
         InventoryNavigation : 'Inventory Navigation',
+        ConfigurationNavigation : 'Configuration Navigation'
+    }
+
+    static ConfigurationType = {
+        Unit: 'Unit',
+        Furnishing: 'Furnishing',
+        Room: 'Room'
     }
 }
