@@ -10,6 +10,8 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm install
 
+ENV PATH /app/node_modules/.bin:$PATH
+
 # Copy the rest of the application code
 COPY . .
 
