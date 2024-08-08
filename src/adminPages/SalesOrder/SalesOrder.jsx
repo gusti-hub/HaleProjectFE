@@ -420,9 +420,13 @@ const SalesOrder = () => {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
-                                                        {pdt._id}
-                                                    </div>
+                                                    {
+                                                        pdt.progress === "Not Started" ?
+                                                            <div className=''>{pdt._id}</div> :
+                                                            <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
+                                                                {pdt._id}
+                                                            </div>
+                                                    }
                                                 </td>
                                                 <td>{pdt.name}</td>
                                                 <td>{pdt.desc}</td>

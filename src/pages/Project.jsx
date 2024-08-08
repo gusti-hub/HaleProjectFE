@@ -20,7 +20,7 @@ const Project = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
-        name: '', desc: '', client: '', budget: 0
+        name: '', desc: '', client: '', budget: 0, imageUrl: ''
     });
     const [section, setSection] = useState({
         projectId: address.id, secname: ''
@@ -30,6 +30,9 @@ const Project = () => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [activeProjectId, setActiveProjectId] = useState(null);
+
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [fileName, setFileName] = useState('');
 
     const handleOpen = (projectId) => {
         setActiveProjectId(projectId);
@@ -46,6 +49,8 @@ const Project = () => {
     const handleOpenForm = () => {
         setOpenForm(state => !state);
     }
+
+    const [imgModal, setImgModal] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -64,8 +69,9 @@ const Project = () => {
             const project = response.data;
             setProjectDetails(project);
             setFormData({
-                name: project.name, desc: project.desc, client: project.client, budget: project.budget
+                name: project.name, desc: project.desc, client: project.client, budget: project.budget, imageUrl: project.imageUrl
             });
+            setFileName(project.imageUrl ? project.imageUrl.split('/').pop() : '');
             setLoading(false);
         } catch (error) {
             setError(error.message);
@@ -105,13 +111,44 @@ const Project = () => {
         fetchSections();
     }, []);
 
+    const handleFileChange = (event) => {
+        setSelectedFile(event.target.files[0]);
+        setFileName(event.target.files[0].name);
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return formData.imageUrl;
+
+        const uploadData = new FormData();
+        uploadData.append('image', selectedFile);
+
+        try {
+            const response = await axios.post(`${backendServer}/api/upload`, uploadData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data.imageUrl;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Error uploading image');
+            return null;
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`${backendServer}/api/project/${address.id}`, formData);
-            toast.success(response.data.message);
-            fetchDetails();
-            setLoading(false);
+            const uploadedImageUrl = await handleUpload();
+
+            if (uploadedImageUrl !== null) {
+                const finalFormData = { ...formData, imageUrl: uploadedImageUrl };
+
+                const response = await axios.put(`${backendServer}/api/project/${address.id}`, finalFormData);
+                toast.success(response.data.message);
+                fetchDetails();
+                setLoading(false);
+            }
         } catch (err) {
             toast.error(err.message);
             setError(err.message);
@@ -209,6 +246,32 @@ const Project = () => {
                                                         className='w-full focus:border-b border-solid border-b-black p-1 bg-transparent outline-none'
                                                         type="number" name="budget" />
                                                 </div>
+                                                <div className="w-full flex items-start justify-start gap-2 text-black">
+                                                    <label htmlFor="file">Attachment:</label>
+                                                    <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                                    <input type="file" onChange={handleFileChange} name='file' />
+                                                </div>
+                                                {
+                                                    fileName &&
+                                                    <div className="w-full flex items-center justify-start text-sm gap-8">
+                                                        <div className="text-left">Uploaded file: {fileName}</div>
+                                                        {
+                                                            formData.imageUrl ?
+                                                                <div onClick={() => setImgModal(curr => !curr)}
+                                                                    className='cursor-pointer text-blue-900 font-medium'>View attachment</div> : ''
+                                                        }
+                                                    </div>
+                                                }
+                                                <Dialog
+                                                    size="xs"
+                                                    open={imgModal}
+                                                    handler={() => setImgModal(curr => !curr)}
+                                                    className="bg-transparent shadow-none w-full flex items-center justify-center"
+                                                >
+                                                    <div className="w-full flex items-center justify-center p-4 rounded-lg bg-white">
+                                                        <img src={formData.imageUrl} />
+                                                    </div>
+                                                </Dialog>
                                                 <div className="w-full flex items-center justify-end">
                                                     <button onClick={handleSubmit}
                                                         type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>
