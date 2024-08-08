@@ -83,7 +83,7 @@ const Login = () => {
 
                     <div className="w-full flex flex-col items-center justify-start gap-6">
                         <div className="w-full text-center text-2xl font-medium text-main">
-                            Welcome back! Gusti
+                            Welcome back!
                         </div>
                         <form onSubmit={handleSubmit}
                             className='w-full flex flex-col items-center justify-center gap-6'
