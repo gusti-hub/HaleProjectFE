@@ -9,6 +9,7 @@ import Comments from '../components/Comments';
 import ProjectItem from '../components/ProjectItem';
 import { IoMdAdd } from 'react-icons/io';
 import { Dialog } from '@material-tailwind/react';
+import GlobalVariable from '../utils/GlobalVariable';
 
 const Project = () => {
     const address = useParams();
@@ -30,6 +31,8 @@ const Project = () => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [activeProjectId, setActiveProjectId] = useState(null);
+
+    const [ConfigurationType, setConfigurationType] = useState([]);
 
     const handleOpen = (projectId) => {
         setActiveProjectId(projectId);
@@ -99,7 +102,22 @@ const Project = () => {
         }
     }
 
+    const fetchConfigurationType = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/configuration/` + GlobalVariable.ConfigurationType.Room, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setConfigurationType(response.data.configuration);
+            setLoading(false);
+        } catch (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
+        fetchConfigurationType();
         fetchDetails();
         fetchClientsNames();
         fetchSections();
@@ -246,8 +264,19 @@ const Project = () => {
                                                         <div className="flex items-center justify-center gap-2">
                                                             <label htmlFor="secname" className='font-medium'>Section:</label>
                                                             <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                                                            <input value={section.secname} onChange={handleInputChange}
-                                                                className='outline-none p-1 border-b border-solid border-black' type="text" name="secname" />
+                                                            <select
+                                                                value={section.secname}
+                                                                onChange={handleInputChange}
+                                                                className='outline-none p-1 border-b border-solid border-black'
+                                                                name="secname"
+                                                            >
+                                                            <option value="">Select configuration...</option>
+                                                            {ConfigurationType.map(option => (
+                                                                <option key={option.code} value={option.name}>
+                                                                    {option.name}
+                                                                </option>
+                                                            ))}
+                                                            </select>
                                                         </div>
                                                         <button type='submit' className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>Add</button>
                                                     </div>

@@ -6,6 +6,7 @@ import { AppContext } from '../context/CommonContext';
 import { useNavigate } from 'react-router-dom';
 import Dashboard from '../adminPages/Dashboard/Dashboard';
 import { ClientRegistration, UserRegistration, VendorRegistration, RoleAuthorization, RoleRegistration } from '../adminPages/UserRegistration/UserRegistration';
+import Configurations from '../adminPages/Configuration/Configuration';
 import { FaArrowLeft, FaArrowRight, FaRegBuilding, FaRegUser, FaUserCircle, FaUsers } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiUsers } from 'react-icons/fi';
@@ -123,7 +124,15 @@ const AdminPanel = () => {
                                     <MdOutlineInventory2 className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 8 ? 'text-black' : 'text-gray-800'}`} />
                                     <div className={`font-medium text-base text-nowrap ${menuID === 8 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Inventory</div>
                                 </div> 
-                            )}                        
+                            )}
+                            {action.includes(GlobalVariable.ActionRole.InventoryNavigation) && (
+                                <div
+                                    onClick={() => handleMenuID(10)}
+                                    className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 10 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                    <RiSafeLine className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 10 ? 'text-black' : 'text-gray-800'}`} />
+                                    <div className={`font-medium text-base text-nowrap ${menuID === 8 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Configuration</div>
+                                </div> 
+                            )}                                                         
                         </div>
                     </div>
 
@@ -151,7 +160,8 @@ const AdminPanel = () => {
                                         : menuID === 5 ? <ClientRegistration />
                                             : menuID === 6 ? <RoleAuthorization />
                                                 : menuID === 7 ? <Procurement />
-                                                    : menuID === 9 ? <RoleRegistration /> : ""
+                                                    : menuID === 9 ? <RoleRegistration />
+                                                        : menuID === 10 ? <Configurations /> : ""
                     }
                 </div>
             </div>

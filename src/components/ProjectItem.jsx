@@ -6,6 +6,7 @@ import { backendServer } from '../utils/info';
 import toast from 'react-hot-toast';
 import { MdDeleteOutline } from 'react-icons/md';
 import { FaEdit, FaUserCircle } from 'react-icons/fa';
+import GlobalVariable from '../utils/GlobalVariable';
 
 const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     const initialFormData = isEditMode ? editItem : { projectId: id, type: 'Reference', title: '', desc: '' };
@@ -160,7 +161,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         desc: '',
         imageUrl: ''
     };
-
+    const [FurnishingType, setFurnishingType] = useState([]);
     const [formData, setFormData] = useState(initialFormData);
     const [selectedFile, setSelectedFile] = useState(null);
     const [fileName, setFileName] = useState(isEditMode && editItem ? editItem.imageUrl.split('/').pop() : '');
@@ -290,8 +291,21 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         }
     };
 
+    const fetchFurnishingType = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/configuration/` + GlobalVariable.ConfigurationType.Furnishing, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setFurnishingType(response.data.configuration);
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+
     useEffect(() => {
         fetchVendorsNames();
+        fetchFurnishingType();
     }, []);
 
     if (error) return (
@@ -303,22 +317,40 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     return (
         <form onSubmit={handleSubmit} className='w-full flex flex-col items-center gap-4'>
             <div className="w-full flex items-center justify-center gap-4">
+                { <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                    <label htmlFor="code">Furnishing:</label>
+                    <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                    <select
+                        value={formData.furnishing}
+                        onChange={handleInputChange}
+                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                        name='furnishing'
+                    >
+                        <option value="" disabled>Select an option</option>
+                        {FurnishingType.map((option) => (
+                        <option key={option.code} value={option.name}>
+                            {option.name}
+                        </option>
+                        ))}
+                    </select>
+                </div> }       
+            </div>
+            <div className="w-full flex items-center justify-center gap-4">
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="name">Item Name:</label>
                     <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                     <input value={formData.name} onChange={handleInputChange}
                         className='w-full outline-none border-b border-solid border-b-black p-[2px]'
                         type="text" name='name' placeholder='Type here...' />
-                </div>
-                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                </div>         
+                {/* <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="code">Item Code:</label>
                     <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                     <input value={formData.code} onChange={handleInputChange}
                         className='w-full outline-none border-b border-solid border-b-black p-[2px]'
                         type="text" name='code' placeholder='Type here...' />
-                </div>
+                </div> */}
             </div>
-
             <div className="w-full flex items-center justify-start gap-2">
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="unit">Size Unit:</label>
@@ -331,6 +363,9 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                         <option value="inch">inch</option>
                     </select>
                 </div>
+            </div>
+
+            <div className="w-full flex items-center justify-start gap-2">
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="len">L:</label>
                     <input value={formData.len} onChange={handleInputChange}
@@ -344,10 +379,30 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                         type="number" name='wid' placeholder='Width' />
                 </div>
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                    <label htmlFor="height">H:</label>
+                    <input value={formData.height} onChange={handleInputChange}
+                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                        type="number" name='height' placeholder='Height' />
+                </div>                
+            </div>
+            <div className="w-full flex items-center justify-start gap-2">              
+                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                    <label htmlFor="depth">D:</label>
+                    <input value={formData.depth} onChange={handleInputChange}
+                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                        type="number" name='depth' placeholder='Depth' />
+                </div>
+                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                    <label htmlFor="seatheight">SH:</label>
+                    <input value={formData.seatheight} onChange={handleInputChange}
+                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                        type="number" name='seatheight' placeholder='Seat height' />
+                </div>                                
+                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="dia">Dia:</label>
                     <input value={formData.dia} onChange={handleInputChange}
                         className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                        type="number" name='dia' placeholder='Dia' />
+                        type="number" name='diameter' placeholder='Diameter' />
                 </div>
             </div>
 
