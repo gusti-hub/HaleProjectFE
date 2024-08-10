@@ -11,6 +11,7 @@ const Procurement = () => {
     const navigate = useNavigate();
 
     const token = localStorage.getItem('token');
+    const name = localStorage.getItem('name');
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -39,7 +40,9 @@ const Procurement = () => {
         fetchSalesData();
     }, []);
 
-    const filteredSales = allSales.filter(sale =>
+    const sales = allSales.filter(sale => sale.invitedUsers.includes(name));
+
+    const filteredSales = sales.filter(sale =>
         sale.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -107,7 +110,7 @@ const Procurement = () => {
                                                 </td>
                                                 <td>{pdt.name}</td>
                                                 <td>{pdt.owner}</td>
-                                                <td>{pdt.client}</td>
+                                                <td>{pdt.client.split('-')[1]}</td>
                                                 <td>
                                                     {
                                                         pdt.progress === "Not Started" ?

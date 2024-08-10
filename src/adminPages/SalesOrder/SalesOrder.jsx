@@ -18,8 +18,9 @@ const SalesOrder = () => {
 
     const token = localStorage.getItem('token');
     const name = localStorage.getItem('name');
+    const userId = localStorage.getItem('userId');
 
-    const [formData, setFormData] = useState({ name: '', desc: '', owner: name, client: '' });
+    const [formData, setFormData] = useState({ name: '', desc: '', owner: name, ownerId: userId, client: '' });
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -79,7 +80,7 @@ const SalesOrder = () => {
         fetchEmployeesNames();
         fetchClientsNames();
         fetchSalesData();
-    }, []);
+    }, []); 
 
     const handleOpen = () => {
         setOpen((cur) => !cur);
@@ -89,7 +90,7 @@ const SalesOrder = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', desc: '', owner: name, client: '' });
+        setFormData({ name: '', desc: '', owner: name, ownerId: userId, client: '' });
     };
 
     const handleInputChange = (e) => {
@@ -146,9 +147,10 @@ const SalesOrder = () => {
 
     const updateInviteUser = async (name) => {
         try {
-            const response = await axios.put(`${backendServer}/api//addinviteduser/${currProject._id}`, { name: name });
+            const response = await axios.put(`${backendServer}/api/addinviteduser/${currProject._id}`, { name: name });
             toast.success(response.data.message);
             await getUserListHandler(currProject._id);
+            fetchSalesData();
         } catch (error) {
             toast.error(error.message);
             await getUserListHandler(currProject._id);
@@ -157,9 +159,10 @@ const SalesOrder = () => {
 
     const removeInvitedUser = async (name) => {
         try {
-            const response = await axios.put(`${backendServer}/api//removeinviteduser/${currProject._id}`, { name: name });
+            const response = await axios.put(`${backendServer}/api/removeinviteduser/${currProject._id}`, { name: name });
             toast.success(response.data.message);
             await getUserListHandler(currProject._id);
+            fetchSalesData();
         } catch (error) {
             toast.error(error.message);
             await getUserListHandler(currProject._id);
@@ -190,7 +193,7 @@ const SalesOrder = () => {
         }
     };
 
-    const sales = allSales.filter(sale => sale.owner === name);
+    const sales = allSales.filter(sale => sale.invitedUsers.includes(name));
 
     const filteredSales = sales.filter(sale =>
         sale.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -309,7 +312,7 @@ const SalesOrder = () => {
                             className='p-1 outline-none' name="client" id="client">
                             <option value="" disabled>Select an option</option>
                             {clients.map((client) => (
-                                <option key={client.id} value={client.name}>{client.name}</option>
+                                <option key={client.id} value={`${client.code}-${client.name}`}>{client.code}-{client.name}</option>
                             ))}
                         </select>
                     </div>
@@ -431,7 +434,7 @@ const SalesOrder = () => {
                                                 <td>{pdt.name}</td>
                                                 <td>{pdt.desc}</td>
                                                 <td>{pdt.owner}</td>
-                                                <td>{pdt.client}</td>
+                                                <td>{pdt.client.split('-')[1]}</td>
                                                 <td>
                                                     {
                                                         pdt.progress === "Not Started" ?

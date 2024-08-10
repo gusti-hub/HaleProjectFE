@@ -13,14 +13,20 @@ const RFQ = ({ fetchAllProductsMain }) => {
     const token = localStorage.getItem('token');
     const address = useParams();
 
+    const today = new Date().toISOString().split('T')[0];
+
     const [add, setAdd] = useState(false);
-    const handleAddNew = () => { setAdd(curr => !curr) };
+    const handleAddNew = () => { 
+        setSelectedProducts([]);
+        setAdd(curr => !curr) 
+    };
 
     const [addPdt, setAddPdt] = useState(false);
     const handleAddPdt = () => { setAddPdt(curr => !curr) };
 
     const [formData, setFormData] = useState(
         {
+            rfqId: '',
             projectId: address.id,
             vendor: '',
             curr: '',
@@ -110,6 +116,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
         }
     };
 
+    const [rfqs, setRfqs] = useState([]);
+
     const handleSaveRFQ = async () => {
         if (formData.vendor && formData.curr && formData.deadline) {
             try {
@@ -123,6 +131,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                 }
 
                 const response = await axios.post(`${backendServer}/api/add-rfq`, {
+                    rfqId: `RFQ-00${rfqs.length + 1}`,
                     projectId: address.id,
                     vendor: formData.vendor,
                     curr: formData.curr,
@@ -142,8 +151,6 @@ const RFQ = ({ fetchAllProductsMain }) => {
         }
     };
 
-
-    const [rfqs, setRfqs] = useState([]);
 
     const fetchRFQDetails = async () => {
         try {
@@ -338,7 +345,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                                     }
                                                                 </div>
                                                             </td>
-                                                            <td>{rfq._id}</td>
+                                                            <td>{rfq.rfqId}</td>
                                                             <td>{rfq.deadline}</td>
                                                             <td>{rfq.vendor}</td>
                                                             <td>{rfq.status}</td>
@@ -575,7 +582,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                     value={formData.deadline}
                                                     onChange={handleInputChange}
                                                     className='p-1 outline-none'
-                                                    type="date" name="deadline" id="deadline" />
+                                                    type="date" name="deadline" id="deadline" min={today} />
                                             </div>
                                         </form>
                             }
@@ -641,8 +648,6 @@ const RFQ = ({ fetchAllProductsMain }) => {
         </div>
     );
 }
-
-
 
 
 const Products = () => {

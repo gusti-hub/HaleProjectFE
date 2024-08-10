@@ -248,7 +248,6 @@ const Project = () => {
                                                 </div>
                                                 <div className="w-full flex items-start justify-start gap-2 text-black">
                                                     <label htmlFor="file">Attachment:</label>
-                                                    <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                                                     <input type="file" onChange={handleFileChange} name='file' />
                                                 </div>
                                                 {
