@@ -8,6 +8,495 @@ import { MdOutlineClose, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight
 import { Dialog } from '@material-tailwind/react';
 import toast from 'react-hot-toast';
 
+//PO
+
+const PO = ({ fetchAllProductsMain }) => {
+
+    const token = localStorage.getItem('token');
+    const address = useParams();
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const [formData, setFormData] = useState({
+        poId: '', projectId: address.id, vendor: '', rfq: '', delivery: '', receive: '', totalPrice: ''
+    });
+
+    const resetForm = () => {
+        setFormData({
+            poId: '', projectId: address.id, vendor: '', rfq: '', delivery: '', receive: '', totalPrice: ''
+        })
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
+    };
+
+    const [loading, setLoading] = useState(true);
+    const [loading1, setLoading1] = useState(true);
+    const [loadPdts, setLoadPdts] = useState(true);
+
+    const [error, setError] = useState(null);
+    const [error1, setError1] = useState(null);
+    const [errPdts, setErrPdts] = useState(null);
+
+    const [pos, setPos] = useState([]);
+
+    const [addPO, setAddPO] = useState(false);
+
+    const [vendors, setVendors] = useState([]);
+    const [rfqs, setRfqs] = useState([]);
+
+    const [pdts, setPdts] = useState([]);
+    const [isClicked, setClicked] = useState(false);
+    const [totalPrice, setTotalPrice] = useState(null);
+
+    const handleAddPO = () => {
+        resetForm();
+        setAddPO(curr => !curr);
+        setTotalPrice(null);
+        setClicked(false);
+    }
+
+    const fetchPODetails = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`);
+            setPos(response.data.allPOs);
+            setLoading(false);
+        } catch (error) {
+            setError(error.response.data.message);
+            setLoading(false);
+        }
+    }
+
+    const fetchVendorsNames = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/getvendornames`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setVendors(response.data);
+            setLoading1(false);
+        } catch (err) {
+            setError1(err.response.data.message);
+            setLoading1(false);
+        }
+    };
+
+    const fetchRFQDetails = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/rfqDetails/${address.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setRfqs(response.data.allRFQs);
+            setLoading1(false);
+        } catch (error) {
+            setLoading1(false);
+            setError1(error.response.data.message);
+        }
+    }
+
+    const vendorRFQs = rfqs.filter(rfq => rfq.vendor === formData.vendor && rfq.status === 'Received RFQ');
+
+    const receivedRFQs = rfqs.filter(rfq => rfq.status === 'Received RFQ');
+
+    const handleTotalPrice = (pdts) => {
+        let totalUSD = 0;
+        let totalIDR = 0;
+
+        setTotalPrice(null);
+
+        pdts.forEach(pdt => {
+            const price = pdt.qty * pdt.price;
+
+            if (pdt.curr === 'USD') {
+                totalUSD += price;
+            } else if (pdt.curr === 'IDR') {
+                totalIDR += price;
+            }
+        });
+
+        if (totalUSD > 0) {
+            const formattedTotalUSD = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            }).format(totalUSD);
+            setTotalPrice(formattedTotalUSD);
+        } else if (totalIDR > 0) {
+            const formattedTotalIDR = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+            }).format(totalIDR);
+            setTotalPrice(formattedTotalIDR);
+        } else {
+            setTotalPrice(null);
+        }
+    };
+
+    const fetcthRFQProducts = async (rfqId) => {
+        try {
+            const response = await axios.get(`${backendServer}/api/rfqProducts/${address.id}/${rfqId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setPdts(response.data);
+            handleTotalPrice(response.data);
+            setLoadPdts(false);
+        } catch (error) {
+            setErrPdts(error.response.data.message);
+            setLoadPdts(false);
+        }
+    }
+
+    const handleContinue = (e, rfqId) => {
+        e.preventDefault();
+        fetcthRFQProducts(rfqId);
+        setClicked(true);
+    }
+
+    const handleSavePO = async (e) => {
+        e.preventDefault();
+
+        if (formData.vendor && formData.rfq && formData.delivery && formData.receive && totalPrice) {
+            try {
+                const pdtsIds = pdts.map(pdt => ({ productId: String(pdt._id) }));
+
+                const response = await axios.post(`${backendServer}/api/add-po`, {
+                    poId: `PO-00${pos.length + 1}`,
+                    projectId: address.id,
+                    vendor: formData.vendor,
+                    rfq: formData.rfq,
+                    delivery: formData.delivery,
+                    receive: formData.receive,
+                    totalPrice: totalPrice,
+                    products: pdtsIds
+                });
+
+                fetchAllProductsMain();
+                fetchPODetails();
+                handleAddPO();
+                toast.success(response.data.message);
+            } catch (error) {
+                toast.error(error.response.data.message);
+            }
+        } else {
+            toast.error("Fill all the mandatory fields!");
+        }
+    };
+
+    const [menuOpen, setMenuOpen] = useState('');
+
+    const openMenu = (_id) => {
+        if (menuOpen === _id) {
+            setMenuOpen(null);
+        } else {
+            setMenuOpen(_id);
+        }
+    };
+
+    useEffect(() => {
+        fetchPODetails();
+        fetchVendorsNames();
+        fetchRFQDetails();
+    }, []);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(5);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const current = pos.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(pos.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    if (loading1) {
+        <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
+            <div className='w-full flex items-center justify-center my-4'>
+                <CircularProgress />
+            </div>
+        </div>
+    }
+
+    if (receivedRFQs.length === 0) {
+        return (
+            <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
+                <div className="w-full text-left font-medium text-black">No Received RFQ found!</div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
+            <div className="w-full flex items-center justify-start">
+                <button onClick={() => setAddPO(state => !state)}
+                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                    ADD NEW PO
+                </button>
+            </div>
+
+            {
+                loading ?
+                    <div className='w-full flex items-center justify-center my-4'>
+                        <CircularProgress />
+                    </div>
+                    : error ?
+                        <div className="w-full flex items-center justify-center text-red-600 font-medium my-4">
+                            Error: {error}
+                        </div>
+                        :
+                        <div className="w-full flex items-center justify-center text-black">
+                            {
+                                pos.length === 0 ?
+                                    <div className="w-full text-left font-medium">
+                                        No PO detail found!
+                                    </div> :
+                                    <table className='w-full border-collapse'>
+                                        <thead className='text-nowrap'>
+                                            <tr className='text-gray-700 text-lg'>
+                                                <th>Action</th>
+                                                <th>PO Number</th>
+                                                <th>PO Date</th>
+                                                <th>Estimation Delivery</th>
+                                                <th>Estimation Received</th>
+                                                <th>Vendor Name</th>
+                                                <th>Total Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                current.map(po => {
+                                                    return (
+                                                        <tr>
+                                                            <td>
+                                                                <div className='flex items-center justify-center relative'>
+                                                                    {
+                                                                        menuOpen != po._id ?
+                                                                            <MdOutlineMoreVert
+                                                                                className='cursor-pointer text-xl' />
+                                                                            :
+                                                                            <IoCloseSharp
+                                                                                className='cursor-pointer text-xl' />
+                                                                    }
+                                                                </div>
+                                                            </td>
+                                                            <td>{po.poId}</td>
+                                                            <td>{po.createdAt.split('T')[0]}</td>
+                                                            <td>{po.delivery}</td>
+                                                            <td>{po.receive}</td>
+                                                            <td>{po.vendor}</td>
+                                                            <td>{po.totalPrice}</td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                        </tbody>
+                                    </table>
+                            }
+                        </div>
+            }
+
+            {
+                pos.length != 0 &&
+                <div className='w-full flex items-center justify-end gap-2'>
+
+                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
+                        <MdOutlineKeyboardArrowLeft className='text-xl' />
+                    </button>
+
+                    <div className='text-gray-700'>
+                        Page {currentPage} of {totalPages}
+                    </div>
+
+                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
+                        <MdOutlineKeyboardArrowRight className='text-xl' />
+                    </button>
+
+                </div>
+            }
+
+            <Dialog
+                size={isClicked ? `xl` : `md`}
+                open={addPO}
+                handler={handleAddPO}
+                className="bg-transparent shadow-none w-full flex items-center justify-center"
+            >
+                {
+                    loading1 ?
+                        <div className='w-full flex items-center justify-center my-4'>
+                            <CircularProgress />
+                        </div>
+                        : error1 ?
+                            <div className="w-full flex items-center justify-center text-red-600 font-medium my-4">
+                                Error: {error1}
+                            </div> :
+                            <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
+                                <form className='w-full flex flex-col items-center'>
+                                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                        <label htmlFor="vendor">Vendor:</label>
+                                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                        <select
+                                            value={formData.vendor}
+                                            onChange={handleInputChange}
+                                            className='p-1 outline-none' name="vendor">
+                                            <option value="" disabled>Select an option</option>
+                                            {vendors.map((vendor) => (
+                                                <option key={vendor.id} value={vendor.name}>{vendor.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                        <label htmlFor="rfq">RFQ:</label>
+                                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                        {
+                                            !formData.vendor || vendorRFQs.length === 0 ?
+                                                <div className='text-sm text-red-600 italic'>No RFQ details found! <span className='text-black'>(Select vendor to continue.)</span></div> :
+                                                <select
+                                                    value={formData.rfq}
+                                                    onChange={handleInputChange}
+                                                    className='p-1 outline-none' name="rfq">
+                                                    <option value="" disabled>Select an option</option>
+                                                    {vendorRFQs && vendorRFQs.map((rfq) => (
+                                                        <option key={rfq.id} value={rfq.rfqId}>{rfq.rfqId}</option>
+                                                    ))}
+                                                </select>
+
+                                        }
+                                    </div>
+                                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                        <label htmlFor="delivery">Estimation Delivery:</label>
+                                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                        <input
+                                            value={formData.delivery}
+                                            onChange={handleInputChange}
+                                            className='p-1 outline-none'
+                                            type="date" name="delivery" min={today} />
+                                    </div>
+                                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                        <label htmlFor="receive">Estimation Received:</label>
+                                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                        <input
+                                            value={formData.receive}
+                                            onChange={handleInputChange}
+                                            className='p-1 outline-none'
+                                            type="date" name="receive" min={today} />
+                                    </div>
+                                    {
+                                        (formData.rfq && vendorRFQs.length != 0) && <div className="w-full flex flex-col items-center gap-4">
+                                            <div className="w-full flex items-center justify-end">
+                                                <button onClick={(e) => handleContinue(e, formData.rfq)}
+                                                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                    Continue
+                                                </button>
+                                            </div>
+                                            {
+                                                isClicked && <div className="w-full flex items-center justify-center">
+                                                    {
+                                                        loadPdts ?
+                                                            <div className='w-full flex items-center justify-center my-4'>
+                                                                <CircularProgress />
+                                                            </div> :
+                                                            errPdts ?
+                                                                <div className="w-full flex items-center justify-center text-red-600 font-medium my-4">
+                                                                    Error: {errPdts}
+                                                                </div> :
+                                                                <div className="w-full flex flex-col items-center justify-start gap-4">
+                                                                    <div className="w-full flex items-start justify-start max-h-[20rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                                                                        {
+                                                                            pdts.length === 0 ? <div className="w-full text-left">No product found!</div>
+                                                                                :
+                                                                                <table className='w-full border-collapse mt-4'>
+                                                                                    <thead>
+                                                                                        <tr className='text-gray-700 text-lg text-nowrap'>
+                                                                                            <th>Product Name</th>
+                                                                                            <th>Image</th>
+                                                                                            <th>Specification</th>
+                                                                                            <th>Quantity</th>
+                                                                                            <th>Price</th>
+                                                                                            <th>Total Price</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        {
+                                                                                            pdts.map(pdt => {
+                                                                                                return (
+                                                                                                    <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                                                        <td>{pdt.title}</td>
+                                                                                                        <td>
+                                                                                                            <div className="flex items-center justify-center">
+                                                                                                                <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                        <td>
+                                                                                                            <div className="flex flex-col items-start">
+                                                                                                                {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                                                                {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                                                                {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                        <td>{pdt.qty}</td>
+                                                                                                        <td>
+                                                                                                            {
+                                                                                                                pdt.curr === 'IDR' ?
+                                                                                                                    new Intl.NumberFormat('id-ID', {
+                                                                                                                        style: 'currency',
+                                                                                                                        currency: 'IDR',
+                                                                                                                    }).format(pdt.price) :
+                                                                                                                    new Intl.NumberFormat('en-US', {
+                                                                                                                        style: 'currency',
+                                                                                                                        currency: 'USD',
+                                                                                                                    }).format(pdt.price)
+                                                                                                            }
+                                                                                                        </td>
+                                                                                                        <td>
+                                                                                                            {
+                                                                                                                pdt.curr === 'IDR' ?
+                                                                                                                    new Intl.NumberFormat('id-ID', {
+                                                                                                                        style: 'currency',
+                                                                                                                        currency: 'IDR',
+                                                                                                                    }).format(pdt.qty * pdt.price) :
+                                                                                                                    new Intl.NumberFormat('en-US', {
+                                                                                                                        style: 'currency',
+                                                                                                                        currency: 'USD',
+                                                                                                                    }).format(pdt.qty * pdt.price)
+                                                                                                            }
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                )
+                                                                                            })
+                                                                                        }
+                                                                                    </tbody>
+                                                                                </table>
+                                                                        }
+                                                                    </div>
+                                                                    <div className="w-full flex items-center justify-end text-black text-lg font-medium">
+                                                                        Total amount: {totalPrice}
+                                                                    </div>
+                                                                    <div className="w-full flex items-center justify-start">
+                                                                        <button onClick={handleSavePO}
+                                                                            className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                                            Save PO
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </form>
+                            </div>
+                }
+            </Dialog >
+        </div >
+    )
+}
+
+
+
+
+//RFQ
+
 const RFQ = ({ fetchAllProductsMain }) => {
 
     const token = localStorage.getItem('token');
@@ -16,9 +505,9 @@ const RFQ = ({ fetchAllProductsMain }) => {
     const today = new Date().toISOString().split('T')[0];
 
     const [add, setAdd] = useState(false);
-    const handleAddNew = () => { 
+    const handleAddNew = () => {
         setSelectedProducts([]);
-        setAdd(curr => !curr) 
+        setAdd(curr => !curr)
     };
 
     const [addPdt, setAddPdt] = useState(false);
@@ -360,22 +849,22 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
             }
             {
-                rfqs.length != 0 ?
-                    <div className='w-full flex items-center justify-end gap-2'>
+                rfqs.length != 0 &&
+                <div className='w-full flex items-center justify-end gap-2'>
 
-                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
-                            <MdOutlineKeyboardArrowLeft className='text-xl' />
-                        </button>
+                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
+                        <MdOutlineKeyboardArrowLeft className='text-xl' />
+                    </button>
 
-                        <div className='text-gray-700'>
-                            Page {currentPage} of {totalPages}
-                        </div>
+                    <div className='text-gray-700'>
+                        Page {currentPage} of {totalPages}
+                    </div>
 
-                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
-                            <MdOutlineKeyboardArrowRight className='text-xl' />
-                        </button>
+                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
+                        <MdOutlineKeyboardArrowRight className='text-xl' />
+                    </button>
 
-                    </div> : ''
+                </div>
             }
 
             {/* Receive RFQ Section */}
@@ -430,7 +919,20 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                                     <div className="w-full text-left font-semibold">Price</div>
                                                                     {
                                                                         rfqCurrPdts.filter(rfqPdt => rfqPdt.productId === pdt._id).map(rfqPdt => {
-                                                                            return ( <div className="w-full">{rfqPdt.price} {rfqCurr}</div> )
+                                                                            return (
+                                                                                <div className="w-full">
+                                                                                    {
+                                                                                        rfqCurr === 'IDR' ?
+                                                                                            new Intl.NumberFormat('id-ID', {
+                                                                                                style: 'currency',
+                                                                                                currency: 'IDR',
+                                                                                            }).format(rfqPdt.price) :
+                                                                                            new Intl.NumberFormat('en-US', {
+                                                                                                style: 'currency',
+                                                                                                currency: 'USD',
+                                                                                            }).format(rfqPdt.price)
+                                                                                    }
+                                                                                </div>)
                                                                         })
                                                                     }
                                                                 </div>
@@ -589,7 +1091,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                             <div className="w-full flex items-center justify-end">
                                 <button onClick={handleAddPdt}
                                     className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white my-1'>
-                                    { selectedProducts.length === 0 ? "Add Product" : "Edit Selected Product(s)"}
+                                    {selectedProducts.length === 0 ? "Add Product" : "Edit Selected Product(s)"}
                                 </button>
                             </div>
 
@@ -650,6 +1152,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
 }
 
 
+//Procurement
+
 const Products = () => {
 
     const navigate = useNavigate();
@@ -698,6 +1202,12 @@ const Products = () => {
         setRfq(state => !state);
     };
 
+    const [po, setPo] = useState(false);
+
+    const handlePO = () => {
+        setPo(state => !state);
+    }
+
     return (
         <div className="w-full flex items-center justify-center">
             <div className="w-full min-h-screen flex flex-col items-center justify-start border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg">
@@ -721,7 +1231,8 @@ const Products = () => {
                                 <div className="w-full flex items-center justify-start gap-6">
                                     <button onClick={handleRFQ}
                                         className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>RFQ</button>
-                                    <button className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>PO</button>
+                                    <button onClick={handlePO}
+                                        className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>PO</button>
                                 </div>
                                 {
                                     onlyProducts.length === 0 ?
@@ -755,7 +1266,7 @@ const Products = () => {
                                                                     <td>{pdt.rfqNumber}</td>
                                                                     <td>{pdt.rfqSentDate}</td>
                                                                     <td>{pdt.rfqReceiveDate}</td>
-                                                                    <td></td>
+                                                                    <td>{pdt.poNumber}</td>
                                                                 </tr>
                                                             )
                                                         })
@@ -789,6 +1300,15 @@ const Products = () => {
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
                 <RFQ fetchAllProductsMain={fetchAllProducts} />
+            </Dialog>
+
+            <Dialog
+                size="lg"
+                open={po}
+                handler={handlePO}
+                className="bg-transparent shadow-none w-full flex items-center justify-center"
+            >
+                <PO fetchAllProductsMain={fetchAllProducts} />
             </Dialog>
         </div>
     );
