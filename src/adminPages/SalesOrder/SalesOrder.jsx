@@ -214,30 +214,29 @@ const SalesOrder = () => {
             material: item.productDetails.material,
             insert: item.productDetails.insert,
             finish: item.productDetails.finish,
-            quantity: item.productDetails.qty.toString(),
-            vendor: item.productDetails.vendor,
-            budget: item.productDetails.budget ? item.productDetails.budget.toString() : '',
-            buyCost: item.productDetails.buyCost ? item.productDetails.buyCost.toString() : '',
-            sellCost: item.productDetails.sellCost ? item.productDetails.sellCost.toString() : '',
             // createdAt: item.createdAt.split('T')[0],
             status: item.status
         }));
     };
 
     const handleDownload = async (id) => {
-        const response = await axios.get(`${backendServer}/api/products/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        setProducts(response.data.products);
-        const prods = response.data.products.filter(prod => prod.type === "Product");
-
-        const flattenedData = flattenData(prods);
-
-        const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-        XLSX.writeFile(workbook, 'table_data.xlsx');
+        try {
+            const response = await axios.get(`${backendServer}/api/products/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setProducts(response.data.products);
+            const prods = response.data.products.filter(prod => prod.type === "Product");
+    
+            const flattenedData = flattenData(prods);
+    
+            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    
+            XLSX.writeFile(workbook, 'table_data.xlsx');
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const [currentPage, setCurrentPage] = useState(1);

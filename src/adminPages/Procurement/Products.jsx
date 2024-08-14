@@ -150,10 +150,14 @@ const PO = ({ fetchAllProductsMain }) => {
         e.preventDefault();
         fetcthRFQProducts(rfqId);
         setClicked(true);
-    }
+    };
+
+    const [saveLoader, setSaveLoader] = useState(false);
 
     const handleSavePO = async (e) => {
         e.preventDefault();
+
+        setSaveLoader(true);
 
         if (formData.vendor && formData.rfq && formData.delivery && formData.receive && totalPrice) {
             try {
@@ -173,6 +177,7 @@ const PO = ({ fetchAllProductsMain }) => {
                 fetchAllProductsMain();
                 fetchPODetails();
                 handleAddPO();
+                setSaveLoader(false);
                 toast.success(response.data.message);
             } catch (error) {
                 toast.error(error.response.data.message);
@@ -490,10 +495,17 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                     Total amount: {totalPrice}
                                                                 </div>
                                                                 <div className="w-full flex items-center justify-start">
-                                                                    <button onClick={handleSavePO}
-                                                                        className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                                        Save PO
-                                                                    </button>
+                                                                    {
+                                                                        saveLoader ?
+                                                                            <div className='flex items-center justify-center m-4'>
+                                                                                <CircularProgress />
+                                                                            </div>
+                                                                            :
+                                                                            <button onClick={handleSavePO}
+                                                                                className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                                                Save PO
+                                                                            </button>
+                                                                    }
                                                                 </div>
                                                             </div>
                                                 }
@@ -612,6 +624,16 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const [add, setAdd] = useState(false);
     const handleAddNew = () => {
+        setFormData(
+            {
+                rfqId: '',
+                projectId: address.id,
+                vendor: '',
+                curr: '',
+                deadline: ''
+            }
+        );
+        setZeroQty(false);
         setSelectedProducts([]);
         setAdd(curr => !curr)
     };
@@ -698,51 +720,50 @@ const RFQ = ({ fetchAllProductsMain }) => {
         setAddPdt(false);
     };
 
-    const updateQty = async (_id, qty) => {
-        if (qty > 0) {
-            try {
-                const response = await axios.put(`${backendServer}/api/updateQty/${_id}`, { qty });
-                return response.data;
-            } catch (error) {
-                throw new Error(error.response ? error.response.data.message : error.message);
-            }
-        } else {
-            toast.error("Quantity must be greater than zero");
-        }
-    };
-
     const [rfqs, setRfqs] = useState([]);
 
+    const [zeroQty, setZeroQty] = useState(false);
+
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSaveRFQ = async () => {
-        if (formData.vendor && formData.curr && formData.deadline) {
-            try {
-                const productQuantities = selectedProducts.map(product => ({
-                    productId: product._id,
-                    qty: qty[product._id]
-                })).filter(item => item.qty > 0);
 
-                for (const product of productQuantities) {
-                    await updateQty(product.productId, product.qty);
-                }
-
-                const response = await axios.post(`${backendServer}/api/add-rfq`, {
-                    rfqId: `RFQ-00${rfqs.length + 1}`,
-                    projectId: address.id,
-                    vendor: formData.vendor,
-                    curr: formData.curr,
-                    deadline: formData.deadline,
-                    products: productQuantities
-                });
-
-                fetchRFQDetails();
-                fetchAllProductsMain();
-                setAdd(false);
-                toast.success(response.data.message);
-            } catch (error) {
-                toast.error(error.response.data.message);
-            }
-        } else {
+        if (!formData.vendor || !formData.curr || !formData.deadline) {
             toast.error("Fill all the mandatory fields!");
+            return;
+        }
+
+        try {
+            setSaveLoader(true);
+
+            const productQuantities = selectedProducts.map(product => ({
+                productId: product._id,
+                qty: qty[product._id] || 0
+            }));
+
+            const invalidProducts = productQuantities.filter(item => item.qty <= 0);
+            if (invalidProducts.length > 0) {
+                setZeroQty(true);
+                toast.error("Please provide quantities greater than zero for all selected products!");
+                return;
+            }
+
+            const response = await axios.post(`${backendServer}/api/add-rfq`, {
+                rfqId: `RFQ-00${rfqs.length + 1}`,
+                projectId: address.id,
+                vendor: formData.vendor,
+                curr: formData.curr,
+                deadline: formData.deadline,
+                products: productQuantities
+            });
+
+            fetchRFQDetails();
+            fetchAllProductsMain();
+            setAdd(false);
+            setSaveLoader(false);
+            toast.success(response.data.message);
+        } catch (error) {
+            toast.error(error.response?.data?.message || "An error occurred while saving the RFQ.");
         }
     };
 
@@ -1204,7 +1225,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                             {
                                 selectedProducts.length === 0 ? <div className="w-full text-left font-medium">No product is added!</div>
                                     :
-                                    <div className="w-full flex items-center justify-start">
+                                    <div className="w-full flex items-start justify-center max-h-[15rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
                                         <table className='w-full border-collapse mt-2'>
                                             <thead>
                                                 <tr className='text-gray-700 text-lg text-nowrap'>
@@ -1225,9 +1246,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                                         <input
                                                                             value={qty[pdt._id] || ''}
                                                                             onChange={(e) => handleQtyChange(e, pdt._id)}
-                                                                            className='w-[4rem] p-2 py-1 outline-none bg-[#F8F9FD]'
-                                                                            placeholder='0'
-                                                                            min="0"
+                                                                            className={`w-[4rem] p-2 py-1 outline-none bg-[#F8F9FD] 
+                                                                                ${qty[pdt._id] <= 0 ? 'border border-solid border-red-600' : 'border-none'}`}
+                                                                            placeholder='1'
+                                                                            min={1}
                                                                             type="number"
                                                                             name="qty"
                                                                         />
@@ -1241,14 +1263,22 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                         </table>
                                     </div>
                             }
+                            {zeroQty && <div className="w-full text-left text-xs italic text-red-600">Quantity must be greater than zero.</div>}
                             {
-                                selectedProducts.length != 0 ?
-                                    <div className="w-full flex items-center justify-start">
-                                        <button onClick={handleSaveRFQ}
-                                            className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white mt-2'>
-                                            Save RFQ
-                                        </button>
-                                    </div> : ''
+                                selectedProducts.length != 0 &&
+                                <div className="w-full flex items-center justify-start">
+                                    {
+                                        saveLoader ?
+                                            <div className='flex items-center justify-center m-4'>
+                                                <CircularProgress />
+                                            </div>
+                                            :
+                                            <button onClick={handleSaveRFQ}
+                                                className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white mt-2'>
+                                                Save RFQ
+                                            </button>
+                                    }
+                                </div>
                             }
                         </div>
                 }
@@ -1409,7 +1439,7 @@ const Products = () => {
             </Dialog>
 
             <Dialog
-                size="lg"
+                size="xl"
                 open={po}
                 handler={handlePO}
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
