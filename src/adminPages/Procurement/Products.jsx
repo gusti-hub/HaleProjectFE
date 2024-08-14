@@ -218,7 +218,7 @@ const PO = ({ fetchAllProductsMain }) => {
         </div>
     }
 
-    if (receivedRFQs.length === 0) {
+    if (rfqs.length != 0 && receivedRFQs.length === 0) {
         return (
             <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
                 <div className="w-full text-left font-medium text-black">No Received RFQ found!</div>
