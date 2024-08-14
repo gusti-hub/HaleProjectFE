@@ -213,6 +213,7 @@ const PO = ({ fetchAllProductsMain }) => {
     const [viewPO, setViewPO] = useState(false);
 
     const viewPODetails = (poId, rfqId) => {
+        setLoadPdts(true);
         setViewPO(curr => !curr);
         fetcthRFQProducts(rfqId);
     }
