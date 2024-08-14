@@ -210,12 +210,11 @@ const PO = ({ fetchAllProductsMain }) => {
         setCurrentPage(pageNumber);
     };
 
-    if (loading1) {
-        <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
-            <div className='w-full flex items-center justify-center my-4'>
-                <CircularProgress />
-            </div>
-        </div>
+    const [viewPO, setViewPO] = useState(false);
+
+    const viewPODetails = (poId, rfqId) => {
+        setViewPO(curr => !curr);
+        fetcthRFQProducts(rfqId);
     }
 
     if (rfqs.length != 0 && receivedRFQs.length === 0) {
@@ -273,10 +272,26 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                     {
                                                                         menuOpen != po._id ?
                                                                             <MdOutlineMoreVert
+                                                                                onClick={() => openMenu(po._id)}
                                                                                 className='cursor-pointer text-xl' />
                                                                             :
                                                                             <IoCloseSharp
+                                                                                onClick={() => openMenu(po._id)}
                                                                                 className='cursor-pointer text-xl' />
+                                                                    }
+                                                                    {
+                                                                        menuOpen === po._id &&
+                                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
+
+                                                                            <button onClick={() => viewPODetails(po.poId, po.rfq)}
+                                                                                className='w-full text-left'>View PO</button>
+
+                                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+
+                                                                            <button className='w-full text-left'>Download PO</button>
+
+                                                                        </div>
                                                                     }
                                                                 </div>
                                                             </td>
@@ -381,113 +396,203 @@ const PO = ({ fetchAllProductsMain }) => {
                                             className='p-1 outline-none'
                                             type="date" name="receive" min={today} />
                                     </div>
-                                    {
-                                        (formData.rfq && vendorRFQs.length != 0) && <div className="w-full flex flex-col items-center gap-4">
-                                            <div className="w-full flex items-center justify-end">
-                                                <button onClick={(e) => handleContinue(e, formData.rfq)}
-                                                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                    Continue
-                                                </button>
-                                            </div>
-                                            {
-                                                isClicked && <div className="w-full flex items-center justify-center">
-                                                    {
-                                                        loadPdts ?
-                                                            <div className='w-full flex items-center justify-center my-4'>
-                                                                <CircularProgress />
-                                                            </div> :
-                                                            errPdts ?
-                                                                <div className="w-full flex items-center justify-center text-red-600 font-medium my-4">
-                                                                    Error: {errPdts}
-                                                                </div> :
-                                                                <div className="w-full flex flex-col items-center justify-start gap-4">
-                                                                    <div className="w-full flex items-start justify-start max-h-[20rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
-                                                                        {
-                                                                            pdts.length === 0 ? <div className="w-full text-left">No product found!</div>
-                                                                                :
-                                                                                <table className='w-full border-collapse mt-4'>
-                                                                                    <thead>
-                                                                                        <tr className='text-gray-700 text-lg text-nowrap'>
-                                                                                            <th>Product Name</th>
-                                                                                            <th>Image</th>
-                                                                                            <th>Specification</th>
-                                                                                            <th>Quantity</th>
-                                                                                            <th>Price</th>
-                                                                                            <th>Total Price</th>
-                                                                                        </tr>
-                                                                                    </thead>
-                                                                                    <tbody>
-                                                                                        {
-                                                                                            pdts.map(pdt => {
-                                                                                                return (
-                                                                                                    <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                                                                                        <td>{pdt.title}</td>
-                                                                                                        <td>
-                                                                                                            <div className="flex items-center justify-center">
-                                                                                                                <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
-                                                                                                            </div>
-                                                                                                        </td>
-                                                                                                        <td>
-                                                                                                            <div className="flex flex-col items-start">
-                                                                                                                {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                                                                {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                                                                {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
-                                                                                                            </div>
-                                                                                                        </td>
-                                                                                                        <td>{pdt.qty}</td>
-                                                                                                        <td>
-                                                                                                            {
-                                                                                                                pdt.curr === 'IDR' ?
-                                                                                                                    new Intl.NumberFormat('id-ID', {
-                                                                                                                        style: 'currency',
-                                                                                                                        currency: 'IDR',
-                                                                                                                    }).format(pdt.price) :
-                                                                                                                    new Intl.NumberFormat('en-US', {
-                                                                                                                        style: 'currency',
-                                                                                                                        currency: 'USD',
-                                                                                                                    }).format(pdt.price)
-                                                                                                            }
-                                                                                                        </td>
-                                                                                                        <td>
-                                                                                                            {
-                                                                                                                pdt.curr === 'IDR' ?
-                                                                                                                    new Intl.NumberFormat('id-ID', {
-                                                                                                                        style: 'currency',
-                                                                                                                        currency: 'IDR',
-                                                                                                                    }).format(pdt.qty * pdt.price) :
-                                                                                                                    new Intl.NumberFormat('en-US', {
-                                                                                                                        style: 'currency',
-                                                                                                                        currency: 'USD',
-                                                                                                                    }).format(pdt.qty * pdt.price)
-                                                                                                            }
-                                                                                                        </td>
-                                                                                                    </tr>
-                                                                                                )
-                                                                                            })
-                                                                                        }
-                                                                                    </tbody>
-                                                                                </table>
-                                                                        }
-                                                                    </div>
-                                                                    <div className="w-full flex items-center justify-end text-black text-lg font-medium">
-                                                                        Total amount: {totalPrice}
-                                                                    </div>
-                                                                    <div className="w-full flex items-center justify-start">
-                                                                        <button onClick={handleSavePO}
-                                                                            className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                                            Save PO
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-                                    }
                                 </form>
+                                {
+                                    (formData.rfq && vendorRFQs.length != 0) && <div className="w-full flex flex-col items-center gap-4">
+                                        <div className="w-full flex items-center justify-end">
+                                            <button onClick={(e) => handleContinue(e, formData.rfq)}
+                                                className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                Continue
+                                            </button>
+                                        </div>
+                                        {
+                                            isClicked && <div className="w-full flex items-center justify-center">
+                                                {
+                                                    loadPdts ?
+                                                        <div className='w-full flex items-center justify-center my-4'>
+                                                            <CircularProgress />
+                                                        </div> :
+                                                        errPdts ?
+                                                            <div className="w-full flex items-center justify-center text-red-600 font-medium my-4">
+                                                                Error: {errPdts}
+                                                            </div> :
+                                                            <div className="w-full flex flex-col items-center justify-start gap-4">
+                                                                <div className="w-full flex items-start justify-start max-h-[20rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                                                                    {
+                                                                        pdts.length === 0 ? <div className="w-full text-left">No product found!</div>
+                                                                            :
+                                                                            <table className='w-full border-collapse mt-4'>
+                                                                                <thead>
+                                                                                    <tr className='text-gray-700 text-lg text-nowrap'>
+                                                                                        <th>Product Name</th>
+                                                                                        <th>Image</th>
+                                                                                        <th>Specification</th>
+                                                                                        <th>Quantity</th>
+                                                                                        <th>Price</th>
+                                                                                        <th>Total Price</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {
+                                                                                        pdts.map(pdt => {
+                                                                                            return (
+                                                                                                <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                                                    <td>{pdt.title}</td>
+                                                                                                    <td>
+                                                                                                        <div className="flex items-center justify-center">
+                                                                                                            <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <div className="flex flex-col items-start">
+                                                                                                            {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                                                            {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                                                            {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                    <td>{pdt.qty}</td>
+                                                                                                    <td>
+                                                                                                        {
+                                                                                                            pdt.curr === 'IDR' ?
+                                                                                                                new Intl.NumberFormat('id-ID', {
+                                                                                                                    style: 'currency',
+                                                                                                                    currency: 'IDR',
+                                                                                                                }).format(pdt.price) :
+                                                                                                                new Intl.NumberFormat('en-US', {
+                                                                                                                    style: 'currency',
+                                                                                                                    currency: 'USD',
+                                                                                                                }).format(pdt.price)
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        {
+                                                                                                            pdt.curr === 'IDR' ?
+                                                                                                                new Intl.NumberFormat('id-ID', {
+                                                                                                                    style: 'currency',
+                                                                                                                    currency: 'IDR',
+                                                                                                                }).format(pdt.qty * pdt.price) :
+                                                                                                                new Intl.NumberFormat('en-US', {
+                                                                                                                    style: 'currency',
+                                                                                                                    currency: 'USD',
+                                                                                                                }).format(pdt.qty * pdt.price)
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            )
+                                                                                        })
+                                                                                    }
+                                                                                </tbody>
+                                                                            </table>
+                                                                    }
+                                                                </div>
+                                                                <div className="w-full flex items-center justify-end text-black text-lg font-medium">
+                                                                    Total amount: {totalPrice}
+                                                                </div>
+                                                                <div className="w-full flex items-center justify-start">
+                                                                    <button onClick={handleSavePO}
+                                                                        className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                                        Save PO
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
                             </div>
                 }
             </Dialog >
+
+            <Dialog
+                size='xl'
+                open={viewPO}
+                handler={() => setViewPO(curr => !curr)}
+                className="bg-transparent shadow-none w-full flex items-center justify-center"
+            >
+                <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
+                    {
+                        loadPdts ?
+                            <div className='w-full flex items-center justify-center my-4'>
+                                <CircularProgress />
+                            </div>
+                            : errPdts ?
+                                <div className="w-full flex items-center justify-center text-red-600 font-medium my-4">
+                                    Error: {errPdts}
+                                </div>
+                                :
+                                <div className="w-full flex flex-col items-center gap-4">
+                                    <div className="w-full flex items-start justify-start max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                                        <table className='w-full border-collapse mt-4'>
+                                            <thead>
+                                                <tr className='text-gray-700 text-lg text-nowrap'>
+                                                    <th>Product Name</th>
+                                                    <th>Image</th>
+                                                    <th>Specification</th>
+                                                    <th>Quantity</th>
+                                                    <th>Price</th>
+                                                    <th>Total Price</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    pdts.map(pdt => {
+                                                        return (
+                                                            <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                <td>{pdt.title}</td>
+                                                                <td>
+                                                                    <div className="flex items-center justify-center">
+                                                                        <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="flex flex-col items-start">
+                                                                        {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                        {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                        {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                                    </div>
+                                                                </td>
+                                                                <td>{pdt.qty}</td>
+                                                                <td>
+                                                                    {
+                                                                        pdt.curr === 'IDR' ?
+                                                                            new Intl.NumberFormat('id-ID', {
+                                                                                style: 'currency',
+                                                                                currency: 'IDR',
+                                                                            }).format(pdt.price) :
+                                                                            new Intl.NumberFormat('en-US', {
+                                                                                style: 'currency',
+                                                                                currency: 'USD',
+                                                                            }).format(pdt.price)
+                                                                    }
+                                                                </td>
+                                                                <td>
+                                                                    {
+                                                                        pdt.curr === 'IDR' ?
+                                                                            new Intl.NumberFormat('id-ID', {
+                                                                                style: 'currency',
+                                                                                currency: 'IDR',
+                                                                            }).format(pdt.qty * pdt.price) :
+                                                                            new Intl.NumberFormat('en-US', {
+                                                                                style: 'currency',
+                                                                                currency: 'USD',
+                                                                            }).format(pdt.qty * pdt.price)
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        )
+                                                    })
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="w-full flex items-center justify-end text-black text-lg font-medium">
+                                        Total amount: {totalPrice}
+                                    </div>
+                                </div>
+                    }
+                </div>
+            </Dialog>
         </div >
     )
 }
@@ -814,23 +919,23 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                                                 className='cursor-pointer text-xl' />
                                                                     }
                                                                     {
-                                                                        menuOpen === rfq._id ?
-                                                                            <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                                                className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
-                                                                                {
-                                                                                    rfq.status === "Received RFQ" ?
-                                                                                        <button onClick={() => handleViewRFQ(rfq._id)}
-                                                                                            className='w-full text-left'>View RFQ</button>
-                                                                                        :
-                                                                                        <button onClick={() => handleRrOpen(rfq._id)}
-                                                                                            className='w-full text-left'>Receive RFQ</button>
-                                                                                }
+                                                                        menuOpen === rfq._id &&
+                                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
+                                                                            {
+                                                                                rfq.status === "Received RFQ" ?
+                                                                                    <button onClick={() => handleViewRFQ(rfq._id)}
+                                                                                        className='w-full text-left'>View RFQ</button>
+                                                                                    :
+                                                                                    <button onClick={() => handleRrOpen(rfq._id)}
+                                                                                        className='w-full text-left'>Receive RFQ</button>
+                                                                            }
 
-                                                                                <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                                <button className='w-full text-left'>Download RFQ</button>
+                                                                            <button className='w-full text-left'>Download RFQ</button>
 
-                                                                            </div> : ''
+                                                                        </div>
                                                                     }
                                                                 </div>
                                                             </td>
