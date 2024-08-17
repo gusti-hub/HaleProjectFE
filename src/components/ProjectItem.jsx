@@ -133,11 +133,11 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         material: editItem.productDetails?.material || '',
         insert: editItem.productDetails?.insert || '',
         finish: editItem.productDetails?.finish || '',
-        qty: editItem.productDetails?.qty || '',
-        vendor: editItem.productDetails?.vendor || '',
-        budget: editItem.productDetails?.budget || '',
-        buyCost: editItem.productDetails?.buyCost || '',
-        sellCost: editItem.productDetails?.sellCost || '',
+        // qty: editItem.productDetails?.qty || '',
+        // vendor: editItem.productDetails?.vendor || '',
+        // budget: editItem.productDetails?.budget || '',
+        // buyCost: editItem.productDetails?.buyCost || '',
+        // sellCost: editItem.productDetails?.sellCost || '',
         desc: editItem.desc || '',
         imageUrl: editItem.imageUrl || ''
     } : {
@@ -153,11 +153,11 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         material: '',
         insert: '',
         finish: '',
-        qty: null,
-        vendor: '',
-        budget: null,
-        buyCost: null,
-        sellCost: null,
+        // qty: null,
+        // vendor: '',
+        // budget: null,
+        // buyCost: null,
+        // sellCost: null,
         desc: '',
         imageUrl: ''
     };
@@ -183,11 +183,11 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 material: editItem.productDetails?.material || '',
                 insert: editItem.productDetails?.insert || '',
                 finish: editItem.productDetails?.finish || '',
-                qty: editItem.productDetails?.qty || '',
-                vendor: editItem.productDetails?.vendor || '',
-                budget: editItem.productDetails?.budget || '',
-                buyCost: editItem.productDetails?.buyCost || '',
-                sellCost: editItem.productDetails?.sellCost || '',
+                // qty: editItem.productDetails?.qty || '',
+                // vendor: editItem.productDetails?.vendor || '',
+                // budget: editItem.productDetails?.budget || '',
+                // buyCost: editItem.productDetails?.buyCost || '',
+                // sellCost: editItem.productDetails?.sellCost || '',
                 desc: editItem.desc || '',
                 imageUrl: editItem.imageUrl || ''
             });
@@ -227,7 +227,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isEditMode ? (formData.name.length === 0 || formData.code.length === 0 || formData.qty.length === 0) : (formData.name.length === 0 || formData.code.length === 0 || formData.qty.length === 0 || !selectedFile)) {
+        if (isEditMode ? (formData.name.length === 0 || formData.code.length === 0) : (formData.name.length === 0 || formData.code.length === 0 || !selectedFile)) {
             toast.error("Fill the mandatory fields");
             handleClose();
         } else {
@@ -268,11 +268,11 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             material: '',
             insert: '',
             finish: '',
-            qty: null,
-            vendor: '',
-            budget: null,
-            buyCost: null,
-            sellCost: null,
+            // qty: null,
+            // vendor: '',
+            // budget: null,
+            // buyCost: null,
+            // sellCost: null,
             desc: '',
             imageUrl: ''
         });
@@ -436,7 +436,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 </div>
             </div>
 
-            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+            {/* <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
                 <label htmlFor="qty">Quantity:</label>
                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                 <input value={formData.qty} onChange={handleInputChange}
@@ -478,7 +478,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                         className='w-full outline-none border-b border-solid border-b-black p-[2px]'
                         type="number" name='sellCost' placeholder='Type here...' />
                 </div>
-            </div>
+            </div> */}
 
             <div className="w-full flex items-start justify-start gap-2 text-black">
                 <label htmlFor="desc">Description:</label>
@@ -688,7 +688,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                             <span>{pdt.title} ({pdt.productDetails.code})</span>
                                                         </div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <img src={pdt.imageUrl} alt="" />
+                                                        <img className='max-w-[15rem]' src={pdt.imageUrl} alt="" />
                                                     </div>
 
                                                     <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
@@ -723,7 +723,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                             <div className='font-medium'>Finish:</div>
                                                             <div>{pdt.productDetails.finish}</div>
                                                         </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                        {/* <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>Quantity:</div>
                                                             <div>{pdt.productDetails.qty}</div>
                                                         </div>
@@ -742,7 +742,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>Selling price ($):</div>
                                                             <div>{pdt.productDetails.sellCost}</div>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
 
                                                     <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">

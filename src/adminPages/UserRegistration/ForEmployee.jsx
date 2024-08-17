@@ -49,8 +49,14 @@ const ForEmployee = () => {
             }            
         }
         else{
-            setFormData({ ...formData, [name]: value });
+            if (!value.includes(' ')) {
+                setFormData((prevData) => ({
+                    ...prevData,
+                    [name]: value,
+                }));
+            }
         }
+           
     };
 
     const handleCheckboxChange = (event) => {

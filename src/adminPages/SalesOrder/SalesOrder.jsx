@@ -18,8 +18,9 @@ const SalesOrder = () => {
 
     const token = localStorage.getItem('token');
     const name = localStorage.getItem('name');
+    const userId = localStorage.getItem('userId');
 
-    const [formData, setFormData] = useState({ name: '', desc: '', owner: name, client: '' });
+    const [formData, setFormData] = useState({ name: '', desc: '', owner: name, ownerId: userId, client: '' });
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -79,7 +80,7 @@ const SalesOrder = () => {
         fetchEmployeesNames();
         fetchClientsNames();
         fetchSalesData();
-    }, []);
+    }, []); 
 
     const handleOpen = () => {
         setOpen((cur) => !cur);
@@ -89,7 +90,7 @@ const SalesOrder = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', desc: '', owner: name, client: '' });
+        setFormData({ name: '', desc: '', owner: name, ownerId: userId, client: '' });
     };
 
     const handleInputChange = (e) => {
@@ -146,9 +147,10 @@ const SalesOrder = () => {
 
     const updateInviteUser = async (name) => {
         try {
-            const response = await axios.put(`${backendServer}/api//addinviteduser/${currProject._id}`, { name: name });
+            const response = await axios.put(`${backendServer}/api/addinviteduser/${currProject._id}`, { name: name });
             toast.success(response.data.message);
             await getUserListHandler(currProject._id);
+            fetchSalesData();
         } catch (error) {
             toast.error(error.message);
             await getUserListHandler(currProject._id);
@@ -157,9 +159,10 @@ const SalesOrder = () => {
 
     const removeInvitedUser = async (name) => {
         try {
-            const response = await axios.put(`${backendServer}/api//removeinviteduser/${currProject._id}`, { name: name });
+            const response = await axios.put(`${backendServer}/api/removeinviteduser/${currProject._id}`, { name: name });
             toast.success(response.data.message);
             await getUserListHandler(currProject._id);
+            fetchSalesData();
         } catch (error) {
             toast.error(error.message);
             await getUserListHandler(currProject._id);
@@ -190,7 +193,7 @@ const SalesOrder = () => {
         }
     };
 
-    const sales = allSales.filter(sale => sale.owner === name);
+    const sales = allSales.filter(sale => sale.invitedUsers.includes(name));
 
     const filteredSales = sales.filter(sale =>
         sale.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -211,30 +214,29 @@ const SalesOrder = () => {
             material: item.productDetails.material,
             insert: item.productDetails.insert,
             finish: item.productDetails.finish,
-            quantity: item.productDetails.qty.toString(),
-            vendor: item.productDetails.vendor,
-            budget: item.productDetails.budget ? item.productDetails.budget.toString() : '',
-            buyCost: item.productDetails.buyCost ? item.productDetails.buyCost.toString() : '',
-            sellCost: item.productDetails.sellCost ? item.productDetails.sellCost.toString() : '',
             // createdAt: item.createdAt.split('T')[0],
             status: item.status
         }));
     };
 
     const handleDownload = async (id) => {
-        const response = await axios.get(`${backendServer}/api/products/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        setProducts(response.data.products);
-        const prods = response.data.products.filter(prod => prod.type === "Product");
-
-        const flattenedData = flattenData(prods);
-
-        const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-        XLSX.writeFile(workbook, 'table_data.xlsx');
+        try {
+            const response = await axios.get(`${backendServer}/api/products/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setProducts(response.data.products);
+            const prods = response.data.products.filter(prod => prod.type === "Product");
+    
+            const flattenedData = flattenData(prods);
+    
+            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    
+            XLSX.writeFile(workbook, 'table_data.xlsx');
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -309,7 +311,7 @@ const SalesOrder = () => {
                             className='p-1 outline-none' name="client" id="client">
                             <option value="" disabled>Select an option</option>
                             {clients.map((client) => (
-                                <option key={client.id} value={client.name}>{client.name}</option>
+                                <option key={client.id} value={`${client.code}-${client.name}`}>{client.code}-{client.name}</option>
                             ))}
                         </select>
                     </div>
@@ -420,14 +422,18 @@ const SalesOrder = () => {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
-                                                        {pdt._id}
-                                                    </div>
+                                                    {
+                                                        pdt.progress === "Not Started" ?
+                                                            <div className=''>{pdt._id}</div> :
+                                                            <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
+                                                                {pdt._id}
+                                                            </div>
+                                                    }
                                                 </td>
                                                 <td>{pdt.name}</td>
                                                 <td>{pdt.desc}</td>
                                                 <td>{pdt.owner}</td>
-                                                <td>{pdt.client}</td>
+                                                <td>{pdt.client.split('-')[1]}</td>
                                                 <td>
                                                     {
                                                         pdt.progress === "Not Started" ?
