@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { IoPersonAdd } from 'react-icons/io5';
 import CircularProgress from '@mui/material/CircularProgress';
 import { FaEdit } from 'react-icons/fa';
-import { MdDeleteOutline } from 'react-icons/md';
+import { MdDeleteOutline, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight  } from 'react-icons/md';
 import { backendServer } from '../../utils/info';
 import { FiSearch } from 'react-icons/fi';
 
@@ -21,6 +21,7 @@ const ForRoleAuthorization = () => {
     const [editMode, setEditMode] = useState(false);
     const [currentroleId, setCurrentroleId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const token = localStorage.getItem('token');
 
 
     const handleOpen = () => {
@@ -50,7 +51,9 @@ const ForRoleAuthorization = () => {
 
     const fetchAuthorizationRoles = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/authorizationRole`);
+            const response = await axios.get(`${backendServer}/api/authorizationRole`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setAuthorizationRoles(response.data.authorizationRoles);
             setLoading(false);
         } catch (error) {
@@ -61,7 +64,9 @@ const ForRoleAuthorization = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/roles`);
+            const response = await axios.get(`${backendServer}/api/roles`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setRoles(response.data.roles);
         } catch (error) {
             setError(error.message);
@@ -130,6 +135,19 @@ const ForRoleAuthorization = () => {
     const filteredAuthorizationRoles = AuthorizationRoles.filter(role =>
         role.role_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const current = filteredAuthorizationRoles.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredAuthorizationRoles.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
 
 
     if (loading) return (
@@ -223,35 +241,48 @@ const ForRoleAuthorization = () => {
                     <div className="w-full flex items-center justify-start text-lg font-medium">
                         No records found!
                     </div> :
-                    <table className='border-collapse w-full'>
-                        <thead>
-                            <tr className='text-gray-700 text-lg'>
-                                <th className='w-20'>Actions</th>
-                                <th>Role</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                filteredAuthorizationRoles.map(role => (
-                                    <tr key={role._id} className='text-base text-center text-gray-700'>
-                                        <td className='p-2'>
-                                            <div className='w-full flex items-center justify-center space-x-2'>
-                                                <FaEdit
-                                                    className='text-base cursor-pointer'
-                                                    onClick={() => handleEditClick(role)} />
-                                                <MdDeleteOutline
-                                                    className='text-base text-red-600 cursor-pointer'
-                                                    onClick={() => handleDeleteClick(role._id)} />
-                                            </div>
-                                        </td>
-                                        <td>{role.role_name}</td>
-                                        <td>{role.action_name}</td>
-                                    </tr>
-                                ))
-                            }
-                        </tbody>
-                    </table>
+                    <div className="w-full flex flex-col items-center">
+                        <table className='border-collapse w-full'>
+                            <thead>
+                                <tr className='text-gray-700 text-lg'>
+                                    <th className='w-20'>Actions</th>
+                                    <th>Role</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    current.map(role => (
+                                        <tr key={role._id} className='text-base text-center text-gray-700'>
+                                            <td className='p-2'>
+                                                <div className='w-full flex items-center justify-center space-x-2'>
+                                                    <FaEdit
+                                                        className='text-base cursor-pointer'
+                                                        onClick={() => handleEditClick(role)} />
+                                                    <MdDeleteOutline
+                                                        className='text-base text-red-600 cursor-pointer'
+                                                        onClick={() => handleDeleteClick(role._id)} />
+                                                </div>
+                                            </td>
+                                            <td>{role.role_name}</td>
+                                            <td>{role.action_name}</td>
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+                        </table>
+                        <div className='w-full flex items-center justify-end gap-2 mt-4'>
+                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
+                                <MdOutlineKeyboardArrowLeft className='text-xl' />
+                            </button>
+                            <div className='text-gray-700'>
+                                Page {currentPage} of {totalPages}
+                            </div>
+                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
+                                <MdOutlineKeyboardArrowRight className='text-xl' />
+                            </button>
+                        </div>
+                    </div>
             }
         </div>
     );

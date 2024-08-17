@@ -94,17 +94,33 @@ const SalesOrder = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
+        if (name === 'client') {
+            const [code, clientName] = value.split('|');
+            setFormData({
+                ...formData,
+                clientCode: code,
+                clientName: clientName,
+            });
+        } else {
+            setFormData((prevData) => ({ ...prevData, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.name.length === 0 && formData.owner.length === 0 && formData.client.length === 0) {
-            toast.error("Can't submit empty fields!");
+        console.log(formData);
+        if (formData.name.length ===  0) {
+            toast.error("Can't submit empty Project Name!");
             setOpen(false);
         }
+
+        if (formData.client.length === 0) {
+            toast.error("Can't submit empty Client Name!");
+            setOpen(false);
+        }
+
         try {
-            if (formData.name.length > 0 && formData.owner.length > 0 && formData.client.length > 0) {
+            if (formData.name.length > 0 && formData.client.length > 0) {
                 const response = await axios.post(`${backendServer}/api/productreg`, formData);
                 toast.success(response.data.message);
                 resetForm();
@@ -292,7 +308,6 @@ const SalesOrder = () => {
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
                             <label htmlFor="desc">Project Description:</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                         </div>
                         <input
                             value={formData.desc}
@@ -304,12 +319,14 @@ const SalesOrder = () => {
                         <label htmlFor="client">For Client:</label>
                         <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                         <select
-                            value={formData.client}
+                            value={formData.clientName}
                             onChange={handleInputChange}
                             className='p-1 outline-none' name="client" id="client">
                             <option value="" disabled>Select an option</option>
                             {clients.map((client) => (
-                                <option key={client.id} value={client.name}>{client.name}</option>
+                                <option key={client._id} value={`${client.code}|${client.name}`}>
+                                    {client.name}
+                                </option>
                             ))}
                         </select>
                     </div>

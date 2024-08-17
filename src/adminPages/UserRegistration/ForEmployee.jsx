@@ -108,7 +108,9 @@ const ForEmployee = () => {
 
     const fetchRoles = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/roles`);
+            const response = await axios.get(`${backendServer}/api/roles`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setRoles(response.data.roles);
         } catch (error) {
             setError(error.message);
