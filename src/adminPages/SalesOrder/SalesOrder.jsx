@@ -203,19 +203,18 @@ const SalesOrder = () => {
 
     const flattenData = (data) => {
         return data.map(item => ({
-            title: item.title,
-            code: item.productDetails.code,
-            desc: item.desc,
-            unit: item.productDetails.unit,
-            length: item.productDetails.len ? item.productDetails.len.toString() : '',
-            width: item.productDetails.wid ? item.productDetails.wid.toString() : '',
-            diameter: item.productDetails.dia ? item.productDetails.dia.toString() : '',
-            color: item.productDetails.color,
-            material: item.productDetails.material,
-            insert: item.productDetails.insert,
-            finish: item.productDetails.finish,
-            // createdAt: item.createdAt.split('T')[0],
-            status: item.status
+            Title: item.title,
+            Item_Code: item.productDetails.code,
+            Description: item.desc,
+            Measuring_unit: item.productDetails.unit,
+            Length: item.productDetails.len ? item.productDetails.len.toString() : '',
+            Width: item.productDetails.wid ? item.productDetails.wid.toString() : '',
+            Diameter: item.productDetails.dia ? item.productDetails.dia.toString() : '',
+            Color: item.productDetails.color,
+            Material: item.productDetails.material,
+            Insert: item.productDetails.insert,
+            Finish: item.productDetails.finish,
+            Item_status: item.status,
         }));
     };
 

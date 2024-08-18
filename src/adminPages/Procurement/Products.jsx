@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { MdOutlineClose, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight, MdOutlineMoreVert } from 'react-icons/md';
 import { Dialog } from '@material-tailwind/react';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 
 //PO
 
@@ -60,7 +61,9 @@ const PO = ({ fetchAllProductsMain }) => {
 
     const fetchPODetails = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`);
+            const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setPos(response.data.allPOs);
             setLoading(false);
         } catch (error) {
@@ -223,6 +226,61 @@ const PO = ({ fetchAllProductsMain }) => {
         fetcthRFQProducts(rfqId);
     }
 
+    const approvePO = async (_id) => {
+        try {
+            const response = await axios.put(`${backendServer}/api/updatePOStatus/${_id}`);
+            fetchPODetails();
+            toast.success(response.data.message);
+        } catch (error) {
+            toast.error(error.response.data.message);
+        }
+    }
+
+    // Download PO
+
+    const flattenData = (data) => {
+        return data.map(item => ({
+            PO_No: item.orgPOId,
+            PO_Sent_Date: item.orgPODate.split('T')[0],
+            RFQ_No: item.orgRFQ,
+            Vendor: item.orgVendor,
+            Total_Price: item.orgTP,
+            Est_Delivery: item.orgEstDel,
+            Est_Received: item.orgEstRec,
+            PO_Status: item.orgPOStatus,
+            Title: item.title,
+            Item_Code: item.productDetails.code,
+            Description: item.desc,
+            Measuring_unit: item.productDetails.unit,
+            Length: item.productDetails.len ? item.productDetails.len.toString() : '',
+            Width: item.productDetails.wid ? item.productDetails.wid.toString() : '',
+            Diameter: item.productDetails.dia ? item.productDetails.dia.toString() : '',
+            Color: item.productDetails.color,
+            Material: item.productDetails.material,
+            Insert: item.productDetails.insert,
+            Finish: item.productDetails.finish,
+            Item_status: item.status
+        }));
+    };
+
+    const handleDownload = async (id) => {
+        try {
+            const response = await axios.get(`${backendServer}/api/getPOPdts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const flattenedData = flattenData(response.data);
+
+            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+            XLSX.writeFile(workbook, 'PO_Details.xlsx');
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     if (rfqs.length != 0 && receivedRFQs.length === 0) {
         return (
             <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
@@ -266,6 +324,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                 <th>Estimation Received</th>
                                                 <th>Vendor Name</th>
                                                 <th>Total Price</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -290,12 +349,23 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                         <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
                                                                             className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
 
+                                                                            {
+                                                                                po.status === 'Waiting for approval' &&
+                                                                                <button onClick={() => approvePO(po._id)}
+                                                                                    className='w-full text-left'>Approve PO</button>
+                                                                            }
+
+                                                                            {
+                                                                                po.status === 'Waiting for approval' && <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                            }
+
                                                                             <button onClick={() => viewPODetails(po.poId, po.rfq)}
                                                                                 className='w-full text-left'>View PO</button>
 
                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                            <button className='w-full text-left'>Download PO</button>
+                                                                            <button onClick={() => handleDownload(po._id)}
+                                                                                className='w-full text-left'>Download PO</button>
 
                                                                         </div>
                                                                     }
@@ -307,6 +377,12 @@ const PO = ({ fetchAllProductsMain }) => {
                                                             <td>{po.receive}</td>
                                                             <td>{po.vendor}</td>
                                                             <td>{po.totalPrice}</td>
+                                                            {
+                                                                po.status === 'Approved' ?
+                                                                    <td className='font-medium text-green-700'>{po.status}</td> :
+                                                                    <td>{po.status}</td>
+                                                            }
+
                                                         </tr>
                                                     )
                                                 })
@@ -622,21 +698,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const today = new Date().toISOString().split('T')[0];
 
-    const [add, setAdd] = useState(false);
-    const handleAddNew = () => {
-        setFormData(
-            {
-                rfqId: '',
-                projectId: address.id,
-                vendor: '',
-                curr: '',
-                deadline: ''
-            }
-        );
-        setZeroQty(false);
-        setSelectedProducts([]);
-        setAdd(curr => !curr)
-    };
+    const [selectedProducts, setSelectedProducts] = useState([]);
 
     const [addPdt, setAddPdt] = useState(false);
     const handleAddPdt = () => { setAddPdt(curr => !curr) };
@@ -704,8 +766,6 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const onlyProducts = products.filter(product => product.type === "Product");
 
-    const [selectedProducts, setSelectedProducts] = useState([]);
-
     const handleCheckboxChange = (product) => {
         setSelectedProducts((prevSelectedProducts) => {
             if (prevSelectedProducts.some(p => p._id === product._id)) {
@@ -726,44 +786,65 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const [saveLoader, setSaveLoader] = useState(false);
 
+    const [add, setAdd] = useState(false);
+
+    const handleAddNew = () => {
+        setFormData(
+            {
+                rfqId: '',
+                projectId: address.id,
+                vendor: '',
+                curr: '',
+                deadline: ''
+            }
+        );
+        setQty({});
+        setZeroQty(false);
+        setSelectedProducts([]);
+        setAdd(curr => !curr)
+    };
+
     const handleSaveRFQ = async () => {
 
         if (!formData.vendor || !formData.curr || !formData.deadline) {
             toast.error("Fill all the mandatory fields!");
             return;
         }
-
-        try {
-            setSaveLoader(true);
-
-            const productQuantities = selectedProducts.map(product => ({
+        else {
+            const productQties = selectedProducts.map(product => ({
                 productId: product._id,
                 qty: qty[product._id] || 0
             }));
 
-            const invalidProducts = productQuantities.filter(item => item.qty <= 0);
+            const invalidProducts = productQties.filter(item => item.qty <= 0);
+
             if (invalidProducts.length > 0) {
                 setZeroQty(true);
                 toast.error("Please provide quantities greater than zero for all selected products!");
                 return;
             }
+            else {                
+                try {
+                    setSaveLoader(true);
 
-            const response = await axios.post(`${backendServer}/api/add-rfq`, {
-                rfqId: `RFQ-00${rfqs.length + 1}`,
-                projectId: address.id,
-                vendor: formData.vendor,
-                curr: formData.curr,
-                deadline: formData.deadline,
-                products: productQuantities
-            });
+                    const response = await axios.post(`${backendServer}/api/add-rfq`, {
+                        rfqId: `RFQ-00${rfqs.length + 1}`,
+                        projectId: address.id,
+                        vendor: formData.vendor,
+                        curr: formData.curr,
+                        deadline: formData.deadline,
+                        products: productQties
+                    });
 
-            fetchRFQDetails();
-            fetchAllProductsMain();
-            setAdd(false);
-            setSaveLoader(false);
-            toast.success(response.data.message);
-        } catch (error) {
-            toast.error(error.response?.data?.message || "An error occurred while saving the RFQ.");
+                    fetchRFQDetails();
+                    fetchAllProductsMain();
+                    setAdd(false);
+                    setSaveLoader(false);
+                    toast.success(response.data.message);
+                } catch (error) {
+                    toast.error(error.response?.data?.message || "An error occurred while saving the RFQ.");
+                }
+            }
         }
     };
 
@@ -888,6 +969,52 @@ const RFQ = ({ fetchAllProductsMain }) => {
         }
     };
 
+    // Download RFQ
+
+    const flattenData = (data) => {
+        return data.map(item => ({
+            RFQ_No: item.orgRFQId,
+            RFQ_Deadline: item.orgDeadline,
+            Vendor: item.orgVendor,
+            Currency_unit: item.orgCurrUnit,
+            RFQ_Status: item.orgPOStatus,
+            Title: item.title,
+            Item_Code: item.productDetails.code,
+            Description: item.desc,
+            Measuring_unit: item.productDetails.unit,
+            Length: item.productDetails.len ? item.productDetails.len.toString() : '',
+            Width: item.productDetails.wid ? item.productDetails.wid.toString() : '',
+            Diameter: item.productDetails.dia ? item.productDetails.dia.toString() : '',
+            Color: item.productDetails.color,
+            Material: item.productDetails.material,
+            Insert: item.productDetails.insert,
+            Finish: item.productDetails.finish,
+            Item_status: item.status,
+            Quantity: item.qty ? item.qty.toString() : '',
+            Item_price: item.price ? item.price.toString() : '',
+        }));
+    };
+
+    const handleDownload = async (id) => {
+        try {
+            // const response = await axios.get(`${backendServer}/api/getRFQPdts/${id}`, {
+            //     headers: { Authorization: `Bearer ${token}` },
+            // });
+
+            const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`);
+
+            const flattenedData = flattenData(response.data);
+
+            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+            XLSX.writeFile(workbook, 'RFQ_Details.xlsx');
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
 
     return (
         <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
@@ -955,7 +1082,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                            <button className='w-full text-left'>Download RFQ</button>
+                                                                            <button onClick={() => handleDownload(rfq._id)}
+                                                                                className='w-full text-left'>Download RFQ</button>
 
                                                                         </div>
                                                                     }
