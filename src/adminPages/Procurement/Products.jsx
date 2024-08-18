@@ -997,11 +997,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const handleDownload = async (id) => {
         try {
-            // const response = await axios.get(`${backendServer}/api/getRFQPdts/${id}`, {
-            //     headers: { Authorization: `Bearer ${token}` },
-            // });
 
-            const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`);
+            const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
             const flattenedData = flattenData(response.data);
 
