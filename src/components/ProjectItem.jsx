@@ -433,9 +433,9 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             </div>
 
             <div className="w-full flex items-start justify-start gap-2 text-black">
-                <label htmlFor="file">Attachment:</label>
+                <label htmlFor="file">Attachment <span className='text-sm'>(Image only)</span>:</label>
                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                <input type="file" onChange={handleFileChange} name='file' />
+                <input type="file" onChange={handleFileChange} name='file' accept="image/*" />
             </div>
 
             {fileName && <div className="w-full text-left text-sm">Uploaded file: {fileName}</div>}
@@ -451,6 +451,17 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
     const loggedInUser = localStorage.getItem('name');
 
     const token = localStorage.getItem('token');
+
+    const options = {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
 
     const [type, setType] = useState('ref');
     const [loading, setLoading] = useState(true);
@@ -601,7 +612,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                                         <div className="w-full flex items-center justify-start p-2 text-base font-medium gap-2">
                                                                             <FaUserCircle className='text-xl' />
                                                                             <div>{comment.name}</div>
-                                                                            <div className='text-sm'>{comment.createdAt.split('T')[0]}</div>
+                                                                            <div className='text-sm'>{new Intl.DateTimeFormat('en-US', options).format(new Date(comment.createdAt))}</div>
                                                                         </div>
                                                                         <div className="w-full flex items-center justify-start p-2 bg-white">{comment.body}</div>
                                                                     </div>
@@ -703,7 +714,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                                         <div className="w-full flex items-center justify-start p-2 text-base font-medium gap-2">
                                                                             <FaUserCircle className='text-xl' />
                                                                             <div>{comment.name}</div>
-                                                                            <div className='text-sm'>{comment.createdAt.split('T')[0]}</div>
+                                                                            <div className='text-sm'>{new Intl.DateTimeFormat('en-US', options).format(new Date(comment.createdAt))}</div>
                                                                         </div>
                                                                         <div className="w-full flex items-center justify-start p-2 bg-white">{comment.body}</div>
                                                                     </div>

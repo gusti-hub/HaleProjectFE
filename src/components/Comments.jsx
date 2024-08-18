@@ -10,6 +10,17 @@ const Comments = ({ id }) => {
 
     const token = localStorage.getItem('token');
 
+    const options = {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [comment, setComment] = useState([]);
@@ -91,7 +102,7 @@ const Comments = ({ id }) => {
                                         <div className="w-full flex items-center justify-start p-2 text-base font-medium gap-2">
                                             <FaUserCircle className='text-xl' />
                                             <div>{comment.userName}</div>
-                                            <div className='text-sm'>{comment.createdAt.split('T')[0]}</div>
+                                            <div className='text-sm'>{new Intl.DateTimeFormat('en-US', options).format(new Date(comment.createdAt))}</div>
                                         </div>
                                         <div className="w-full flex items-center justify-start p-2 bg-white">{comment.body}</div>
                                     </div>

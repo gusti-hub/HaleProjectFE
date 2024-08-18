@@ -8,6 +8,8 @@ import { MdOutlineClose, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight
 import { Dialog } from '@material-tailwind/react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 //PO
 
@@ -140,8 +142,8 @@ const PO = ({ fetchAllProductsMain }) => {
             const response = await axios.get(`${backendServer}/api/rfqProducts/${address.id}/${rfqId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setPdts(response.data);
-            handleTotalPrice(response.data);
+            setPdts(response.data.response);
+            handleTotalPrice(response.data.response);
             setLoadPdts(false);
         } catch (error) {
             setErrPdts(error.response.data.message);
@@ -149,10 +151,16 @@ const PO = ({ fetchAllProductsMain }) => {
         }
     }
 
-    const handleContinue = (e, rfqId) => {
-        e.preventDefault();
+    const handleContinue = (rfqId) => {
+        setLoadPdts(true);
         fetcthRFQProducts(rfqId);
         setClicked(true);
+    };
+
+    const handleRFQInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
+        handleContinue(value);
     };
 
     const [saveLoader, setSaveLoader] = useState(false);
@@ -220,9 +228,16 @@ const PO = ({ fetchAllProductsMain }) => {
 
     const [viewPO, setViewPO] = useState(false);
 
-    const viewPODetails = (poId, rfqId) => {
+    const [poDetails, setPODetails] = useState({
+        poId: '', vendor: ''
+    })
+
+    const viewPODetails = (poId, rfqId, vendor) => {
         setLoadPdts(true);
         setViewPO(curr => !curr);
+        setPODetails({
+            poId: poId, vendor: vendor
+        });
         fetcthRFQProducts(rfqId);
     }
 
@@ -359,7 +374,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                                 po.status === 'Waiting for approval' && <div className="w-full h-[2px] bg-gray-300"></div>
                                                                             }
 
-                                                                            <button onClick={() => viewPODetails(po.poId, po.rfq)}
+                                                                            <button onClick={() => viewPODetails(po.poId, po.rfq, po.vendor)}
                                                                                 className='w-full text-left'>View PO</button>
 
                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
@@ -450,7 +465,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                 <div className='text-sm text-red-600 italic'>No RFQ details found! <span className='text-black'>(Select vendor to continue.)</span></div> :
                                                 <select
                                                     value={formData.rfq}
-                                                    onChange={handleInputChange}
+                                                    onChange={handleRFQInputChange}
                                                     className='p-1 outline-none' name="rfq">
                                                     <option value="" disabled>Select an option</option>
                                                     {vendorRFQs && vendorRFQs.map((rfq) => (
@@ -481,12 +496,6 @@ const PO = ({ fetchAllProductsMain }) => {
                                 </form>
                                 {
                                     (formData.rfq && vendorRFQs.length != 0) && <div className="w-full flex flex-col items-center gap-4">
-                                        <div className="w-full flex items-center justify-end">
-                                            <button onClick={(e) => handleContinue(e, formData.rfq)}
-                                                className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                Continue
-                                            </button>
-                                        </div>
                                         {
                                             isClicked && <div className="w-full flex items-center justify-center">
                                                 {
@@ -570,7 +579,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                 <div className="w-full flex items-center justify-end text-black text-lg font-medium">
                                                                     Total amount: {totalPrice}
                                                                 </div>
-                                                                <div className="w-full flex items-center justify-start">
+                                                                <div className="w-full flex items-center justify-end">
                                                                     {
                                                                         saveLoader ?
                                                                             <div className='flex items-center justify-center m-4'>
@@ -611,6 +620,10 @@ const PO = ({ fetchAllProductsMain }) => {
                                 </div>
                                 :
                                 <div className="w-full flex flex-col items-center gap-4">
+                                    <div className="w-full flex flex-col items-center text-black">
+                                        <div className="w-full text-left font-semibold">PO Id: <span className='font-normal'>{poDetails.poId}</span></div>
+                                        <div className="w-full text-left font-semibold">Vendor: <span className='font-normal'>{poDetails.vendor}</span></div>
+                                    </div>
                                     <div className="w-full flex items-start justify-start max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
                                         <table className='w-full border-collapse mt-4'>
                                             <thead>
@@ -823,7 +836,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                 toast.error("Please provide quantities greater than zero for all selected products!");
                 return;
             }
-            else {                
+            else {
                 try {
                     setSaveLoader(true);
 
@@ -899,6 +912,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const [currentRFQId, setCurrentRFQId] = useState(null);
 
+    const [rfqDetails, setRFQDetails] = useState({
+        id: '', vendor: ''
+    })
+
     const fetchAddedRFQPdts = async (_id) => {
         try {
             const response = await axios.get(`${backendServer}/api/getRFQPdts/${_id}`, {
@@ -907,6 +924,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
             setReqRFQPdts(response.data.products);
             setRfqCurr(response.data.curr);
             setRfqCurrPdts(response.data.rfqPdts);
+            setRFQDetails({
+                id: response.data.rfqId,
+                vendor: response.data.vendor
+            })
             setRrLoading(false);
         } catch (error) {
             setRrError(error.response.data.message);
@@ -918,15 +939,23 @@ const RFQ = ({ fetchAllProductsMain }) => {
         setViewRFQ(false);
         setPrices({});
         setReqRFQPdts([]);
+        setRFQDetails({
+            id: '', vendor: ''
+        });
         setRrOpen(curr => !curr);
         fetchAddedRFQPdts(_id);
         setCurrentRFQId(_id);
+        setZeroPrice(false);
     };
 
     const handleViewRFQ = (_id) => {
         setViewRFQ(true);
+        setRrLoading(true);
         setRfqCurr(null);
         setRfqCurrPdts([]);
+        setRFQDetails({
+            id: '', vendor: ''
+        });
         setRrOpen(curr => !curr);
         fetchAddedRFQPdts(_id);
         setCurrentRFQId(_id);
@@ -942,6 +971,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
         }));
     };
 
+    const [zeroPrice, setZeroPrice] = useState(false);
+
     const handleReceiveRFQ = async () => {
         try {
             const productPrices = reqRFQPdts.map(product => ({
@@ -952,6 +983,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
             const allPricesValid = productPrices.every(item => item.price > 0);
 
             if (!allPricesValid || productPrices.length === 0) {
+                setZeroPrice(true);
                 toast.error('All product prices must be greater than 0.');
                 return;
             }
@@ -995,20 +1027,56 @@ const RFQ = ({ fetchAllProductsMain }) => {
         }));
     };
 
-    const handleDownload = async (id) => {
-        try {
+    // const handleDownload = async (id) => {
+    //     try {
 
+    //         const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
+    //             headers: { Authorization: `Bearer ${token}` },
+    //         });
+
+    //         const flattenedData = flattenData(response.data);
+
+    //         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+    //         const workbook = XLSX.utils.book_new();
+    //         XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    //         XLSX.writeFile(workbook, 'RFQ_Details.xlsx');
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
+
+    const handleDownload = async (id, name) => {
+        try {
             const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
             const flattenedData = flattenData(response.data);
 
-            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+            const doc = new jsPDF();
 
-            XLSX.writeFile(workbook, 'RFQ_Details.xlsx');
+            doc.setFontSize(12);
+
+            flattenedData.forEach((item, index) => {
+                if (index > 0) {
+                  doc.addPage();
+                }
+        
+                const x = 10;
+                let y = 20; 
+        
+                Object.keys(item).forEach((key) => {
+                  doc.setFont('helvetica', 'bold');
+                  doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
+                  const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
+                  doc.setFont('helvetica', 'normal');
+                  doc.text(item[key], x + keyWidth, y);
+                  y += 10;
+                });
+            });
+
+            doc.save(`RFQ_Details_${name}.pdf`);
         } catch (error) {
             console.log(error);
         }
@@ -1081,7 +1149,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                            <button onClick={() => handleDownload(rfq._id)}
+                                                                            <button onClick={() => handleDownload(rfq._id, rfq.rfqId)}
                                                                                 className='w-full text-left'>Download RFQ</button>
 
                                                                         </div>
@@ -1142,6 +1210,12 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                 <div className="w-full flex flex-col items-center gap-4">
                                     <div className="w-full flex flex-col items-center gap-4 max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
                                         {
+                                            viewRFQ && <div className="w-full flex flex-col items-center">
+                                                <div className="w-full text-left font-semibold">RFQ Id: <span className='font-normal'>{rfqDetails.id}</span></div>
+                                                <div className="w-full text-left font-semibold">Vendor: <span className='font-normal'>{rfqDetails.vendor}</span></div>
+                                            </div>
+                                        }
+                                        {
                                             reqRFQPdts.map(pdt => {
                                                 return (
                                                     <div key={pdt._id} className="w-full flex items-start justify-center bg-[#F8F9FD] p-2 rounded-lg gap-4">
@@ -1195,7 +1269,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                                     <div className="w-full text-left font-semibold">Price</div>
                                                                     <input value={prices[pdt._id] || ''} onChange={(e) => handlePriceChange(e, pdt._id)}
                                                                         placeholder={`In ${rfqCurr}`}
-                                                                        className='w-full p-1.5 outline-none'
+                                                                        className={`w-full p-1.5 outline-none ${prices[pdt._id] <= 0 ? 'border border-solid border-red-600' : 'border-none'}`}
                                                                         type="number" min="1" name="" />
                                                                 </div>
                                                         }
@@ -1204,6 +1278,9 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                             })
                                         }
                                     </div>
+                                    {
+                                        zeroPrice && <div className="w-full text-left text-xs text-red-600 italic -my-2">All product prices must be greater than 0.</div>
+                                    }
                                     {
                                         !viewRFQ ?
                                             <div className="w-full flex items-center justify-end my-1">

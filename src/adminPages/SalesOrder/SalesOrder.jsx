@@ -80,7 +80,7 @@ const SalesOrder = () => {
         fetchEmployeesNames();
         fetchClientsNames();
         fetchSalesData();
-    }, []); 
+    }, []);
 
     const handleOpen = () => {
         setOpen((cur) => !cur);
@@ -218,21 +218,21 @@ const SalesOrder = () => {
         }));
     };
 
-    const handleDownload = async (id) => {
+    const handleDownload = async (id, name) => {
         try {
             const response = await axios.get(`${backendServer}/api/products/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setProducts(response.data.products);
             const prods = response.data.products.filter(prod => prod.type === "Product");
-    
+
             const flattenedData = flattenData(prods);
-    
+
             const worksheet = XLSX.utils.json_to_sheet(flattenedData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    
-            XLSX.writeFile(workbook, 'table_data.xlsx');
+
+            XLSX.writeFile(workbook, `Summary_${name}.xlsx`);
         } catch (error) {
             console.log(error);
         }
@@ -380,42 +380,42 @@ const SalesOrder = () => {
 
                                                             <button onClick={() => progressButtonClick(pdt._id, "In progress")}
                                                                 disabled={pdt.progress === "In progress" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className='w-full text-left font-normal text-nowrap'>Initiate</button>
+                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Initiate</button>
 
-                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 
                                                             <button onClick={() => handleInviteMenu(pdt._id)}
-                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className='w-full text-left font-normal text-nowrap'>Invite User</button>
+                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected" || pdt.owner != name}
+                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Invite User</button>
 
-                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 
                                                             <button onClick={() => progressButtonClick(pdt._id, "Request for Approval")}
                                                                 disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className='w-full text-left font-normal text-nowrap'>Request for Approval</button>
+                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Request for Approval</button>
 
-                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 
                                                             <button onClick={() => progressButtonClick(pdt._id, "Approved")}
                                                                 disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className='w-full text-left font-normal text-nowrap'>Approve</button>
+                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Approve</button>
 
-                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 
                                                             <button onClick={() => progressButtonClick(pdt._id, "Rejected")}
                                                                 disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className='w-full text-left font-normal text-nowrap'>Reject</button>
+                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Reject</button>
 
-                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 
-                                                            <button onClick={() => handleDownload(pdt._id)}
+                                                            <button onClick={() => handleDownload(pdt._id, pdt.name)}
                                                                 disabled={pdt.progress === "Not Started"}
                                                                 className='w-full text-left font-normal text-nowrap'>Download Summary</button>
 
-                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 
                                                             <button onClick={() => handleDeleteProject(pdt._id)} disabled={pdt.progress != "Not Started"}
-                                                                className='w-full text-left font-normal text-nowrap text-red-600'>Delete project</button>
+                                                                className={`w-full text-left font-normal text-nowrap text-red-600 ${pdt.owner === name ? 'block' : 'hidden'}`}>Delete project</button>
 
                                                         </div>
                                                     </div>
