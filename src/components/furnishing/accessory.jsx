@@ -9,7 +9,7 @@ const Accessory = ({formData, handleInputChange}) => {
                     <select
                         value={formData.acessory_unit}
                         onChange={handleInputChange}
-                        className='p-1 outline-none' name="unit">
+                        className='p-1 outline-none' name="acessory_unit">
                         <option value="" disabled>Select an option</option>
                         <option value="cm">cm</option>
                         <option value="inch">inch</option>

@@ -5,11 +5,11 @@ const Arearug = ({formData, handleInputChange}) => {
         <>
             <div className="w-full flex items-center justify-start gap-2">
                     <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                        <label htmlFor="unit">Size Unit:</label>
+                        <label htmlFor="arearug_unit">Size Unit:</label>
                         <select
-                            value={formData.unit}
+                            value={formData.arearug_unit}
                             onChange={handleInputChange}
-                            className='p-1 outline-none' name="unit">
+                            className='p-1 outline-none' name="arearug_unit">
                             <option value="" disabled>Select an option</option>
                             <option value="cm">cm</option>
                             <option value="inch">inch</option>
@@ -54,9 +54,9 @@ const Arearug = ({formData, handleInputChange}) => {
                 </div>
                 <div className="w-full flex items-center justify-start gap-2">
                     <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                        <label htmlFor="arearug_unit">Custom:</label>
+                        <label htmlFor="arearug_custom">Custom:</label>
                         <select
-                            value={formData.custom}
+                            value={formData.arearug_custom}
                             onChange={handleInputChange}
                             className='p-1 outline-none' name="arearug_custom">
                             <option value="" disabled>Select an option</option>
@@ -66,7 +66,7 @@ const Arearug = ({formData, handleInputChange}) => {
                     </div>
                 </div>
                 {
-                    formData.custom === "Yes" ? (
+                    formData.arearug_custom === "Yes" ? (
                         <><div className="w-full flex items-center justify-center gap-4">
                                 <div className="w-full flex items-center justify-start gap-2">
                                     <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">

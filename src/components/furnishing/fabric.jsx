@@ -17,7 +17,7 @@ const Fabric = ({formData, handleInputChange}) => {
                     <select
                         value={formData.fabric_unit}
                         onChange={handleInputChange}
-                        className='p-1 outline-none' name="unit">
+                        className='p-1 outline-none' name="fabric_unit">
                         <option value="" disabled>Select an option</option>
                         <option value="cm">cm</option>
                         <option value="inch">inch</option>
@@ -67,23 +67,25 @@ const Fabric = ({formData, handleInputChange}) => {
             <div className="w-full flex items-center justify-center gap-4">
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="fabric_cfa_required">CFA Required:</label>
-                    <input
-                        className=''
-                        type="checkbox"
-                        value="fabric_cfa_required"
-                        checked={formData.fabric_cfa_required}
+                     <select
+                        value={formData.fabric_cfa_required}
                         onChange={handleInputChange}
-                    />
+                        className='p-1 outline-none' name="fabric_cfa_required">
+                        <option value="" disabled>Select an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
                 </div> 
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="fabric_cfa_waived">CFA Waived:</label>
-                    <input
-                        className=''
-                        type="checkbox"
-                        value="fabric_cfa_waived"
-                        checked={formData.fabric_cfa_waived}
+                    <select
+                        value={formData.fabric_cfa_waived}
                         onChange={handleInputChange}
-                    />
+                        className='p-1 outline-none' name="fabric_cfa_waived">
+                        <option value="" disabled>Select an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
                 </div>                 
             </div>                                        
         </>);

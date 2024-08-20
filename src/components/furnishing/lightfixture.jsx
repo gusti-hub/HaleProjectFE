@@ -215,13 +215,14 @@ const Hardwired = ({formData, handleInputChange}) => {
             <div className="w-full flex items-center justify-center gap-4">
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="hardwired">Hardwired:</label>
-                    <input
-                        className=''
-                        type="checkbox"
-                        value="hardwired"
-                        checked={formData.hardwired}
+                    <select
+                        value={formData.hardwired}
                         onChange={handleInputChange}
-                    />
+                        className='p-1 outline-none' name="hardwired">
+                        <option value="" disabled>Select an option</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
                 </div>                
             </div>                                                                                                                                                                                                                                              
         </>

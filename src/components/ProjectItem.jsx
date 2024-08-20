@@ -23,6 +23,22 @@ import Wallpaper from './furnishing/wallpaper';
 import Upholstery from './furnishing/upholstery';
 import WindowTreatment from './furnishing/windowtreatment';
 import Table from './furnishing/table';
+import ViewHardware from './view/hardware';
+import ViewArtwork from './view/artwork';
+import ViewCasegood from './view/casegood';
+import ViewAcessory from './view/accessory';
+import ViewArearug from './view/arearug';
+import ViewEquipment from './view/equipment';
+import ViewFabric from './view/fabric';
+import ViewHardwired from './view/lightfixture';
+import ViewDecorativeLighting from './view/decoretivelighting';
+import ViewMirror from './view/mirror';
+import ViewMiscellaneous from './view/miscellaneous';
+import ViewTable from './view/table';
+import ViewSeating from './view/seating';
+import ViewWallpaper from './view/wallpaper';
+import ViewUpholstery from './view/upholstery';
+import ViewWindowTreatment from './view/windowtreatment';
 
 const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     const initialFormData = isEditMode ? editItem : { projectId: id, type: 'Reference', title: '', desc: '' };
@@ -133,7 +149,7 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     );
 };
 
-const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
+const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode, client, secName, ConfigurationType, products, addressID }) => {
     const token = localStorage.getItem('token');
 
     const initialFormData = isEditMode && editItem ? {
@@ -141,8 +157,25 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         type: 'Product',
         name: editItem.title || '',
         code: editItem.productDetails?.code || '',
-        qty: editItem.productDetails?.qty || '',
+        furnishing: editItem.furnishing || '',
+        qty: editItem.qty || '',
+        sku: editItem.sku || '',
         imageUrl: editItem.imageUrl || '',
+        vendor : editItem.vendor || '',
+        rfq : editItem.rfq || '',
+        net_cost : editItem.net_cost || '',
+        shipping_cost : editItem.shipping_cost || '',
+        other_cost : editItem.other_cost || '',
+        po_amount : editItem.po_amount || '',
+        buy_tax : editItem.buy_tax || '',
+        buy_sales_tax : editItem.buy_sales_tax || '',
+        sell_markup : editItem.sell_markup || '',
+        client_product_cost : editItem.client_product_cost || '',
+        client_price : editItem.client_price || '',
+        sell_tax : editItem.sell_tax || '',
+        sell_sales_tax : editItem.sell_sales_tax || '',
+        
+
         
         //Accessory
         acessory_unit: editItem.productDetails?.acessory_unit || '',
@@ -158,6 +191,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         arearug_wid: editItem.productDetails?.arearug_wid || '',
         arearug_rugpad: editItem.productDetails?.arearug_rugpad || '',
         arearug_content: editItem.productDetails?.arearug_content || '',
+        arearug_custom: editItem.productDetails?.arearug_custom || '',
         arearug_color: editItem.productDetails?.arearug_color || '',
         arearug_gauge: editItem.productDetails?.arearug_gauge || '',
         arearug_pile: editItem.productDetails?.arearug_pile || '',
@@ -185,6 +219,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
 
         //Artwork
+        artwork_unit: editItem.productDetails?.artwork_unit || '',
         len_overall: editItem.productDetails?.len_overall || '',
         wid_overall: editItem.productDetails?.wid_overall || '',
         height_overall: editItem.productDetails?.height_overall || '',
@@ -314,7 +349,6 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         seating_com_fabric: editItem.productDetails?.seating_com_fabric || '',
         seating_pattern_name: editItem.productDetails?.seating_pattern_name || '',
         seating_sku: editItem.productDetails?.seating_sku || '',
-        seating_color: editItem.productDetails?.seating_color || '',
         seating_width: editItem.productDetails?.seating_width || '',
         seating_horizontal: editItem.productDetails?.seating_horizontal || '',
         seating_vertical: editItem.productDetails?.seating_vertical || '',
@@ -384,10 +418,26 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     } : {
         projectId: id,
         type: 'Product',
+        furnishing: '',
         name: '',
         code: '',
         qty: null,
+        sku:'',
         imageUrl: '',
+        vendor: '',
+        rfq: '',
+        net_cost: '',
+        shipping_cost: '',
+        other_cost: '',
+        po_amount: '',
+        buy_tax: '',
+        buy_sales_tax: '',
+        sell_markup: '',
+        client_product_cost: '',
+        client_price: '',
+        sell_tax: '',
+        sell_sales_tax: '',
+
 
         //Accessory
         acessory_unit: '',
@@ -403,6 +453,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         arearug_wid: null,
         arearug_rugpad: '',
         arearug_content: '',
+        arearug_custom:'',
         arearug_color: '',
         arearug_gauge: '',
         arearug_pile: null,
@@ -431,6 +482,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         
 
         //Artwork
+        artwork_unit: '',
         artwork_len_overall: null,
         artwork_wid_overall: null,
         artwork_height_overall: null,
@@ -553,7 +605,6 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         seating_len: null,
         seating_wid: null,
         seating_height: null,
-        seating_color: '',
         seating_finish: '',
         seating_vendor_provided_fabric: '',
         seating_fabric: '',
@@ -628,6 +679,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
     };
     const [FurnishingType, setFurnishingType] = useState([]);
+    const [rfqs, setRfqs] = useState([]);
     const [formData, setFormData] = useState(initialFormData);
     const [selectedFile, setSelectedFile] = useState(null);
     const [fileName, setFileName] = useState(isEditMode && editItem ? editItem.imageUrl.split('/').pop() : '');
@@ -639,10 +691,26 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             setFormData({
                 projectId: id,
                 type: 'Product',
+                furnishing: editItem.furnishing || '',
                 name: editItem.title || '',
                 code: editItem.productDetails?.code || '',
-                qty: editItem.productDetails?.qty || '',
+                qty: editItem.qty || '',
+                sku: editItem.sku || '',
                 imageUrl: editItem.imageUrl || '',
+                vendor : editItem.vendor || '',
+                rfq : editItem.rfq || '',
+                net_cost : editItem.net_cost || '',
+                shipping_cost : editItem.shipping_cost || '',
+                other_cost : editItem.other_cost || '',
+                po_amount : editItem.po_amount || '',
+                buy_tax : editItem.buy_tax || '',
+                buy_sales_tax : editItem.buy_sales_tax || '',
+                sell_markup : editItem.sell_markup || '',
+                client_product_cost : editItem.client_product_cost || '',
+                client_price : editItem.client_price || '',
+                sell_tax : editItem.sell_tax || '',
+                sell_sales_tax : editItem.sell_sales_tax || '',                
+
 
                 //Accessory
                 acessory_unit: editItem.productDetails?.acessory_unit || '',
@@ -658,6 +726,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 arearug_wid: editItem.productDetails?.arearug_wid || '',
                 arearug_rugpad: editItem.productDetails?.arearug_rugpad || '',
                 arearug_content: editItem.productDetails?.arearug_content || '',
+                arearug_custom: editItem.productDetails?.arearug_custom || '',
                 arearug_color: editItem.productDetails?.arearug_color || '',
                 arearug_gauge: editItem.productDetails?.arearug_gauge || '',
                 arearug_pile: editItem.productDetails?.arearug_pile || '',
@@ -686,6 +755,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
 
                 //Artwork
+                artwork_unit: editItem.productDetails?.artwork_unit || '',
                 artwork_len_overall: editItem.productDetails?.artwork_len_overall || '',
                 artwork_wid_overall: editItem.productDetails?.artwork_wid_overall || '',
                 artwork_height_overall: editItem.productDetails?.artwork_height_overall || '',
@@ -809,7 +879,6 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 seating_len: editItem.productDetails?.seating_len || '',
                 seating_wid: editItem.productDetails?.seating_wid || '',
                 seating_height: editItem.productDetails?.seating_height || '',
-                seating_color: editItem.productDetails?.seating_color || '',
                 seating_finish: editItem.productDetails?.seating_finish || '',
                 seating_vendor_provided_fabric: editItem.productDetails?.seating_vendor_provided_fabric || '',
                 seating_fabric: editItem.productDetails?.seating_fabric || '',
@@ -890,16 +959,26 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
     const handleInputChange = (e) => {
         const { name, value, maxLength } = e.target;
+        const effectiveMaxLength = maxLength || 50;
         console.log(name)
         console.log(value)
-        console.log(maxLength);
-
-        setFormData((prevData) => ({ ...prevData, [name]: value.slice(0, maxLength) }));
+        //console.log(effectiveMaxLength);
+        //console.log(value.slice(0, effectiveMaxLength))
+        
+        setFormData((prevData) => ({ ...prevData, [name]: value.slice(0, effectiveMaxLength) }));
 
         if(name == 'furnishing'){
-            
+            //Generate product COde
+            if(!isEditMode){
+                const areaCode =  ConfigurationType.find(sec => sec.name === secName).code;
+                const furnishingCode = FurnishingType.find(option => option.name === value).code;
+                const clientCode = client.split('-')[0];
+                const len = products.length+1;
+                formData.code = clientCode + "-" + areaCode + "-" + furnishingCode + "-" + len;
+            }
+
             //Accessory
-            formData.acessory_unit= null;
+            formData.acessory_unit= '';
             formData.acessory_len= null;
             formData.acessory_wid= null;
             formData.acessory_height= null;
@@ -907,7 +986,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             formData.acessory_finish= '';
 
             //Area Rug
-            formData.arearug_unit= null;
+            formData.arearug_unit= '';
             formData.arearug_len= null;
             formData.arearug_wid= null;
             formData.arearug_rugpad= '';
@@ -939,6 +1018,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
             
             //Artwork
+            formData.artwork_unit= '',
             formData.artwork_len_overall= null;
             formData.artwork_wid_overall= null;
             formData.artwork_height_overall= null;
@@ -970,7 +1050,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             
             //fabric
             formData.fabric_color= '';
-            formData.fabric_unit= null;
+            formData.fabric_unit= '';
             formData.fabric_width= null;
             formData.fabric_horizontal= null;
             formData.fabric_vertical= null;
@@ -980,7 +1060,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             formData.fabric_cfa_waived= '';
 
             //Handwired
-            formData.hardwired_unit= null;
+            formData.hardwired_unit= '';
             formData.hardwired_len_overall= null;
             formData.hardwired_wid_overall= null;
             formData.hardwired_height_overall= null;
@@ -1006,7 +1086,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             formData.hardwired= '';
 
             //Decorative Lighting
-            formData.decorative_lighting_unit= null;
+            formData.decorative_lighting_unit= '';
             formData.decorative_lighting_len_overall= null;
             formData.decorative_lighting_wid_overall= null;
             formData.decorative_lighting_height_overall= null;
@@ -1031,7 +1111,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             formData.decorative_lighting_rating= '';
 
             //Mirror
-            formData.mirror_unit= null;
+            formData.mirror_unit= '';
             formData.mirror_len= null;
             formData.mirror_wid= null;
             formData.mirror_height= null;
@@ -1047,7 +1127,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             formData.miscellaneous_insert= '';
 
             //Table
-            formData.table_unit= null;
+            formData.table_unit= '';
             formData.table_len= null;
             formData.table_wid= null;
             formData.table_height= null;
@@ -1135,7 +1215,65 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             formData.wt_shade_blackout_linear= '';
 
         }
-        console.log(formData);
+
+        if(name == 'arearug_custom'){
+            formData.arearug_color= '';
+            formData.arearug_gauge= '';
+            formData.arearug_pile= null;
+            formData.arearug_stitches= '';
+            formData.arearug_pattern= '';
+            formData.arearug_construction= '';
+            formData.arearug_backing= '';
+            formData.arearug_secondaryBacking= '';
+        }
+
+        if(name == 'wt_vendor_provided_fabric'){
+            formData.wt_fabric = '';
+        }
+
+        if(name == 'wt_com_fabric'){
+            formData.wt_pattern_name = '';
+            formData.wt_sku = '';
+            formData.wt_color = '';
+            formData.wt_horizontal = '';
+            formData.wt_vertical = '';
+            formData.wt_content = '';
+            formData.wt_backing = '';
+            formData.wt_installation_type = '';
+        }
+
+        if(name == 'wt_type'){
+            formData.wt_drapery_style = '';
+            formData.wt_drapery_fullness = '';
+            formData.wt_drapery_hem = '';
+            formData.wt_drapery_construction = '';
+            formData.wt_drapery_control = '';
+            formData.wt_drapery_control_location = '';
+            formData.wt_drapery_hardware = '';
+            formData.wt_drapery_blackout_linear = '';
+            formData.wt_shade_style = '';
+            formData.wt_shade_fullness = '';
+            formData.wt_shade_hem = '';
+            formData.wt_shade_construction = '';
+            formData.wt_shade_control_type = '';
+            formData.wt_shade_control_location = '';
+            formData.wt_shade_hardware = '';
+            formData.wt_shade_blackout_linear = '';
+        }
+
+        if (isEditMode) {
+            if(name == 'rfq'){
+                const rfq = rfqs.find(rfq => rfq.rfqId === value);
+                if (rfq) {
+                    const product = rfq.products.find(product => product.productId === editItem._id);
+                    if (product) {
+                        formData.net_cost = product.price;
+                        formData.vendor = rfq.vendor;
+                    }
+                }
+
+            }
+        }
     };
 
     const handleFileChange = (event) => {
@@ -1196,9 +1334,24 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         setFormData({
             projectId: id,
             type: 'Product',
+            furnishing: '',
             name: '',
             code: '',
             qty: null,
+            sku: '',
+            vendor: '',
+            rfq: '',
+            net_cost: '',
+            shipping_cost: '',
+            other_cost: '',
+            po_amount: '',
+            buy_tax: '',
+            buy_sales_tax: '',
+            sell_markup: '',
+            client_product_cost: '',
+            client_price: '',
+            sell_tax: '',
+            sell_sales_tax: '',
             // vendor: '',
             // budget: null,
             // buyCost: null,
@@ -1220,6 +1373,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             arearug_wid: null,
             arearug_rugpad: '',
             arearug_content: '',
+            arearug_custom: '',
             arearug_color: '',
             arearug_gauge: '',
             arearug_pile: null,
@@ -1247,6 +1401,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
 
             //Artwork
+            artwork_unit: '',
             artwork_len_overall: null,
             artwork_wid_overall: null,
             artwork_height_overall: null,
@@ -1368,7 +1523,6 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             seating_len: null,
             seating_wid: null,
             seating_height: null,
-            seating_color: '',
             seating_finish: '',
             seating_vendor_provided_fabric: '',
             seating_fabric: '',
@@ -1471,9 +1625,33 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         }
     };
 
+    const fetchRFQDetails = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/rfqDetails/${addressID}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (isEditMode) {
+                const filteredRfqs = response.data.allRFQs.filter(rfq =>
+                    rfq.products.some(product => product.productId === editItem._id)
+                );
+                setRfqs(filteredRfqs);
+            }
+            else{
+                setRfqs([])
+            }
+
+
+            
+        } catch (error) {
+            setError(error.response.data.message);
+        }
+    }
+
     useEffect(() => {
         fetchVendorsNames();
         fetchFurnishingType();
+        fetchRFQDetails();
     }, []);
 
     if (error) return (
@@ -1482,26 +1660,41 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         </div>
     );
 
+    formData.po_amount = (Number(formData.qty || 0) * Number(formData.net_cost || 0)) + Number(formData.other_cost || 0);
+    formData.buy_sales_tax = (Number(formData.po_amount || 0) * (formData.buy_tax/100));
+    formData.client_product_cost = (Number(formData.net_cost || 0) * (1 + (Number(formData.sell_markup || 0)/100)) )
+    formData.client_price = (Number(formData.client_product_cost || 0) * (formData.qty));
+    formData.sell_sales_tax = (Number(formData.client_price || 0) * (Number(formData.sell_tax || 0)/100));
+
     return (
         <form onSubmit={handleSubmit} className='w-full flex flex-col items-center gap-4'>
             <div className="w-full flex items-center justify-center gap-4">
-                { <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                    <label htmlFor="code">Furnishing:</label>
-                    <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                    <select
-                        value={formData.furnishing}
-                        onChange={handleInputChange}
-                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                        name='furnishing'
-                    >
-                        <option value="" disabled>Select an option</option>
-                        {FurnishingType.map((option) => (
-                        <option key={option.code} value={option.name}>
-                            {option.name}
-                        </option>
-                        ))}
-                    </select>
-                </div> }       
+                { isEditMode ? 
+                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                        <label htmlFor="code">Furnishing:</label>
+                        <label className='p-1'>
+                            {formData.furnishing}
+                        </label>  
+                    </div>               
+                    :
+                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                        <label htmlFor="code">Furnishing:</label>
+                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        <select
+                            value={formData.furnishing}
+                            onChange={handleInputChange}
+                            className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                            name='furnishing'
+                        >
+                            <option value="" disabled>Select an option</option>
+                            {FurnishingType.map((option) => (
+                            <option key={option.code} value={option.name}>
+                                {option.name}
+                            </option>
+                            ))}
+                        </select>
+                    </div> 
+                }       
             </div>
             <div className="w-full flex items-center justify-center gap-4">
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
@@ -1614,13 +1807,107 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 )
             }
 
-            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+            <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                 <label htmlFor="qty">Quantity:</label>
                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                 <input value={formData.qty} onChange={handleInputChange}
                     className='w-full max-w-[40%] outline-none border-b border-solid border-b-black p-[2px]'
                     type="number" name='qty' placeholder='Type here...' maxLength="5"/>
-            </div>           
+            </div>
+
+            <div className="h-[20px] bg-gray-300"></div>
+            <div className="w-full flex items-center justify-start font-semibold">Buy Price</div>
+            <div className="w-full flex items-center justify-center gap-4">
+                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                    <label htmlFor="rfq">RFQ Document:</label>
+                    <select
+                            value={formData.rfq}
+                            onChange={handleInputChange}
+                            className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                            name='rfq'
+                        >
+                            <option value="" disabled>Select an option</option>
+                            {rfqs.map((option) => (
+                            <option key={option.rfqId} value={option.rfqId}>
+                                {option.rfqId}
+                            </option>
+                            ))}
+                    </select>
+                </div>                           
+            </div>
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="vendor">Vendor :</label>
+                <div>{formData.vendor}</div>
+            </div>
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="net_cost">Net Cost ($):</label>
+                <div>{formData.net_cost}</div>
+            </div>
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="shipping_cost">Shipping Cost ($):</label>
+                <input value={formData.shipping_cost} onChange={handleInputChange}
+                    className='w-full max-w-[40%] outline-none border-b border-solid border-b-black p-[2px]'
+                    type="number" name='shipping_cost' placeholder='Type here...' maxLength="20"/>
+            </div>            
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="other_cost">Other Cost ($):</label>
+                <input value={formData.other_cost} onChange={handleInputChange}
+                    className='w-full max-w-[40%] outline-none border-b border-solid border-b-black p-[2px]'
+                    type="number" name='other_cost' placeholder='Type here...' maxLength="20"/>
+            </div> 
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="po_amount">PO Amount ($):</label>
+                <div>{formData.po_amount}</div>
+            </div> 
+
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="buy_tax">Tax (%):</label>
+                <input value={formData.buy_tax} onChange={handleInputChange}
+                    className='w-full max-w-[40%] outline-none border-b border-solid border-b-black p-[2px]'
+                    type="number" name='buy_tax' placeholder='Type here...' maxLength="3"/>
+            </div>    
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="buy_sales_tax">Sales Tax ($):</label>
+                <div>{formData.buy_sales_tax}</div>
+            </div> 
+
+            <div className="h-[20px] bg-gray-300"></div>
+            <div className="w-full flex items-center justify-start font-semibold">Sell Price</div>
+            
+            
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="sell_markup">Markup (%):</label>
+                <input value={formData.sell_markup} onChange={handleInputChange}
+                    className='w-full max-w-[40%] outline-none border-b border-solid border-b-black p-[2px]'
+                    type="number" name='sell_markup' placeholder='Type here...' maxLength="3"/>
+            </div>    
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="client_product_cost">Client Product Cost ($):</label>
+                <div>{formData.client_product_cost}</div>
+            </div>  
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="client_price">Client Price ($):</label>
+                <div>{formData.client_price}</div>
+            </div>  
+
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="sell_tax">Tax (%):</label>
+                <input value={formData.sell_tax} onChange={handleInputChange}
+                    className='w-full max-w-[40%] outline-none border-b border-solid border-b-black p-[2px]'
+                    type="number" name='sell_tax' placeholder='Type here...' maxLength="3"/>
+            </div>    
+            
+            <div className="w-full flex items-start justify-start gap-2 text-black text-nowrap">
+                <label htmlFor="sell_sales_tax">Sales Tax ($):</label>
+                <div>{formData.sell_sales_tax}</div>
+            </div>            
 
             <div className="w-full flex items-start justify-start gap-2 text-black">
                 <label htmlFor="file">Attachment:</label>
@@ -1637,7 +1924,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     );
 };
 
-const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fetchSections }) => {
+const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fetchSections, client, ConfigurationType }) => {
     const loggedInUser = localStorage.getItem('name');
 
     const token = localStorage.getItem('token');
@@ -1817,70 +2104,154 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                             ) :
                                             (
                                                 <div className="w-full flex items-start justify-center gap-3 text-black">
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
+                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <span className='font-semibold'>{pdt.type}:</span>
-                                                            <span>{pdt.title} ({pdt.productDetails.code})</span>
+                                                            <span>{pdt.title} ({pdt.code})</span>
                                                         </div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                                         <img className='max-w-[15rem]' src={pdt.imageUrl} alt="" />
                                                     </div>
 
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
-                                                        <div className="w-full flex items-center justify-start font-semibold">Description</div>
+                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                        <div className="w-full flex items-center justify-start font-semibold">Specification</div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <div className="w-full flex items-center justify-start">{pdt.desc}</div>
-                                                        <div className="w-full h-[1.5px] bg-gray-300"></div>
                                                         <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Dimension:</div>
-                                                            <div className="w-full flex flex-wrap items-center justify-start gap-2">
-                                                                {pdt.productDetails.len ? <div><span className='text-black font-medium'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                {pdt.productDetails.wid ? <div><span className='text-black font-medium'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                {pdt.productDetails.dia ? <div><span className='text-black font-medium'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
-                                                            </div>
-                                                        </div>
+                                                            <div className='font-medium'>SKU:</div>
+                                                            <div>{pdt.sku}</div>
+                                                        </div>                                                        
                                                         <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Color:</div>
-                                                            <div className="flex items-center justify-center gap-2">
-                                                                <div className={`w-7 h-5 rounded-sm`} style={{ backgroundColor: pdt.productDetails.color }}></div>
-                                                                <div>{pdt.productDetails.color}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Material:</div>
-                                                            <div>{pdt.productDetails.material}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Insert:</div>
-                                                            <div>{pdt.productDetails.insert}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Finish:</div>
-                                                            <div>{pdt.productDetails.finish}</div>
-                                                        </div>
-                                                        {/* <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>Quantity:</div>
-                                                            <div>{pdt.productDetails.qty}</div>
+                                                            <div>{pdt.qty}</div>
+                                                        </div>
+                                                            {pdt.furnishing === 'Accessory' ? (
+                                                                <ViewAcessory
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Area Rug' ? (
+                                                                <ViewArearug
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Equipment' ? (
+                                                                <ViewEquipment
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Hardware' ? (
+                                                                <ViewHardware
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Artwork' ? (
+                                                                <ViewArtwork
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Casegood' ? (
+                                                                <ViewCasegood
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Fabric' ? (
+                                                                <ViewFabric
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Light Fixture (hardwired)' ? (
+                                                                <ViewHardwired
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Decorative Lighting' ? (
+                                                                <ViewDecorativeLighting
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Mirror' ? (
+                                                                <ViewMirror
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Miscellaneous' ? (
+                                                                <ViewMiscellaneous
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Table' ? (
+                                                                <ViewTable
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Seating' ? (
+                                                                <ViewSeating
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Wallpaper' ? (
+                                                                <ViewWallpaper
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Upholstery' ? (
+                                                                <ViewUpholstery
+                                                                    pdt={pdt}
+                                                                />
+                                                            )   : pdt.furnishing === 'Window Treatment' ? (
+                                                                <ViewWindowTreatment
+                                                                    pdt={pdt}
+                                                                />                      
+                                                            )   
+                                                            
+                                                            
+                                                            : <></>
+                                                            }
+                                                        <div className="h-[20px] bg-gray-300"></div>
+                                                        <div className="w-full flex items-center justify-start font-semibold">Buy Price</div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                            <div className='font-medium'>RFQ :</div>
+                                                            <div>{pdt.rfq}</div>
                                                         </div>
                                                         <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Vendor:</div>
-                                                            <div>{pdt.productDetails.vendor}</div>
+                                                            <div className='font-medium'>Vendor ($):</div>
+                                                            <div>{pdt.vendor}</div>
                                                         </div>
                                                         <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Budget ($):</div>
-                                                            <div>{pdt.productDetails.budget}</div>
+                                                            <div className='font-medium'>Net Cost ($):</div>
+                                                            <div>{pdt.net_cost}</div>
                                                         </div>
                                                         <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Buying price ($):</div>
-                                                            <div>{pdt.productDetails.buyCost}</div>
-                                                        </div>
+                                                                <div className='font-medium'>Shipping Cost ($):</div>
+                                                                <div>{pdt.shipping_cost}</div>
+                                                            </div>
                                                         <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Selling price ($):</div>
-                                                            <div>{pdt.productDetails.sellCost}</div>
-                                                        </div> */}
+                                                                <div className='font-medium'>Other Cost ($):</div>
+                                                                <div>{pdt.other_cost}</div>
+                                                            </div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Po Amount ($):</div>
+                                                                <div>{pdt.po_amount}</div>
+                                                            </div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Tax (%):</div>
+                                                                <div>{pdt.buy_tax}</div>
+                                                            </div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Sales Tax ($):</div>
+                                                                <div>{pdt.buy_sales_tax}</div>
+                                                            </div>
+                                                        <div className="h-[20px] bg-gray-300"></div>
+                                                        <div className="w-full flex items-center justify-start font-semibold">Sales Price</div>    
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Sell Markup (%):</div>
+                                                                <div>{pdt.sell_markup}</div>
+                                                            </div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Client_Product Cost ($):</div>
+                                                                <div>{pdt.client_product_cost}</div>
+                                                            </div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Client Price ($):</div>
+                                                                <div>{pdt.client_price}</div>
+                                                            </div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Sell Tax (%):</div>
+                                                                <div>{pdt.sell_tax}</div>
+                                                            </div>
+                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Sell_Sales Tax ($):</div>
+                                                                <div>{pdt.sell_sales_tax}</div>
+                                                            </div>
                                                     </div>
 
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
+                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                                         <div className="w-full flex items-center justify-between">
                                                             <div className="font-semibold">Comments</div>
                                                         </div>
@@ -1975,6 +2346,11 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                     handleClose={handleClose}
                                     editItem={editItem}
                                     isEditMode={isEditMode}
+                                    client={client}
+                                    secName={name}
+                                    ConfigurationType={ConfigurationType}
+                                    products={products}
+                                    addressID={addressID}
                                 />
                             )
                         }
@@ -1987,4 +2363,3 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
 };
 
 export default ProjectItem;
-

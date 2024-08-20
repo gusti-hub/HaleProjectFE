@@ -9,7 +9,7 @@ const Artwork = ({formData, handleInputChange}) => {
                     <select
                         value={formData.artwork_unit}
                         onChange={handleInputChange}
-                        className='p-1 outline-none' name="unit">
+                        className='p-1 outline-none' name="artwork_unit">
                         <option value="" disabled>Select an option</option>
                         <option value="cm">cm</option>
                         <option value="inch">inch</option>
@@ -133,7 +133,7 @@ const Artwork = ({formData, handleInputChange}) => {
                     <select
                         value={formData.artwork_orientation}
                         onChange={handleInputChange}
-                        className='p-1 outline-none' name="orientation">
+                        className='p-1 outline-none' name="artwork_orientation" >
                         <option value="" disabled>Select an option</option>
                         <option value="Portrait">Portrait</option>
                         <option value="Landscape">Landscape</option>
@@ -146,7 +146,7 @@ const Artwork = ({formData, handleInputChange}) => {
                     <select
                         value={formData.artwork_glass}
                         onChange={handleInputChange}
-                        className='p-1 outline-none' name="glass">
+                        className='p-1 outline-none' name="artwork_glass">
                         <option value="" disabled>Select an option</option>
                         <option value="Regular Glass">Regular Glass</option>
                         <option value="Museum Glass">Museum Glass</option>
