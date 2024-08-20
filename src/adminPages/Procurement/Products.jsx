@@ -7,6 +7,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { MdOutlineClose, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight, MdOutlineMoreVert } from 'react-icons/md';
 import { Dialog } from '@material-tailwind/react';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 //PO
 
@@ -60,7 +63,9 @@ const PO = ({ fetchAllProductsMain }) => {
 
     const fetchPODetails = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`);
+            const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setPos(response.data.allPOs);
             setLoading(false);
         } catch (error) {
@@ -137,8 +142,8 @@ const PO = ({ fetchAllProductsMain }) => {
             const response = await axios.get(`${backendServer}/api/rfqProducts/${address.id}/${rfqId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setPdts(response.data);
-            handleTotalPrice(response.data);
+            setPdts(response.data.response);
+            handleTotalPrice(response.data.response);
             setLoadPdts(false);
         } catch (error) {
             setErrPdts(error.response.data.message);
@@ -146,10 +151,16 @@ const PO = ({ fetchAllProductsMain }) => {
         }
     }
 
-    const handleContinue = (e, rfqId) => {
-        e.preventDefault();
+    const handleContinue = (rfqId) => {
+        setLoadPdts(true);
         fetcthRFQProducts(rfqId);
         setClicked(true);
+    };
+
+    const handleRFQInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
+        handleContinue(value);
     };
 
     const [saveLoader, setSaveLoader] = useState(false);
@@ -217,11 +228,73 @@ const PO = ({ fetchAllProductsMain }) => {
 
     const [viewPO, setViewPO] = useState(false);
 
-    const viewPODetails = (poId, rfqId) => {
+    const [poDetails, setPODetails] = useState({
+        poId: '', vendor: ''
+    })
+
+    const viewPODetails = (poId, rfqId, vendor) => {
         setLoadPdts(true);
         setViewPO(curr => !curr);
+        setPODetails({
+            poId: poId, vendor: vendor
+        });
         fetcthRFQProducts(rfqId);
     }
+
+    const approvePO = async (_id) => {
+        try {
+            const response = await axios.put(`${backendServer}/api/updatePOStatus/${_id}`);
+            fetchPODetails();
+            toast.success(response.data.message);
+        } catch (error) {
+            toast.error(error.response.data.message);
+        }
+    }
+
+    // Download PO
+
+    const flattenData = (data) => {
+        return data.map(item => ({
+            PO_No: item.orgPOId,
+            PO_Sent_Date: item.orgPODate.split('T')[0],
+            RFQ_No: item.orgRFQ,
+            Vendor: item.orgVendor,
+            Total_Price: item.orgTP,
+            Est_Delivery: item.orgEstDel,
+            Est_Received: item.orgEstRec,
+            PO_Status: item.orgPOStatus,
+            Title: item.title,
+            Item_Code: item.productDetails.code,
+            Description: item.desc,
+            Measuring_unit: item.productDetails.unit,
+            Length: item.productDetails.len ? item.productDetails.len.toString() : '',
+            Width: item.productDetails.wid ? item.productDetails.wid.toString() : '',
+            Diameter: item.productDetails.dia ? item.productDetails.dia.toString() : '',
+            Color: item.productDetails.color,
+            Material: item.productDetails.material,
+            Insert: item.productDetails.insert,
+            Finish: item.productDetails.finish,
+            Item_status: item.status
+        }));
+    };
+
+    const handleDownload = async (id) => {
+        try {
+            const response = await axios.get(`${backendServer}/api/getPOPdts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const flattenedData = flattenData(response.data);
+
+            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+            XLSX.writeFile(workbook, 'PO_Details.xlsx');
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     if (rfqs.length != 0 && receivedRFQs.length === 0) {
         return (
@@ -266,6 +339,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                 <th>Estimation Received</th>
                                                 <th>Vendor Name</th>
                                                 <th>Total Price</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -290,12 +364,23 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                         <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
                                                                             className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
 
-                                                                            <button onClick={() => viewPODetails(po.poId, po.rfq)}
+                                                                            {
+                                                                                po.status === 'Waiting for approval' &&
+                                                                                <button onClick={() => approvePO(po._id)}
+                                                                                    className='w-full text-left'>Approve PO</button>
+                                                                            }
+
+                                                                            {
+                                                                                po.status === 'Waiting for approval' && <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                            }
+
+                                                                            <button onClick={() => viewPODetails(po.poId, po.rfq, po.vendor)}
                                                                                 className='w-full text-left'>View PO</button>
 
                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                            <button className='w-full text-left'>Download PO</button>
+                                                                            <button onClick={() => handleDownload(po._id)}
+                                                                                className='w-full text-left'>Download PO</button>
 
                                                                         </div>
                                                                     }
@@ -307,6 +392,12 @@ const PO = ({ fetchAllProductsMain }) => {
                                                             <td>{po.receive}</td>
                                                             <td>{po.vendor}</td>
                                                             <td>{po.totalPrice}</td>
+                                                            {
+                                                                po.status === 'Approved' ?
+                                                                    <td className='font-medium text-green-700'>{po.status}</td> :
+                                                                    <td>{po.status}</td>
+                                                            }
+
                                                         </tr>
                                                     )
                                                 })
@@ -374,7 +465,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                 <div className='text-sm text-red-600 italic'>No RFQ details found! <span className='text-black'>(Select vendor to continue.)</span></div> :
                                                 <select
                                                     value={formData.rfq}
-                                                    onChange={handleInputChange}
+                                                    onChange={handleRFQInputChange}
                                                     className='p-1 outline-none' name="rfq">
                                                     <option value="" disabled>Select an option</option>
                                                     {vendorRFQs && vendorRFQs.map((rfq) => (
@@ -405,12 +496,6 @@ const PO = ({ fetchAllProductsMain }) => {
                                 </form>
                                 {
                                     (formData.rfq && vendorRFQs.length != 0) && <div className="w-full flex flex-col items-center gap-4">
-                                        <div className="w-full flex items-center justify-end">
-                                            <button onClick={(e) => handleContinue(e, formData.rfq)}
-                                                className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                Continue
-                                            </button>
-                                        </div>
                                         {
                                             isClicked && <div className="w-full flex items-center justify-center">
                                                 {
@@ -494,7 +579,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                 <div className="w-full flex items-center justify-end text-black text-lg font-medium">
                                                                     Total amount: {totalPrice}
                                                                 </div>
-                                                                <div className="w-full flex items-center justify-start">
+                                                                <div className="w-full flex items-center justify-end">
                                                                     {
                                                                         saveLoader ?
                                                                             <div className='flex items-center justify-center m-4'>
@@ -535,6 +620,10 @@ const PO = ({ fetchAllProductsMain }) => {
                                 </div>
                                 :
                                 <div className="w-full flex flex-col items-center gap-4">
+                                    <div className="w-full flex flex-col items-center text-black">
+                                        <div className="w-full text-left font-semibold">PO Id: <span className='font-normal'>{poDetails.poId}</span></div>
+                                        <div className="w-full text-left font-semibold">Vendor: <span className='font-normal'>{poDetails.vendor}</span></div>
+                                    </div>
                                     <div className="w-full flex items-start justify-start max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
                                         <table className='w-full border-collapse mt-4'>
                                             <thead>
@@ -622,21 +711,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const today = new Date().toISOString().split('T')[0];
 
-    const [add, setAdd] = useState(false);
-    const handleAddNew = () => {
-        setFormData(
-            {
-                rfqId: '',
-                projectId: address.id,
-                vendor: '',
-                curr: '',
-                deadline: ''
-            }
-        );
-        setZeroQty(false);
-        setSelectedProducts([]);
-        setAdd(curr => !curr)
-    };
+    const [selectedProducts, setSelectedProducts] = useState([]);
 
     const [addPdt, setAddPdt] = useState(false);
     const handleAddPdt = () => { setAddPdt(curr => !curr) };
@@ -704,8 +779,6 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const onlyProducts = products.filter(product => product.type === "Product");
 
-    const [selectedProducts, setSelectedProducts] = useState([]);
-
     const handleCheckboxChange = (product) => {
         setSelectedProducts((prevSelectedProducts) => {
             if (prevSelectedProducts.some(p => p._id === product._id)) {
@@ -726,44 +799,65 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const [saveLoader, setSaveLoader] = useState(false);
 
+    const [add, setAdd] = useState(false);
+
+    const handleAddNew = () => {
+        setFormData(
+            {
+                rfqId: '',
+                projectId: address.id,
+                vendor: '',
+                curr: '',
+                deadline: ''
+            }
+        );
+        setQty({});
+        setZeroQty(false);
+        setSelectedProducts([]);
+        setAdd(curr => !curr)
+    };
+
     const handleSaveRFQ = async () => {
 
         if (!formData.vendor || !formData.curr || !formData.deadline) {
             toast.error("Fill all the mandatory fields!");
             return;
         }
-
-        try {
-            setSaveLoader(true);
-
-            const productQuantities = selectedProducts.map(product => ({
+        else {
+            const productQties = selectedProducts.map(product => ({
                 productId: product._id,
                 qty: qty[product._id] || 0
             }));
 
-            const invalidProducts = productQuantities.filter(item => item.qty <= 0);
+            const invalidProducts = productQties.filter(item => item.qty <= 0);
+
             if (invalidProducts.length > 0) {
                 setZeroQty(true);
                 toast.error("Please provide quantities greater than zero for all selected products!");
                 return;
             }
+            else {
+                try {
+                    setSaveLoader(true);
 
-            const response = await axios.post(`${backendServer}/api/add-rfq`, {
-                rfqId: `RFQ-00${rfqs.length + 1}`,
-                projectId: address.id,
-                vendor: formData.vendor,
-                curr: formData.curr,
-                deadline: formData.deadline,
-                products: productQuantities
-            });
+                    const response = await axios.post(`${backendServer}/api/add-rfq`, {
+                        rfqId: `RFQ-00${rfqs.length + 1}`,
+                        projectId: address.id,
+                        vendor: formData.vendor,
+                        curr: formData.curr,
+                        deadline: formData.deadline,
+                        products: productQties
+                    });
 
-            fetchRFQDetails();
-            fetchAllProductsMain();
-            setAdd(false);
-            setSaveLoader(false);
-            toast.success(response.data.message);
-        } catch (error) {
-            toast.error(error.response?.data?.message || "An error occurred while saving the RFQ.");
+                    fetchRFQDetails();
+                    fetchAllProductsMain();
+                    setAdd(false);
+                    setSaveLoader(false);
+                    toast.success(response.data.message);
+                } catch (error) {
+                    toast.error(error.response?.data?.message || "An error occurred while saving the RFQ.");
+                }
+            }
         }
     };
 
@@ -818,6 +912,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const [currentRFQId, setCurrentRFQId] = useState(null);
 
+    const [rfqDetails, setRFQDetails] = useState({
+        id: '', vendor: ''
+    })
+
     const fetchAddedRFQPdts = async (_id) => {
         try {
             const response = await axios.get(`${backendServer}/api/getRFQPdts/${_id}`, {
@@ -826,6 +924,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
             setReqRFQPdts(response.data.products);
             setRfqCurr(response.data.curr);
             setRfqCurrPdts(response.data.rfqPdts);
+            setRFQDetails({
+                id: response.data.rfqId,
+                vendor: response.data.vendor
+            })
             setRrLoading(false);
         } catch (error) {
             setRrError(error.response.data.message);
@@ -837,15 +939,23 @@ const RFQ = ({ fetchAllProductsMain }) => {
         setViewRFQ(false);
         setPrices({});
         setReqRFQPdts([]);
+        setRFQDetails({
+            id: '', vendor: ''
+        });
         setRrOpen(curr => !curr);
         fetchAddedRFQPdts(_id);
         setCurrentRFQId(_id);
+        setZeroPrice(false);
     };
 
     const handleViewRFQ = (_id) => {
         setViewRFQ(true);
+        setRrLoading(true);
         setRfqCurr(null);
         setRfqCurrPdts([]);
+        setRFQDetails({
+            id: '', vendor: ''
+        });
         setRrOpen(curr => !curr);
         fetchAddedRFQPdts(_id);
         setCurrentRFQId(_id);
@@ -861,6 +971,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
         }));
     };
 
+    const [zeroPrice, setZeroPrice] = useState(false);
+
     const handleReceiveRFQ = async () => {
         try {
             const productPrices = reqRFQPdts.map(product => ({
@@ -871,6 +983,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
             const allPricesValid = productPrices.every(item => item.price > 0);
 
             if (!allPricesValid || productPrices.length === 0) {
+                setZeroPrice(true);
                 toast.error('All product prices must be greater than 0.');
                 return;
             }
@@ -885,6 +998,87 @@ const RFQ = ({ fetchAllProductsMain }) => {
         } catch (error) {
             toast.error('Failed to update prices. Please try again.');
             console.error(error);
+        }
+    };
+
+    // Download RFQ
+
+    const flattenData = (data) => {
+        return data.map(item => ({
+            RFQ_No: item.orgRFQId,
+            RFQ_Deadline: item.orgDeadline,
+            Vendor: item.orgVendor,
+            Currency_unit: item.orgCurrUnit,
+            RFQ_Status: item.orgPOStatus,
+            Title: item.title,
+            Item_Code: item.productDetails.code,
+            Description: item.desc,
+            Measuring_unit: item.productDetails.unit,
+            Length: item.productDetails.len ? item.productDetails.len.toString() : '',
+            Width: item.productDetails.wid ? item.productDetails.wid.toString() : '',
+            Diameter: item.productDetails.dia ? item.productDetails.dia.toString() : '',
+            Color: item.productDetails.color,
+            Material: item.productDetails.material,
+            Insert: item.productDetails.insert,
+            Finish: item.productDetails.finish,
+            Item_status: item.status,
+            Quantity: item.qty ? item.qty.toString() : '',
+            Item_price: item.price ? item.price.toString() : '',
+        }));
+    };
+
+    // const handleDownload = async (id) => {
+    //     try {
+
+    //         const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
+    //             headers: { Authorization: `Bearer ${token}` },
+    //         });
+
+    //         const flattenedData = flattenData(response.data);
+
+    //         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+    //         const workbook = XLSX.utils.book_new();
+    //         XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    //         XLSX.writeFile(workbook, 'RFQ_Details.xlsx');
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
+
+    const handleDownload = async (id, name) => {
+        try {
+            const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const flattenedData = flattenData(response.data);
+
+            const doc = new jsPDF();
+
+            doc.setFontSize(12);
+
+            flattenedData.forEach((item, index) => {
+                if (index > 0) {
+                  doc.addPage();
+                }
+        
+                const x = 10;
+                let y = 20; 
+        
+                Object.keys(item).forEach((key) => {
+                  doc.setFont('helvetica', 'bold');
+                  doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
+                  const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
+                  doc.setFont('helvetica', 'normal');
+                  doc.text(item[key], x + keyWidth, y);
+                  y += 10;
+                });
+            });
+
+            doc.save(`RFQ_Details_${name}.pdf`);
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -955,7 +1149,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                            <button className='w-full text-left'>Download RFQ</button>
+                                                                            <button onClick={() => handleDownload(rfq._id, rfq.rfqId)}
+                                                                                className='w-full text-left'>Download RFQ</button>
 
                                                                         </div>
                                                                     }
@@ -1015,6 +1210,12 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                 <div className="w-full flex flex-col items-center gap-4">
                                     <div className="w-full flex flex-col items-center gap-4 max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
                                         {
+                                            viewRFQ && <div className="w-full flex flex-col items-center">
+                                                <div className="w-full text-left font-semibold">RFQ Id: <span className='font-normal'>{rfqDetails.id}</span></div>
+                                                <div className="w-full text-left font-semibold">Vendor: <span className='font-normal'>{rfqDetails.vendor}</span></div>
+                                            </div>
+                                        }
+                                        {
                                             reqRFQPdts.map(pdt => {
                                                 return (
                                                     <div key={pdt._id} className="w-full flex items-start justify-center bg-[#F8F9FD] p-2 rounded-lg gap-4">
@@ -1068,7 +1269,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                                     <div className="w-full text-left font-semibold">Price</div>
                                                                     <input value={prices[pdt._id] || ''} onChange={(e) => handlePriceChange(e, pdt._id)}
                                                                         placeholder={`In ${rfqCurr}`}
-                                                                        className='w-full p-1.5 outline-none'
+                                                                        className={`w-full p-1.5 outline-none ${prices[pdt._id] <= 0 ? 'border border-solid border-red-600' : 'border-none'}`}
                                                                         type="number" min="1" name="" />
                                                                 </div>
                                                         }
@@ -1077,6 +1278,9 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                             })
                                         }
                                     </div>
+                                    {
+                                        zeroPrice && <div className="w-full text-left text-xs text-red-600 italic -my-2">All product prices must be greater than 0.</div>
+                                    }
                                     {
                                         !viewRFQ ?
                                             <div className="w-full flex items-center justify-end my-1">
