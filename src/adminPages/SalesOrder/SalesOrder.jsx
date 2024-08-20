@@ -95,16 +95,7 @@ const SalesOrder = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'client') {
-            const [code, clientName] = value.split('|');
-            setFormData({
-                ...formData,
-                clientCode: code,
-                clientName: clientName,
-            });
-        } else {
-            setFormData((prevData) => ({ ...prevData, [name]: value }));
-        }
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
@@ -395,7 +386,7 @@ const SalesOrder = () => {
 
                                                             <button onClick={() => progressButtonClick(pdt._id, "In progress")}
                                                                 disabled={pdt.progress === "In progress" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Initiate</button>
+                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Initiate Project</button>
 
                                                             <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 

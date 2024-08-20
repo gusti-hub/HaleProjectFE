@@ -22,7 +22,7 @@ const Equipment = ({formData, handleInputChange}) => {
                         <label htmlFor="equipment_len">L:</label>
                         <input value={formData.equipment_len} onChange={handleInputChange}
                             className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                            type="number" name='equipment_en' placeholder='Length' maxLength="5" />
+                            type="number" name='equipment_len' placeholder='Length' maxLength="5" />
                     </div>
                     <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                         <label htmlFor="equipment_wid">W:</label>

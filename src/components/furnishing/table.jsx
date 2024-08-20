@@ -16,26 +16,27 @@ const Table = ({formData, handleInputChange}) => {
                     </select>
                 </div>
             </div>
-            <div className="w-full flex items-center justify-center gap-4">
-                <div className="w-full flex items-center justify-start gap-2">
-                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                        <label htmlFor="table_len">L:</label>
-                        <input value={formData.table_len} onChange={handleInputChange}
-                            className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                            type="number" name='table_len' placeholder='Length' maxLength="5" />
-                    </div>
-                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                        <label htmlFor="table_wid">W:</label>
-                        <input value={formData.table_wid} onChange={handleInputChange}
-                            className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                            type="number" name='table_wid' placeholder='Width' maxLength="5" />
-                    </div>
-                    <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                        <label htmlFor="table_height">H:</label>
-                        <input value={formData.table_height} onChange={handleInputChange}
-                            className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                            type="number" name='table_height' placeholder='Height' maxLength="5" />
-                    </div>
+                <div className="w-full flex items-center justify-center gap-4">
+                    <div className="w-full flex items-center justify-start gap-2">
+                        <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                            <label htmlFor="table_len">L:</label>
+                            <input value={formData.table_len} onChange={handleInputChange}
+                                className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                                type="number" name='table_len' placeholder='Length' maxLength="5" />
+                        </div>
+                        <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                            <label htmlFor="table_wid">W:</label>
+                            <input value={formData.table_wid} onChange={handleInputChange}
+                                className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                                type="number" name='table_wid' placeholder='Width' maxLength="5" />
+                        </div>
+                        <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                            <label htmlFor="table_height">H:</label>
+                            <input value={formData.table_height} onChange={handleInputChange}
+                                className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                                type="number" name='table_height' placeholder='Height' maxLength="5" />
+                        </div>
+                    </div> 
                 </div>
                 <div className="w-full flex items-center justify-center gap-4">
                     <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
@@ -44,8 +45,8 @@ const Table = ({formData, handleInputChange}) => {
                         className='w-full outline-none border border-solid border-gray-500 p-1 rounded-md'
                         name="table_other_dimension" rows="2" maxLength="2500" placeholder='Type here...'></textarea>
                     </div> 
-                </div>  
-                </div><div className="w-full flex items-center justify-center gap-4">
+                </div> 
+                <div className="w-full flex items-center justify-center gap-4">
                     <div className="w-full flex items-center justify-start gap-2">
                         <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                             <label htmlFor="table_top">Top:</label>

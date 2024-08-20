@@ -234,14 +234,9 @@ const Project = () => {
                                                 </div>
                                                 <div className="w-full max-w-[60%] flex items-center justify-start gap-2">
                                                     <label className='text-nowrap' htmlFor="client">Client:</label>
-                                                    <select
-                                                        value={formData.client}
-                                                        onChange={handleInputChange}
-                                                        className='p-1 outline-none' name="client" id="client">
-                                                        {clients.map((client) => (
-                                                            <option key={client.id} value={client.name}>{client.name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <label className='p-1'>
+                                                        {formData.client}
+                                                    </label>
                                                 </div>
                                                 <div className="w-full max-w-[60%] flex items-center justify-start gap-2">
                                                     <div>Status:</div>
@@ -358,6 +353,8 @@ const Project = () => {
                                                             handleClose={handleClose}
                                                             addressID={address.id}
                                                             fetchSections={fetchSections}
+                                                            client={formData.client}
+                                                            ConfigurationType={ConfigurationType}
                                                         />
                                                     ))
                                             }
