@@ -10,7 +10,27 @@ export default class GlobalVariable {
         AuthorizationRoleNavigation: 'Authorization Role Navigation',
         ProcurementNavigation: 'Procurement Navigation',
         InventoryNavigation : 'Inventory Navigation',
-        ConfigurationNavigation : 'Configuration Navigation'
+        ConfigurationNavigation : 'Configuration Navigation',
+        ApproveDesign : 'Approve Design',
+        RejectDesign : 'Reject Design',
+        ApproveProposal : 'Approve Proposal',
+        RejectProposal : 'Reject Proposal',
+        DeleteProject : 'Delete Project'
+    }
+
+    static Progress = {
+        NotStarted: 'Not Started',
+        InProgress: 'In progress',
+        WaitingDesignApproval: 'Waiting For Design Approval',
+        DesignApproved: 'Design Approved',
+        DesignRejected: 'Design Rejected',
+        WaitingProposalApproval: 'Waiting For Proposal Approval',
+        ProposalApproved: 'Proposal Approved',
+        ProposalRejected: 'Proposal Rejected',
+        DownloadProposal: 'Download Proposal',
+        ProjectFunding : 'Project Funding',
+        ProjectImplementation : 'Project Implementation',
+        ProjectCompleted : 'Project Completed'
     }
 
     static ConfigurationType = {

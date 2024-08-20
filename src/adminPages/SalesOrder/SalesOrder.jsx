@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaDownload } from 'react-icons/fa';
 import { IoCloseSharp } from 'react-icons/io5';
 import * as XLSX from 'xlsx';
+import GlobalVariable from '../../utils/GlobalVariable';
 
 const SalesOrder = () => {
 
@@ -252,6 +253,7 @@ const SalesOrder = () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentSales = filteredSales.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
+    const action = localStorage.getItem('action').split(';');
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -382,53 +384,197 @@ const SalesOrder = () => {
                                                                     className='cursor-pointer text-xl' />
                                                         }
                                                         <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[12rem] flex flex-col items-start justify-start gap-1 p-2 fixed bg-white ml-[14rem] -mt-[0.5rem]`}>
+                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[13rem] flex flex-col items-start justify-start gap-1 p-2 fixed bg-white ml-[14rem] -mt-[0.5rem]`}>
 
-                                                            <button onClick={() => progressButtonClick(pdt._id, "In progress")}
-                                                                disabled={pdt.progress === "In progress" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Initiate Project</button>
+                                                            {(pdt.progress == GlobalVariable.Progress.NotStarted && pdt.owner === name) ?                                                         
+                                                                <>
+                                                                    <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.InProgress)}
+                                                                        disabled={pdt.progress != GlobalVariable.Progress.NotStarted}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Initiate Project</button>
+                                                                        <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+                                                                : <></>
+                                                            }
 
-                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                            {(!(pdt.progress == GlobalVariable.Progress.NotStarted) && pdt.owner == name) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => handleInviteMenu(pdt._id)}
+                                                                        disabled={pdt.progress == GlobalVariable.Progress.NotStarted && pdt.owner != name}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Invite User</button>
 
-                                                            <button onClick={() => handleInviteMenu(pdt._id)}
-                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected" || pdt.owner != name}
-                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Invite User</button>
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
 
-                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                : <></>
+                                                            }
 
-                                                            <button onClick={() => progressButtonClick(pdt._id, "Request for Approval")}
-                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "Request for Approval" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Request for Approval</button>
+                                                            {(pdt.progress == GlobalVariable.Progress.InProgress && pdt.owner == name) || ((pdt.progress == GlobalVariable.Progress.DesignRejected && pdt.owner == name)) || ((pdt.progress == GlobalVariable.Progress.ProposalRejected && pdt.owner == name))?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => progressButtonClick(pdt._id, 'Waiting For Design Approval')}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Request for Design Approval</button>
 
-                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
 
-                                                            <button onClick={() => progressButtonClick(pdt._id, "Approved")}
-                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Approve</button>
+                                                                : <></>
+                                                            }
 
-                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
 
-                                                            <button onClick={() => progressButtonClick(pdt._id, "Rejected")}
-                                                                disabled={pdt.progress === "Not Started" || pdt.progress === "In progress" || pdt.progress === "Approved" || pdt.progress === "Rejected"}
-                                                                className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Reject</button>
+                                                            {(pdt.progress == GlobalVariable.Progress.DesignApproved && pdt.owner == name) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.WaitingProposalApproval)}
+                                                                       disabled={pdt.progress != GlobalVariable.Progress.InProgress && pdt.owner != name}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Request for Proposal Approval</button>
 
-                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
 
-                                                            <button onClick={() => handleDownload(pdt._id, pdt.name)}
-                                                                disabled={pdt.progress === "Not Started"}
-                                                                className='w-full text-left font-normal text-nowrap'>Download Summary</button>
+                                                                : <></>
+                                                            }
 
-                                                            <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                            {(pdt.progress == GlobalVariable.Progress.ProposalApproved && pdt.owner == name) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.ProjectFunding)}
+                                                                       disabled={pdt.progress != GlobalVariable.Progress.InProgress && pdt.owner != name}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Update to Project Funding</button>
 
-                                                            <button onClick={() => handleDeleteProject(pdt._id)} disabled={pdt.progress != "Not Started"}
-                                                                className={`w-full text-left font-normal text-nowrap text-red-600 ${pdt.owner === name ? 'block' : 'hidden'}`}>Delete project</button>
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }   
+
+                                                            {(pdt.progress == GlobalVariable.Progress.ProjectFunding && pdt.owner == name) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.ProjectImplementation)}
+                                                                       disabled={pdt.progress != GlobalVariable.Progress.InProgress && pdt.owner != name}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Update to Project Implementation</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }
+
+                                                            {(pdt.progress == GlobalVariable.Progress.ProjectImplementation && pdt.owner == name) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.ProjectCompleted)}
+                                                                       disabled={pdt.progress != GlobalVariable.Progress.InProgress && pdt.owner != name}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Update to Project Completed</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }                                                                 
+
+                                                            {(pdt.progress == GlobalVariable.Progress.WaitingDesignApproval && action.includes(GlobalVariable.ActionRole.ApproveDesign)) ?                                                         
+                                                                <>                                                                
+                                                                        <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.DesignApproved)}
+                                                                        disabled={pdt.progress === GlobalVariable.Progress.NotStarted || pdt.progress === GlobalVariable.Progress.InProgress || pdt.progress === GlobalVariable.Progress.DesignApproved}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Approve Design</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }
+
+                                                            {(pdt.progress == GlobalVariable.Progress.WaitingProposalApproval && action.includes(GlobalVariable.ActionRole.ApproveProposal)) ?                                                         
+                                                                <>                                                                
+                                                                        <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.ProposalApproved)}
+                                                                        disabled={pdt.progress === GlobalVariable.Progress.NotStarted || pdt.progress === GlobalVariable.Progress.InProgress || pdt.progress === GlobalVariable.Progress.ProposalApproved}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Approve Proposal</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }
+
+                                                            {((pdt.progress == GlobalVariable.Progress.WaitingDesignApproval || pdt.progress == GlobalVariable.Progress.WaitingProposalApproval || pdt.progress == GlobalVariable.Progress.DesignApproved || pdt.progress == GlobalVariable.Progress.ProposalApproved || pdt.progress == GlobalVariable.Progress.ProjectFunding || pdt.progress == GlobalVariable.Progress.ProjectImplementation) && action.includes(GlobalVariable.ActionRole.RejectDesign)) ?                                                         
+                                                                <>                                                                
+                                                                        <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.DesignRejected)}
+                                                                        disabled={pdt.progress === GlobalVariable.Progress.NotStarted || pdt.progress === GlobalVariable.Progress.InProgress || pdt.progress === GlobalVariable.Progress.ProjectCompleted}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Reject Design</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }
+
+                                                            {((pdt.progress == GlobalVariable.Progress.WaitingProposalApproval || pdt.progress == GlobalVariable.Progress.ProposalApproved || pdt.progress == GlobalVariable.Progress.ProjectFunding || pdt.progress == GlobalVariable.Progress.ProjectImplementation)) && action.includes(GlobalVariable.ActionRole.RejectProposal) ?                                                         
+                                                                <>                                                                
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                if (pdt.progress == GlobalVariable.Progress.WaitingProposalApproval) {
+                                                                                    progressButtonClick(pdt._id, GlobalVariable.Progress.ProposalRejected);
+                                                                                } else {
+                                                                                    progressButtonClick(pdt._id, GlobalVariable.Progress.DesignRejected);
+                                                                                }
+                                                                            }}
+                                                                        disabled={pdt.progress === GlobalVariable.Progress.NotStarted || pdt.progress === GlobalVariable.Progress.InProgress || pdt.progress === GlobalVariable.Progress.ProjectCompleted}
+                                                                        className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Reject Proposal</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }
+
+                                                            {!(pdt.progress == GlobalVariable.Progress.NotStarted) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => handleDownload(pdt._id, pdt.name)}
+                                                                        disabled={pdt.progress === GlobalVariable.Progress.NotStarted}
+                                                                        className='w-full text-left font-normal text-nowrap'>Download Summary</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }                                                            
+                                                            
+                                                            {(pdt.progress == GlobalVariable.Progress.ProposalApproved) || (pdt.progress == GlobalVariable.Progress.ProjectFunding) || (pdt.progress == GlobalVariable.Progress.ProjectImplementation || pdt.progress === GlobalVariable.Progress.ProjectCompleted) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => handleDownload(pdt._id, pdt.name)}
+                                                                        disabled={pdt.progress === GlobalVariable.Progress.NotStarted}
+                                                                        className='w-full text-left font-normal text-nowrap'>Download Proposal</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }
+
+                                                            {(pdt.progress == GlobalVariable.Progress.ProposalApproved) || (pdt.progress == GlobalVariable.Progress.ProjectFunding) || (pdt.progress == GlobalVariable.Progress.ProjectImplementation || pdt.progress === GlobalVariable.Progress.ProjectCompleted) ?                                                         
+                                                                <>                                                                
+                                                                    <button onClick={() => handleDownload(pdt._id, pdt.name)}
+                                                                        disabled={pdt.progress === GlobalVariable.Progress.NotStarted}
+                                                                        className='w-full text-left font-normal text-nowrap'>Download Invoice</button>
+
+                                                                    <div className={`w-full h-[2px] bg-gray-300 ${pdt.owner === name ? 'block' : 'hidden'}`}></div>
+                                                                </>
+
+                                                                : <></>
+                                                            }
+
+                                                            {(pdt.progress == GlobalVariable.Progress.NotStarted || action.includes(GlobalVariable.ActionRole.DeleteProject)) ?                                                         
+                                                                <>                                                                
+
+                                                                    <button onClick={() => handleDeleteProject(pdt._id)} disabled={pdt.progress != GlobalVariable.Progress.NotStarted}
+                                                                        className={`w-full text-left font-normal text-nowrap text-red-600 ${pdt.owner === name ? 'block' : 'hidden'}`}>Delete project</button>
+                                                                </>
+
+                                                                : <></>
+                                                            }                                                               
 
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     {
-                                                        pdt.progress === "Not Started" ?
+                                                        pdt.progress === GlobalVariable.Progress.NotStarted ?
                                                             <div className=''>{pdt._id}</div> :
                                                             <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
                                                                 {pdt._id}
@@ -441,16 +587,31 @@ const SalesOrder = () => {
                                                 <td>{pdt.client.split('-')[1]}</td>
                                                 <td>
                                                     {
-                                                        pdt.progress === "Not Started" ?
+                                                        pdt.progress === GlobalVariable.Progress.NotStarted ?
                                                             <div className='p-1 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                            pdt.progress === "In progress" ?
-                                                                <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                pdt.progress === "Request for Approval" ?
-                                                                    <div className='p-1 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                    pdt.progress === "Approved" ?
-                                                                        <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                        pdt.progress === "Rejected" ?
-                                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> : ""
+                                                        pdt.progress === GlobalVariable.Progress.InProgress ?
+                                                            <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.WaitingDesignApproval ?
+                                                            <div className='p-1 bg-yellow-50 text-yellow-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.DesignApproved ?
+                                                            <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.DesignRejected ?
+                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.WaitingProposalApproval ?
+                                                            <div className='p-1 bg-yellow-50 text-yellow-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProposalApproved ?
+                                                            <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProposalRejected ?
+                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.DownloadProposal ?
+                                                            <div className='p-1 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProjectFunding ?
+                                                            <div className='p-1 bg-purple-50 text-purple-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProjectImplementation ?
+                                                            <div className='p-1 bg-teal-50 text-teal-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProjectCompleted ?
+                                                            <div className='p-1 bg-green-100 text-green-800 rounded-3xl font-medium'>{pdt.progress}</div> : 
+                                                        ""
                                                     }
                                                 </td>
                                                 <td>{pdt.createdAt.split('T')[0]}</td>
