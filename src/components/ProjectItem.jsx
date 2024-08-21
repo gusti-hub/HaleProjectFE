@@ -60,7 +60,7 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isEditMode ? (formData.title.length === 0 || formData.desc.length === 0) : (formData.title.length === 0 || formData.desc.length === 0 || !selectedFile)) {
+        if (formData.title.length === 0 || formData.desc.length === 0 || (!isEditMode && !selectedFile)) {
             toast.error("Fill the mandatory fields!");
             handleClose();
         } else {
@@ -226,7 +226,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isEditMode ? (formData.name.length === 0 || formData.code.length === 0) : (formData.name.length === 0 || formData.code.length === 0 || !selectedFile)) {
+        if (formData.name.length === 0 || formData.code.length === 0 || (!isEditMode && !selectedFile)) {
             toast.error("Fill the mandatory fields");
             handleClose();
         } else {

@@ -73,15 +73,18 @@ const Procurement = () => {
         <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
             <div className="w-full text-left text-gray-900 text-2xl font-medium">Procurement</div>
             <div className="w-full h-[2px] bg-gray-300"></div>
-            <div className="w-full flex items-center justify-end">
-                <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
-                    <FiSearch className='text-xl text-gray-600 ml-2' />
-                    <input value={searchQuery} onChange={handleSearchChange}
-                        className='w-[18rem] outline-none p-2 mr-1 text-gray-600'
-                        type="search" placeholder='Search by name'
-                    />
+            {
+                sales.length != 0 &&
+                <div className="w-full flex items-center justify-end">
+                    <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
+                        <FiSearch className='text-xl text-gray-600 ml-2' />
+                        <input value={searchQuery} onChange={handleSearchChange}
+                            className='w-[18rem] outline-none p-2 mr-1 text-gray-600'
+                            type="search" placeholder='Search by name'
+                        />
+                    </div>
                 </div>
-            </div>
+            }
             {
                 filteredSales.length === 0 ?
                     <div className="w-full flex items-center justify-start text-lg font-medium mt-4">

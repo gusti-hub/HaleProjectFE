@@ -13,6 +13,7 @@ import SalesOrder from '../adminPages/SalesOrder/SalesOrder';
 import { RiShieldUserLine, RiUserSettingsLine } from 'react-icons/ri';
 import { GrBusinessService } from 'react-icons/gr';
 import Procurement from '../adminPages/Procurement/Procurement';
+import Inventory from '../adminPages/Inventory/Inventory';
 
 const AdminPanel = () => {
 
@@ -122,7 +123,9 @@ const AdminPanel = () => {
                                 : menuID === 3 ? <UserRegistration />
                                     : menuID === 4 ? <VendorRegistration />
                                         : menuID === 5 ? <ClientRegistration />
-                                            : menuID === 7 ? <Procurement /> : ""
+                                            : menuID === 6 ? ''
+                                                : menuID === 7 ? <Procurement />
+                                                    : menuID === 8 ? <Inventory /> : ''
                     }
                 </div>
             </div>

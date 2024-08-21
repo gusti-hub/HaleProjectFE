@@ -61,12 +61,24 @@ const PO = ({ fetchAllProductsMain }) => {
         setClicked(false);
     }
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(5);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const current = pos.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(pos.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
     const fetchPODetails = async () => {
         try {
             const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setPos(response.data.allPOs);
+            setPos(response.data.allPOs.filter(po => po.isBackOrder === false));
             setLoading(false);
         } catch (error) {
             setError(error.response.data.message);
@@ -214,18 +226,6 @@ const PO = ({ fetchAllProductsMain }) => {
         fetchRFQDetails();
     }, []);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
-
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const current = pos.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(pos.length / itemsPerPage);
-
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
-
     const [viewPO, setViewPO] = useState(false);
 
     const [poDetails, setPODetails] = useState({
@@ -296,7 +296,7 @@ const PO = ({ fetchAllProductsMain }) => {
         }
     };
 
-    if (rfqs.length != 0 && receivedRFQs.length === 0) {
+    if (rfqs.length === 0 || receivedRFQs.length === 0) {
         return (
             <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
                 <div className="w-full text-left font-medium text-black">No Received RFQ found!</div>
@@ -365,13 +365,13 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                             className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
 
                                                                             {
-                                                                                po.status === 'Waiting for approval' &&
+                                                                                po.status != 'Approved' &&
                                                                                 <button onClick={() => approvePO(po._id)}
                                                                                     className='w-full text-left'>Approve PO</button>
                                                                             }
 
                                                                             {
-                                                                                po.status === 'Waiting for approval' && <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                                po.status != 'Approved' && <div className="w-full h-[2px] bg-gray-300"></div>
                                                                             }
 
                                                                             <button onClick={() => viewPODetails(po.poId, po.rfq, po.vendor)}

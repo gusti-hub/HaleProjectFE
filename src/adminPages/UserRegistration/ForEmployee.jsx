@@ -43,7 +43,7 @@ const ForEmployee = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-    
+
         if (!value.includes(' ')) {
             setFormData((prevData) => ({
                 ...prevData,
@@ -291,15 +291,17 @@ const ForEmployee = () => {
                 </form>
             </Dialog>
             <div className="w-full flex items-center justify-between">
-                <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
-                    <FiSearch className='text-xl text-gray-600 ml-2' />
-                    <input
-                        className='outline-none p-2 mr-1 text-gray-600'
-                        type="search" placeholder='Search by name'
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                    />
-                </div>
+                {
+                    users.length != 0 ?
+                        <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
+                            <FiSearch className='text-xl text-gray-600 ml-2' />
+                            <input
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                className='outline-none p-2 mr-1 text-gray-600'
+                                type="search" placeholder='Search by name' />
+                        </div> : <div></div>
+                }
                 <button onClick={handleOpen}
                     className='flex items-center justify-center gap-3 px-5 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
                     <IoPersonAdd className='text-base' />
