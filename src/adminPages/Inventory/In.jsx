@@ -96,6 +96,8 @@ const In = () => {
 
     const [zeroError, setZeroError] = useState(false);
 
+    const [isBackOrder, setIsBackOrder] = useState(false);
+
     const handleRecModal = () => { setRecLoader(true); setRecError(null); setRecModal(curr => !curr); resetRecModal(); };
 
     const handleViewModal = () => { setRecLoader(true); setRecError(null); setViewModal(curr => !curr); resetViewModal(); };
@@ -151,7 +153,9 @@ const In = () => {
 
     const fetchViewModalData = async (id, docNumber) => {
         try {
-            const response = await axios.get(`${backendServer}/api/viewDoc/${id}/${docNumber}`);
+            const response = await axios.get(`${backendServer}/api/viewDoc/${id}/${docNumber}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setCurrPOView(response.data.currPO);
             setViewPdtArray(response.data.doc);
             setRecLoader(false);
@@ -161,7 +165,20 @@ const In = () => {
         }
     }
 
+    const fetchBackOrderPOProducts = async (id) => {
+        try {
+            const response = await axios.get(`${backendServer}/api/invBackOrderPO/${id}`);
+            setCurrPO(response.data.poDetails);
+            setPdtArray(response.data.response);
+            setRecLoader(false);
+        } catch (error) {
+            setRecError(error.response.data.message);
+            setRecLoader(false);
+        }
+    }
+
     const recDoc = (id) => {
+        setIsBackOrder(false);
         handleRecModal();
         fetchPOProducts(id);
     }
@@ -169,6 +186,12 @@ const In = () => {
     const viewDoc = (id, docNumber) => {
         handleViewModal();
         fetchViewModalData(id, docNumber);
+    };
+
+    const recBackOrderDoc = (id) => {
+        setIsBackOrder(true);
+        handleRecModal();
+        fetchBackOrderPOProducts(id);
     };
 
     const updateProductsArray = (products) => {
@@ -214,12 +237,20 @@ const In = () => {
                 setZeroError(true);
                 toast.error("Cannot update: Quantity cannot be less than or equals to zero!");
             } else {
-                const response = await axios.put(`${backendServer}/api/update-rec-qty/${currPO._id}`,
-                    {
-                        docNumber: `IN-00${allDocs.length + 1}`,
-                        products: updatedProducts,
-                        status: "Done"
-                    });
+                const response = isBackOrder ?
+                    await axios.put(`${backendServer}/api/update-recBackOrder-qty/${currPO._id}`,
+                        {
+                            products: updatedProducts,
+                            status: "Done"
+                        })
+                    :
+                    await axios.put(`${backendServer}/api/update-rec-qty/${currPO._id}`,
+                        {
+                            docNumber: `IN-00${allDocs.length + 1}`,
+                            products: updatedProducts,
+                            status: "Done"
+                        });
+
 
                 if (backOrderProduct.length > 0) {
                     await createBackOrder(response.data.docDetails.poId, response.data.docDetails.pdts);
@@ -322,8 +353,9 @@ const In = () => {
                                                                                                 <button onClick={() => viewDoc(po._id, po.docNumber)}
                                                                                                     className='w-full text-left'>View Document</button> :
                                                                                                 po.inStatus === 'Back Order' ?
-                                                                                                    <button
-                                                                                                        className='w-full text-left'>Receive Back Order</button> :
+                                                                                                    <button onClick={() => recBackOrderDoc(po._id)}
+                                                                                                        className='w-full text-left'>Receive Back Order</button>
+                                                                                                    :
                                                                                                     <button onClick={() => recDoc(po._id)}
                                                                                                         className='w-full text-left'>Receive Product</button>
                                                                                         }
