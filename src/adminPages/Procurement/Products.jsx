@@ -182,7 +182,7 @@ const PO = ({ fetchAllProductsMain }) => {
 
         setSaveLoader(true);
 
-        if (formData.vendor && formData.rfq && formData.delivery && formData.receive && totalPrice) {
+        if (formData.vendor.length != 0 && formData.rfq.length != 0 && formData.delivery.length != 0 && formData.receive.length != 0 && totalPrice) {
             try {
                 const pdtsIds = pdts.map(pdt => ({ productId: String(pdt._id) }));
 
@@ -204,9 +204,11 @@ const PO = ({ fetchAllProductsMain }) => {
                 toast.success(response.data.message);
             } catch (error) {
                 toast.error(error.response.data.message);
+                setSaveLoader(false);
             }
         } else {
             toast.error("Fill all the mandatory fields!");
+            setSaveLoader(false);
         }
     };
 
@@ -362,7 +364,7 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                     {
                                                                         menuOpen === po._id &&
                                                                         <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
+                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-[5rem] gap-2">
 
                                                                             {
                                                                                 po.status != 'Approved' &&
@@ -959,6 +961,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
         setRrOpen(curr => !curr);
         fetchAddedRFQPdts(_id);
         setCurrentRFQId(_id);
+        setZeroPrice(false);
     };
 
     const [prices, setPrices] = useState({});

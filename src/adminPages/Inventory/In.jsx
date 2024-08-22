@@ -167,7 +167,9 @@ const In = () => {
 
     const fetchBackOrderPOProducts = async (id) => {
         try {
-            const response = await axios.get(`${backendServer}/api/invBackOrderPO/${id}`);
+            const response = await axios.get(`${backendServer}/api/invBackOrderPO/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setCurrPO(response.data.poDetails);
             setPdtArray(response.data.response);
             setRecLoader(false);

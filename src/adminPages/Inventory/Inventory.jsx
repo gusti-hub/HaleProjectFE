@@ -22,7 +22,7 @@ const Inventory = () => {
             const response = await axios.get(`${backendServer}/api/allpdts`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setAllPdts(response.data);
+            setAllPdts(response.data.filter(pdt => pdt.type === "Product"));
             setLoading(false);
         } catch (error) {
             setError(error.response.data.message);
@@ -103,7 +103,6 @@ const Inventory = () => {
                                     <th>Product ID</th>
                                     <th>Product Name</th>
                                     <th>Project ID</th>
-                                    <th>Vendor</th>
                                     <th>Quantity</th>
                                     <th>Buy Price</th>
                                     <th>Sell Price</th>
@@ -118,8 +117,7 @@ const Inventory = () => {
                                                 <td>{pdt.productDetails.code ? pdt.productDetails.code : null}</td>
                                                 <td>{pdt.title ? pdt.title : null}</td>
                                                 <td>{pdt.projectId ? pdt.projectId : null}</td>
-                                                <td></td>
-                                                <td></td>
+                                                <td>{pdt.totalRecQty}</td>
                                                 <td></td>
                                                 <td></td>
                                             </tr>
