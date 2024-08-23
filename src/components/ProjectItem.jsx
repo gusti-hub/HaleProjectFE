@@ -2151,6 +2151,15 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                         </div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                                         <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
+                                                        {
+                                                            pdt.status === GlobalVariable.ProductStatus.WaitingForClientApproval ?
+                                                                <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{pdt.status}</div> :
+                                                            pdt.status === GlobalVariable.ProductStatus.ClientApproved ?
+                                                                <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.status}</div> :
+                                                            pdt.status === GlobalVariable.ProductStatus.ClientRejected ?
+                                                                <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.status}</div> :
+                                                            ""
+                                                        }
                                                     </div>
 
                                                     <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">

@@ -33,6 +33,12 @@ export default class GlobalVariable {
         ProjectCompleted : 'Project Completed'
     }
 
+    static ProductStatus = {
+        WaitingForClientApproval: 'Waiting For Client Approval',
+        ClientApproved: 'Client Approved',
+        ClientRejected: 'Client Rejected',
+    }
+
     static ConfigurationType = {
         Unit: 'Unit',
         Furnishing: 'Furnishing',

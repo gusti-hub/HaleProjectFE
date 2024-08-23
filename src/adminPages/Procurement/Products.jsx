@@ -1192,35 +1192,32 @@ const RFQ = ({ fetchAllProductsMain }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            console.log(response.data)
-            const newPrd = new Product(response.data);
-            console.log(newPrd);
-
             const flattenedData = flattenData(response.data);
+            generatePDF();
+            
+            // const doc = new jsPDF();
 
-            const doc = new jsPDF();
+            // doc.setFontSize(12);
 
-            doc.setFontSize(12);
-
-            flattenedData.forEach((item, index) => {
-                if (index > 0) {
-                  doc.addPage();
-                }
+            // flattenedData.forEach((item, index) => {
+            //     if (index > 0) {
+            //       doc.addPage();
+            //     }
         
-                const x = 10;
-                let y = 20; 
+            //     const x = 10;
+            //     let y = 20; 
         
-                Object.keys(item).forEach((key) => {
-                  doc.setFont('helvetica', 'bold');
-                  doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
-                  const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
-                  doc.setFont('helvetica', 'normal');
-                  doc.text(item[key], x + keyWidth, y);
-                  y += 10;
-                });
-            });
+            //     Object.keys(item).forEach((key) => {
+            //       doc.setFont('helvetica', 'bold');
+            //       doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
+            //       const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
+            //       doc.setFont('helvetica', 'normal');
+            //       doc.text(item[key], x + keyWidth, y);
+            //       y += 10;
+            //     });
+            // });
 
-            doc.save(`RFQ_Details_${name}.pdf`);
+            // doc.save(`RFQ_Details_${name}.pdf`);
         } catch (error) {
             console.log(error);
         }
@@ -1240,33 +1237,40 @@ const RFQ = ({ fetchAllProductsMain }) => {
         // Subtitle and Date
         doc.setFontSize(12);
         doc.setTextColor(0);
-        doc.text('RFD - Fireplaces - Stone Sinks and Carved Accent Panels', marginLeft, startY + 60);
+        doc.text('RFQ 001', marginLeft, startY + 60);
         doc.text('05.24.24', marginLeft, startY + 75);
     
         // Scope
         doc.setFontSize(14);
         doc.setTextColor(0);
         doc.text('Proposed/Requested Scope:', marginLeft, startY + 100);
-        doc.text('Wall dimensions to be verified', marginLeft, startY + 120);
+        // doc.text('Wall dimensions to be verified', marginLeft, startY + 120);
+
+        // Footer
+        const footerY = doc.internal.pageSize.getHeight() - 40;
+        doc.setFontSize(10);
+        doc.setTextColor(128);
+        doc.text('Henderson | Kahala Coast | San Francisco', doc.internal.pageSize.getWidth() / 2, footerY, { align: 'center' });
+        doc.text('(808) 515-1212 | henderson@henderson.house | henderson.house', doc.internal.pageSize.getWidth() / 2, footerY + 10, { align: 'center' });
+
+        // // Section Heading
+        // doc.setFontSize(16);
+        // doc.setTextColor(0);
+        // doc.text('Primary Bathroom', marginLeft, startY + 150);
     
-        // Section Heading
-        doc.setFontSize(16);
-        doc.setTextColor(0);
-        doc.text('Primary Bathroom', marginLeft, startY + 150);
+        // // First Diagram
+        // doc.setDrawColor(0);
+        // doc.setLineWidth(1);
+        // doc.line(marginLeft, startY + 170, doc.internal.pageSize.getWidth() - marginLeft, startY + 170);
+        // doc.text('1. Highlighted Stone Sinks + Countertop - Qty 2 (1 on either side of bathroom)', marginLeft, startY + 190);
+        // doc.text('Counter Size: 4\'11.5" L x 2\'7.5" D x TBD H', marginLeft, startY + 210);
     
-        // First Diagram
-        doc.setDrawColor(0);
-        doc.setLineWidth(1);
-        doc.line(marginLeft, startY + 170, doc.internal.pageSize.getWidth() - marginLeft, startY + 170);
-        doc.text('1. Highlighted Stone Sinks + Countertop - Qty 2 (1 on either side of bathroom)', marginLeft, startY + 190);
-        doc.text('Counter Size: 4\'11.5" L x 2\'7.5" D x TBD H', marginLeft, startY + 210);
+        // // Insert Image or Diagram (replace 'image.png' with the path to your image)
+        // //doc.addImage('/path/to/your/image.png', 'PNG', marginLeft, startY + 220, 200, 150);
     
-        // Insert Image or Diagram (replace 'image.png' with the path to your image)
-        //doc.addImage('/path/to/your/image.png', 'PNG', marginLeft, startY + 220, 200, 150);
-    
-        // Second Diagram
-        doc.text('2. Accent Stone Panel Inset at Bath - Qty 1', marginLeft, startY + 400);
-        doc.text('Panel Size: approx. 30"W x 59"H x TBD thickness', marginLeft, startY + 420);
+        // // Second Diagram
+        // doc.text('2. Accent Stone Panel Inset at Bath - Qty 1', marginLeft, startY + 400);
+        // doc.text('Panel Size: approx. 30"W x 59"H x TBD thickness', marginLeft, startY + 420);
         // Add second image if necessary
     
         // Add second page with the floor plan image
@@ -1280,7 +1284,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
         //doc.addImage('/path/to/your/floor-plan.png', 'PNG', marginLeft, startY + 50, 500, 500);
     
         // Footer
-        const footerY = doc.internal.pageSize.getHeight() - 40;
+        //const footerY = doc.internal.pageSize.getHeight() - 40;
         doc.setFontSize(10);
         doc.setTextColor(128);
         doc.text('Henderson | Kahala Coast | San Francisco', doc.internal.pageSize.getWidth() / 2, footerY, { align: 'center' });

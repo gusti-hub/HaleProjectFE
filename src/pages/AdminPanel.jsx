@@ -161,8 +161,9 @@ const AdminPanel = () => {
                                         : menuID === 5 ? <ClientRegistration />
                                             : menuID === 6 ? <RoleAuthorization />
                                                 : menuID === 7 ? <Procurement />
-                                                    : menuID === 9 ? <RoleRegistration />
-                                                        : menuID === 10 ? <Configurations /> : ""
+                                                    : menuID === 8 ? <Inventory />
+                                                        : menuID === 9 ? <RoleRegistration />
+                                                            : menuID === 10 ? <Configurations /> : ""
                     }
                 </div>
             </div>
