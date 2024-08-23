@@ -77,12 +77,24 @@ const PO = ({ fetchAllProductsMain }) => {
         setClicked(false);
     }
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(5);
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const current = pos.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(pos.length / itemsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
     const fetchPODetails = async () => {
         try {
             const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setPos(response.data.allPOs);
+            setPos(response.data.allPOs.filter(po => po.isBackOrder === false));
             setLoading(false);
         } catch (error) {
             setError(error.response.data.message);
@@ -186,7 +198,7 @@ const PO = ({ fetchAllProductsMain }) => {
 
         setSaveLoader(true);
 
-        if (formData.vendor && formData.rfq && formData.delivery && formData.receive && totalPrice) {
+        if (formData.vendor.length != 0 && formData.rfq.length != 0 && formData.delivery.length != 0 && formData.receive.length != 0 && totalPrice) {
             try {
                 const pdtsIds = pdts.map(pdt => ({ productId: String(pdt._id) }));
 
@@ -208,9 +220,11 @@ const PO = ({ fetchAllProductsMain }) => {
                 toast.success(response.data.message);
             } catch (error) {
                 toast.error(error.response.data.message);
+                setSaveLoader(false);
             }
         } else {
             toast.error("Fill all the mandatory fields!");
+            setSaveLoader(false);
         }
     };
 
@@ -229,18 +243,6 @@ const PO = ({ fetchAllProductsMain }) => {
         fetchVendorsNames();
         fetchRFQDetails();
     }, []);
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
-
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const current = pos.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(pos.length / itemsPerPage);
-
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
 
     const [viewPO, setViewPO] = useState(false);
 
@@ -312,7 +314,7 @@ const PO = ({ fetchAllProductsMain }) => {
         }
     };
 
-    if (rfqs.length != 0 && receivedRFQs.length === 0) {
+    if (rfqs.length === 0 || receivedRFQs.length === 0) {
         return (
             <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
                 <div className="w-full text-left font-medium text-black">No Received RFQ found!</div>
@@ -378,16 +380,16 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                     {
                                                                         menuOpen === po._id &&
                                                                         <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
+                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-[5rem] gap-2">
 
                                                                             {
-                                                                                po.status === 'Waiting for approval' &&
+                                                                                po.status != 'Approved' &&
                                                                                 <button onClick={() => approvePO(po._id)}
                                                                                     className='w-full text-left'>Approve PO</button>
                                                                             }
 
                                                                             {
-                                                                                po.status === 'Waiting for approval' && <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                                po.status != 'Approved' && <div className="w-full h-[2px] bg-gray-300"></div>
                                                                             }
 
                                                                             <button onClick={() => viewPODetails(po.poId, po.rfq, po.vendor)}
@@ -966,6 +968,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
         setRrOpen(curr => !curr);
         fetchAddedRFQPdts(_id);
         setCurrentRFQId(_id);
+        setZeroPrice(false);
     };
 
     const [prices, setPrices] = useState({});

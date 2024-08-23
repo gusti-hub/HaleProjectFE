@@ -337,13 +337,16 @@ const SalesOrder = () => {
                     <IoMdAdd className='text-xl' />
                     <div>Create</div>
                 </button>
-                <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
-                    <FiSearch className='text-xl text-gray-600 ml-2' />
-                    <input value={searchQuery} onChange={handleSearchChange}
-                        className='w-[18rem] outline-none p-2 mr-1 text-gray-600'
-                        type="search" placeholder='Search by name'
-                    />
-                </div>
+                {
+                    sales.length != 0 ?
+                        <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
+                            <FiSearch className='text-xl text-gray-600 ml-2' />
+                            <input value={searchQuery} onChange={handleSearchChange}
+                                className='w-[18rem] outline-none p-2 mr-1 text-gray-600'
+                                type="search" placeholder='Search by name'
+                            />
+                        </div> : <div></div>
+                }
             </div>
             {
                 filteredSales.length === 0 ?

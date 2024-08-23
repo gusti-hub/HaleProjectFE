@@ -93,7 +93,7 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isEditMode ? (formData.title.length === 0 || formData.desc.length === 0) : (formData.title.length === 0 || formData.desc.length === 0 || !selectedFile)) {
+        if (formData.title.length === 0 || formData.desc.length === 0 || (!isEditMode && !selectedFile)) {
             toast.error("Fill the mandatory fields!");
             handleClose();
         } else {
@@ -1303,7 +1303,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode, client, 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isEditMode ? (formData.name.length === 0 || formData.qty.length === 0) : (formData.name.length === 0 || formData.qty.length === 0 || !selectedFile)) {
+        if (formData.name.length === 0 || formData.code.length === 0 || (!isEditMode && !selectedFile)) {
             toast.error("Fill the mandatory fields");
             handleClose();
         } else {
@@ -2029,6 +2029,16 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
         }
     };
 
+    const [imgModal, setImgModal] = useState(false);
+    const [showImageUrl, setShowImageUrl] = useState(null);
+
+    const handleImgModal = () => { setShowImageUrl(null); setImgModal(curr => !curr); };
+
+    const showImage = (url) => {
+        handleImgModal();
+        setShowImageUrl(url);
+    };
+
     useEffect(() => {
         fetchProductDetails();
     }, []);
@@ -2059,24 +2069,34 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                         <FaEdit onClick={() => handleEdit(pdt)} className='text-xl cursor-pointer' />
                                         <MdDeleteOutline onClick={() => handleDeleteItem(pdt._id)} className='text-2xl text-red-600 cursor-pointer' />
                                     </div>
+                                    <Dialog
+                                        size='md'
+                                        open={imgModal}
+                                        handler={handleImgModal}
+                                        className="bg-transparent shadow-none w-full flex items-center justify-center"
+                                    >
+                                        <div className="w-full flex items-center justify-center bg-white p-4 rounded-lg text-black">
+                                            <img className='w-full aspect-auto' src={showImageUrl} alt="" />
+                                        </div>
+                                    </Dialog>
                                     {
                                         pdt.type === 'Reference' ?
                                             (
                                                 <div className="w-full flex items-start justify-center gap-3 text-black">
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
+                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <span className='font-semibold'>{pdt.type}:</span>
                                                             <span>{pdt.title}</span>
                                                         </div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <img src={pdt.imageUrl} alt="" />
+                                                        <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
                                                     </div>
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
+                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-start font-semibold">Description</div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                                         <div className="w-full flex items-center justify-start">{pdt.desc}</div>
                                                     </div>
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2">
+                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-between">
                                                             <div className="font-semibold">Comments</div>
                                                         </div>
@@ -2115,17 +2135,17 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                             ) :
                                             (
                                                 <div className="w-full flex items-start justify-center gap-3 text-black">
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <span className='font-semibold'>{pdt.type}:</span>
                                                             <span>{pdt.title} ({pdt.code})</span>
                                                         </div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <img className='max-w-[15rem]' src={pdt.imageUrl} alt="" />
+                                                        <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
                                                     </div>
 
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                                        <div className="w-full flex items-center justify-start font-semibold">Specification</div>
+                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                        <div className="w-full flex items-center justify-start font-semibold">Description</div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>SKU:</div>
@@ -2262,7 +2282,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                             </div>
                                                     </div>
 
-                                                    <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-between">
                                                             <div className="font-semibold">Comments</div>
                                                         </div>

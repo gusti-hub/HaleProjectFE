@@ -15,6 +15,7 @@ import { RiShieldUserLine, RiUserSettingsLine, RiSafeLine } from 'react-icons/ri
 import { GrBusinessService } from 'react-icons/gr';
 import GlobalVariable from '../utils/GlobalVariable';
 import Procurement from '../adminPages/Procurement/Procurement';
+import Inventory from '../adminPages/Inventory/Inventory';
 
 const AdminPanel = () => {
 
