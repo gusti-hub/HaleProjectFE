@@ -1631,8 +1631,9 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode, client, 
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            if (isEditMode) {
+            if (isEditMode) {                
                 const filteredRfqs = response.data.allRFQs.filter(rfq =>
+                    rfq.status === "Received RFQ" && 
                     rfq.products.some(product => product.productId === editItem._id)
                 );
                 setRfqs(filteredRfqs);
@@ -1924,7 +1925,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode, client, 
     );
 };
 
-const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fetchSections, client, ConfigurationType }) => {
+const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fetchSections, client, ConfigurationType, Progress }) => {
     const loggedInUser = localStorage.getItem('name');
 
     const token = localStorage.getItem('token');
@@ -2038,15 +2039,20 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
             <div className="w-full flex flex-col items-center justify-start gap-3 p-4 bg-white">
                 <div className="w-full flex items-center justify-between text-gray-900 text-[1.325rem] font-semibold">
                     <div>{name}</div>
-                    <MdDeleteOutline onClick={() => deleteSection(id)} className='text-3xl text-red-600 cursor-pointer' />
+                    {
+                        (Progress == GlobalVariable.Progress.InProgress || Progress == GlobalVariable.Progress.DesignRejected || Progress == GlobalVariable.Progress.ProposalRejected) && 
+                            <MdDeleteOutline onClick={() => deleteSection(id)} className='text-3xl text-red-600 cursor-pointer' />}
                 </div>
                 <div className="w-full h-[2px] bg-gray-300"></div>
                 <div className="w-full flex items-center justify-between">
                     <div className='text-black font-medium text-lg'>Project Items</div>
-                    <button onClick={() => { setIsEditMode(false); handleOpen(); }}
-                        type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg flex items-center justify-center gap-2'>
-                        <IoMdAdd className='text-xl' />
-                    </button>
+                    {
+                        (Progress == GlobalVariable.Progress.InProgress || Progress == GlobalVariable.Progress.DesignRejected || Progress == GlobalVariable.Progress.ProposalRejected) && 
+                        <button onClick={() => { setIsEditMode(false); handleOpen(); }}
+                            type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg flex items-center justify-center gap-2'>
+                            <IoMdAdd className='text-xl' />
+                        </button>
+                    }
                 </div>
                 <div className="w-full flex flex-col items-center justify-start border-2 border-solid border-gray-300 rounded-lg p-3 gap-3">
                     {
@@ -2055,10 +2061,13 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                         ) : (
                             products.map(pdt => (
                                 <div key={pdt._id} className="w-full flex flex-col items-center gap-3 border-2 border-solid border-gray-300 rounded-lg p-3">
-                                    <div className="w-full flex items-center justify-end gap-1">
-                                        <FaEdit onClick={() => handleEdit(pdt)} className='text-xl cursor-pointer' />
-                                        <MdDeleteOutline onClick={() => handleDeleteItem(pdt._id)} className='text-2xl text-red-600 cursor-pointer' />
-                                    </div>
+                                     {
+                                        (Progress == GlobalVariable.Progress.InProgress || Progress == GlobalVariable.Progress.DesignRejected || Progress == GlobalVariable.Progress.ProposalRejected) && 
+                                    
+                                        <div className="w-full flex items-center justify-end gap-1">
+                                            <FaEdit onClick={() => handleEdit(pdt)} className='text-xl cursor-pointer' />
+                                            <MdDeleteOutline onClick={() => handleDeleteItem(pdt._id)} className='text-2xl text-red-600 cursor-pointer' />
+                                        </div>}
                                     {
                                         pdt.type === 'Reference' ?
                                             (

@@ -125,7 +125,7 @@ const AdminPanel = () => {
                                     <div className={`font-medium text-base text-nowrap ${menuID === 8 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Inventory</div>
                                 </div> 
                             )}
-                            {action.includes(GlobalVariable.ActionRole.InventoryNavigation) && (
+                            {action.includes(GlobalVariable.ActionRole.ConfigurationNavigation) && (
                                 <div
                                     onClick={() => handleMenuID(10)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 10 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>

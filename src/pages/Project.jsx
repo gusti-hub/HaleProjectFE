@@ -241,16 +241,31 @@ const Project = () => {
                                                 <div className="w-full max-w-[60%] flex items-center justify-start gap-2">
                                                     <div>Status:</div>
                                                     {
-                                                        projectDetails.progress === "Not Started" ?
-                                                            <div className='p-1 px-3 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
-                                                            projectDetails.progress === "In progress" ?
-                                                                <div className='p-1 px-3 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
-                                                                projectDetails.progress === "Request for Approval" ?
-                                                                    <div className='p-1 px-3 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
-                                                                    projectDetails.progress === "Approved" ?
-                                                                        <div className='p-1 px-3 bg-green-50 text-green-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
-                                                                        projectDetails.progress === "Rejected" ?
-                                                                            <div className='p-1 px-3 bg-red-50 text-red-700 rounded-3xl font-medium'>{projectDetails.progress}</div> : ""
+                                                        projectDetails.progress === GlobalVariable.Progress.NotStarted ?
+                                                            <div className='p-1 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.InProgress ?
+                                                            <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.WaitingDesignApproval ?
+                                                            <div className='p-1 bg-yellow-50 text-yellow-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.DesignApproved ?
+                                                            <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.DesignRejected ?
+                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.WaitingProposalApproval ?
+                                                            <div className='p-1 bg-yellow-50 text-yellow-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.ProposalApproved ?
+                                                            <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.ProposalRejected ?
+                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.DownloadProposal ?
+                                                            <div className='p-1 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.ProjectFunding ?
+                                                            <div className='p-1 bg-purple-50 text-purple-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.ProjectImplementation ?
+                                                            <div className='p-1 bg-teal-50 text-teal-700 rounded-3xl font-medium'>{projectDetails.progress}</div> :
+                                                        projectDetails.progress === GlobalVariable.Progress.ProjectCompleted ?
+                                                            <div className='p-1 bg-green-100 text-green-800 rounded-3xl font-medium'>{projectDetails.progress}</div> : 
+                                                        ""
                                                     }
                                                 </div>
                                                 <div className="w-full max-w-[60%] flex items-center justify-start gap-2">
@@ -259,10 +274,13 @@ const Project = () => {
                                                         className='w-full focus:border-b border-solid border-b-black p-1 bg-transparent outline-none'
                                                         type="number" name="budget" />
                                                 </div>
-                                                <div className="w-full flex items-start justify-start gap-2 text-black">
-                                                    <label htmlFor="file">Attachment:</label>
-                                                    <input type="file" onChange={handleFileChange} name='file' />
-                                                </div>
+                                                {
+                                                    (projectDetails.progress == GlobalVariable.Progress.InProgress || projectDetails.progress == GlobalVariable.Progress.DesignRejected || projectDetails.progress == GlobalVariable.Progress.ProposalRejected) && 
+                                                        <div className="w-full flex items-start justify-start gap-2 text-black">
+                                                            <label htmlFor="file">Attachment:</label>
+                                                            <input type="file" onChange={handleFileChange} name='file' />
+                                                        </div>
+                                                }
                                                 {
                                                     fileName &&
                                                     <div className="w-full flex items-center justify-start text-sm gap-8">
@@ -285,10 +303,13 @@ const Project = () => {
                                                     </div>
                                                 </Dialog>
                                                 <div className="w-full flex items-center justify-end">
-                                                    <button onClick={handleSubmit}
-                                                        type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>
-                                                        Save
-                                                    </button>
+                                                {
+                                                    (projectDetails.progress == GlobalVariable.Progress.InProgress || projectDetails.progress == GlobalVariable.Progress.DesignRejected || projectDetails.progress == GlobalVariable.Progress.ProposalRejected) && 
+                                                        <button onClick={handleSubmit}
+                                                            type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>
+                                                            Save
+                                                        </button>
+                                                }
                                                 </div>
                                             </form>
                                         </div>
@@ -305,11 +326,14 @@ const Project = () => {
                                         </div>
                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                         <div className="w-full flex items-center justify-start">
-                                            <button onClick={handleOpenForm}
-                                                type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg flex items-center justify-center gap-2'>
-                                                <IoMdAdd className='text-xl' />
-                                                <div className='text-nowrap'>Add Section</div>
-                                            </button>
+                                        {
+                                             (projectDetails.progress == GlobalVariable.Progress.InProgress || projectDetails.progress == GlobalVariable.Progress.DesignRejected || projectDetails.progress == GlobalVariable.Progress.ProposalRejected) && 
+                                                <button onClick={handleOpenForm}
+                                                    type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg flex items-center justify-center gap-2'>
+                                                    <IoMdAdd className='text-xl' />
+                                                    <div className='text-nowrap'>Add Section</div>
+                                                </button>
+                                        }
                                             <Dialog
                                                 size="sm"
                                                 open={openForm}
@@ -355,6 +379,7 @@ const Project = () => {
                                                             fetchSections={fetchSections}
                                                             client={formData.client}
                                                             ConfigurationType={ConfigurationType}
+                                                            Progress={projectDetails.progress}
                                                         />
                                                     ))
                                             }

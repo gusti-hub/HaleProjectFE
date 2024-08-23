@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { FiSearch } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
+import GlobalVariable from '../../utils/GlobalVariable';
 
 const Procurement = () => {
 
@@ -113,16 +114,31 @@ const Procurement = () => {
                                                 <td>{pdt.client.split('-')[1]}</td>
                                                 <td>
                                                     {
-                                                        pdt.progress === "Not Started" ?
+                                                        pdt.progress === GlobalVariable.Progress.NotStarted ?
                                                             <div className='p-1 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                            pdt.progress === "In progress" ?
-                                                                <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                pdt.progress === "Request for Approval" ?
-                                                                    <div className='p-1 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                    pdt.progress === "Approved" ?
-                                                                        <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
-                                                                        pdt.progress === "Rejected" ?
-                                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> : ""
+                                                        pdt.progress === GlobalVariable.Progress.InProgress ?
+                                                            <div className='p-1 bg-orange-50 text-orange-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.WaitingDesignApproval ?
+                                                            <div className='p-1 bg-yellow-50 text-yellow-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.DesignApproved ?
+                                                            <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.DesignRejected ?
+                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.WaitingProposalApproval ?
+                                                            <div className='p-1 bg-yellow-50 text-yellow-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProposalApproved ?
+                                                            <div className='p-1 bg-green-50 text-green-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProposalRejected ?
+                                                            <div className='p-1 bg-red-50 text-red-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.DownloadProposal ?
+                                                            <div className='p-1 bg-blue-50 text-blue-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProjectFunding ?
+                                                            <div className='p-1 bg-purple-50 text-purple-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProjectImplementation ?
+                                                            <div className='p-1 bg-teal-50 text-teal-700 rounded-3xl font-medium'>{pdt.progress}</div> :
+                                                        pdt.progress === GlobalVariable.Progress.ProjectCompleted ?
+                                                            <div className='p-1 bg-green-100 text-green-800 rounded-3xl font-medium'>{pdt.progress}</div> : 
+                                                        ""
                                                     }
                                                 </td>
                                             </tr>
