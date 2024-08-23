@@ -232,7 +232,7 @@ const Project = () => {
                                                         className='w-full focus:border-b border-solid border-b-black p-1 bg-transparent outline-none'
                                                         type="text" name="desc" />
                                                 </div>
-                                                {/* <div className="w-full max-w-[60%] flex items-center justify-start gap-2">
+                                                <div className="w-full max-w-[60%] flex items-center justify-start gap-2">
                                                     <label className='text-nowrap' htmlFor="client">Client:</label>
                                                     <label className='p-1'>
                                                         {formData.client}
