@@ -509,14 +509,7 @@ const SalesOrder = () => {
 
                                                             {((pdt.progress == GlobalVariable.Progress.WaitingProposalApproval || pdt.progress == GlobalVariable.Progress.ProposalApproved || pdt.progress == GlobalVariable.Progress.ProjectFunding || pdt.progress == GlobalVariable.Progress.ProjectImplementation)) && action.includes(GlobalVariable.ActionRole.RejectProposal) ?                                                         
                                                                 <>                                                                
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                if (pdt.progress == GlobalVariable.Progress.WaitingProposalApproval) {
-                                                                                    progressButtonClick(pdt._id, GlobalVariable.Progress.ProposalRejected);
-                                                                                } else {
-                                                                                    progressButtonClick(pdt._id, GlobalVariable.Progress.DesignRejected);
-                                                                                }
-                                                                            }}
+                                                                        <button onClick={() => progressButtonClick(pdt._id, GlobalVariable.Progress.ProposalRejected)}
                                                                         disabled={pdt.progress === GlobalVariable.Progress.NotStarted || pdt.progress === GlobalVariable.Progress.InProgress || pdt.progress === GlobalVariable.Progress.ProjectCompleted}
                                                                         className={`w-full text-left font-normal text-nowrap ${pdt.owner === name ? 'block' : 'hidden'}`}>Reject Proposal</button>
 

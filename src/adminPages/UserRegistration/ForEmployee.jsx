@@ -350,7 +350,7 @@ const ForEmployee = () => {
                                                 <td>{user.name}</td>
                                                 <td>{user.email}</td>
                                                 <td>{user.title}</td>
-                                                <td>{user.role}</td>
+                                                <td>{user.role_name}</td>
                                             </tr>
                                         )
                                     })
