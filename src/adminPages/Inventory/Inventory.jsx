@@ -75,7 +75,7 @@ const Inventory = () => {
             <div className="w-full flex items-center justify-start gap-6">
                 <button onClick={() => navigate('/inventory_in')}
                     className='w-20 px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>IN</button>
-                <button
+                <button onClick={() => navigate('/inventory_out')}
                     className='w-20 px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>OUT</button>
             </div>
             {

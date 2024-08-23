@@ -113,9 +113,8 @@ const SalesOrder = () => {
                 setOpen(false);
             }
         } catch (err) {
-            toast.error(err.response.data.message)
-            setError(err.message);
-            fetchSalesData();
+            toast.error(err.response.data.message);
+            setOpen(false);
         }
     };
 
