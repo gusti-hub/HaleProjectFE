@@ -69,7 +69,7 @@ const Inventory = () => {
                         <div className="w-full flex items-center justify-center text-red-600 font-medium">
                             Error: {error}
                         </div> :
-                        <div className="w-full flex flex-col items-center">
+                        <div className="w-full flex flex-col items-center gap-4">
                             <div className="w-full flex items-center justify-start gap-6">
                                 <button onClick={() => navigate('/inventory_in')}
                                     className='w-20 px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>IN</button>

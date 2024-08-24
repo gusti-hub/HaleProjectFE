@@ -128,6 +128,7 @@ const Out = () => {
     };
 
     const fetchOutDocs = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/outDocs`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -158,7 +159,11 @@ const Out = () => {
 
     const [zeroQty, setZeroQty] = useState(false);
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSaveOutDoc = async () => {
+
+        setSaveLoader(true);
 
         try {
             const array = createProductsArray(selectedProducts);
@@ -177,10 +182,12 @@ const Out = () => {
                 toast.success(response.data.message);
                 fetchOutDocs();
                 handleAddModal();
+                setSaveLoader(false);
             }
         } catch (error) {
             toast.error("Can't update the inventory. Try again later.")
             handleAddModal();
+            setSaveLoader(false);
         }
     };
 
@@ -224,9 +231,6 @@ const Out = () => {
                 <div className="w-full flex flex-col items-center p-8 gap-4">
                     <div className="w-full text-left text-gray-900 text-2xl font-medium">Inventory (OUT)</div>
                     <div className="w-full h-[2px] bg-gray-300"></div>
-                    <div className="w-full flex items-center justify-start">
-                        <button onClick={handleAddModal} className='w-20 px-5 py-2 rounded-md bg-[#7F55DE] text-white text-lg'>ADD</button>
-                    </div>
 
                     {
                         loading ?
@@ -234,6 +238,9 @@ const Out = () => {
                             error ?
                                 <div className="w-full flex items-center justify-center text-red-600 font-medium my-4"> Error: {error} </div> :
                                 <div className="w-full flex flex-col items-center gap-4">
+                                    <div className="w-full flex items-center justify-start">
+                                        <button onClick={handleAddModal} className='w-20 px-5 py-2 rounded-md bg-[#7F55DE] text-white text-lg'>ADD</button>
+                                    </div>
                                     {
                                         outDocs.length != 0 &&
                                         <div className="w-full flex items-center justify-end">
@@ -471,9 +478,12 @@ const Out = () => {
 
                                                     {
                                                         selectedProducts.length != 0 && <div className="w-full flex items-center justify-end mt-2">
-                                                            <button onClick={handleSaveOutDoc} className='px-5 py-2 rounded-md bg-[#7F55DE] text-white text-nowrap'>
-                                                                Save Doc
-                                                            </button>
+                                                            {
+                                                                saveLoader ? <CircularProgress /> :
+                                                                    <button onClick={handleSaveOutDoc} className='px-5 py-2 rounded-md bg-[#7F55DE] text-white text-nowrap'>
+                                                                        Save Doc
+                                                                    </button>
+                                                            }
                                                         </div>
                                                     }
                                                 </div>

@@ -93,6 +93,7 @@ const ForEmployee = () => {
     };
 
     const fetchUsers = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/employees`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -110,11 +111,14 @@ const ForEmployee = () => {
         fetchOptions();
     }, []);
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaveLoader(true);
 
         if (formData.name.length === 0 || formData.email.length === 0 || formData.role.length === 0) {
-            toast.error("Can't submit empty form or check password!"); setOpen(false);
+            toast.error("Can't submit empty form or check password!"); setOpen(false); setSaveLoader(false);
         }
 
         if (formData.name.length > 0 && formData.email.length > 0 && (isEditing || formData.password.length >= 8) && formData.role.length > 0) {
@@ -126,11 +130,13 @@ const ForEmployee = () => {
                 resetForm();
                 setOpen(false);
                 fetchUsers();
+                setSaveLoader(false);
             } catch (error) {
                 toast.error(error.response.data.message);
                 resetForm();
                 setOpen(false);
                 fetchUsers();
+                setSaveLoader(false);
             }
         }
     };
@@ -283,10 +289,13 @@ const ForEmployee = () => {
                         </div>
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <button onClick={handleSubmit}
-                            type="button" className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
-                            {isEditing ? 'Update' : 'Register'}
-                        </button>
+                        {
+                            saveLoader ? <CircularProgress /> :
+                                <button onClick={handleSubmit}
+                                    type="button" className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
+                                    {isEditing ? 'Update' : 'Register'}
+                                </button>
+                        }
                     </div>
                 </form>
             </Dialog>

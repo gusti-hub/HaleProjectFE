@@ -46,6 +46,7 @@ const In = () => {
     }
 
     const fetchAllPOs = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/getAllPOs`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -69,7 +70,7 @@ const In = () => {
     );
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(6);
+    const [itemsPerPage] = useState(7);
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -218,7 +219,7 @@ const In = () => {
 
             const response = await axios.post(`${backendServer}/api/createBackOrder/${poId}`, {
                 backOrderProducts: backOrderProducts,
-                docNum: `IN-00${allDocs.length + 2}`
+                docNum: `${isBackOrder ? `IN-00${allDocs.length + 1}` : `IN-00${allDocs.length + 2}`}`
             });
 
             toast.success(response.data.message);
@@ -227,7 +228,12 @@ const In = () => {
         }
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleReceiveDoc = async () => {
+
+        setSaveLoader(true);
+
         try {
             const updatedProducts = updateProductsArray(currPO.currPdts);
 
@@ -238,6 +244,7 @@ const In = () => {
             if (invalidProduct.length > 0) {
                 setZeroError(true);
                 toast.error("Cannot update: Quantity cannot be less than or equals to zero!");
+                setSaveLoader(false);
             } else {
                 const response = isBackOrder ?
                     await axios.put(`${backendServer}/api/update-recBackOrder-qty/${currPO._id}`,
@@ -262,9 +269,11 @@ const In = () => {
                 fetchAllPOs();
                 fetchAllDocs();
                 handleRecModal();
+                setSaveLoader(false);
             }
         } catch (error) {
             toast.error(error.response.data.message);
+            setSaveLoader(false);
         }
 
     };
@@ -485,10 +494,13 @@ const In = () => {
                                                 zeroError && <div className="w-full text-left text-xs text-red-600 italic mt-2">Cannot update: Quantity cannot be less than or equals to zero!</div>
                                             }
                                             <div className="w-full flex items-center justify-end my-1">
-                                                <button onClick={handleReceiveDoc}
-                                                    className='flex items-center justify-center px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                    Save
-                                                </button>
+                                                {
+                                                    saveLoader ? <CircularProgress /> :
+                                                        <button onClick={handleReceiveDoc}
+                                                            className='flex items-center justify-center px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                            Save
+                                                        </button>
+                                                }
                                             </div>
                                         </div>
                                     </div>

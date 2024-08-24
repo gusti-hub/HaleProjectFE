@@ -24,6 +24,7 @@ const Procurement = () => {
     };
 
     const fetchSalesData = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/sales`, {
                 headers: { Authorization: `Bearer ${token}` },

@@ -634,116 +634,119 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                         </div>
                                     </Dialog>
                                     {
-                                        pdt.type === 'Reference' ?
-                                            (
-                                                <div className="w-full flex items-start justify-center gap-3 text-black">
-                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <span className='font-semibold'>{pdt.type}:</span>
-                                                            <span>{pdt.title}</span>
-                                                        </div>
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
-                                                    </div>
-                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
-                                                        <div className="w-full flex items-center justify-start font-semibold">Description</div>
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <div className="w-full flex items-center justify-start">{pdt.desc}</div>
-                                                    </div>
-                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
-                                                        <div className="w-full flex items-center justify-between">
-                                                            <div className="font-semibold">Comments</div>
-                                                        </div>
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        {
-                                                            pdt.comments.length === 0 ?
-                                                                <div className="w-full items-center justify-start">No comment yet!</div> :
-                                                                pdt.comments.map(comment => (
-                                                                    <div key={comment._id} className="w-full flex flex-col items-center bg-[#F8F9FD] gap-1">
-                                                                        <div className="w-full flex items-center justify-start p-2 text-base font-medium gap-2">
-                                                                            <FaUserCircle className='text-xl' />
-                                                                            <div>{comment.name}</div>
-                                                                            <div className='text-sm'>{new Intl.DateTimeFormat('en-US', options).format(new Date(comment.createdAt))}</div>
-                                                                        </div>
-                                                                        <div className="w-full flex items-center justify-start p-2 bg-white">{comment.body}</div>
+                                        loading ? <div className="w-full text-center my-16"><CircularProgress /></div> :
+                                            <div className="w-full flex items-center justify-center">
+                                                {
+                                                    pdt.type === 'Reference' ?
+                                                        (
+                                                            <div className="w-full flex items-start justify-center gap-3 text-black">
+                                                                <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                                    <div className="w-full flex items-center justify-start gap-2">
+                                                                        <span className='font-semibold'>{pdt.type}:</span>
+                                                                        <span>{pdt.title}</span>
                                                                     </div>
-                                                                ))
-                                                        }
-                                                        <form onSubmit={(e) => createNewComment(e, pdt._id)} className="w-full flex items-start gap-3 mt-4">
-                                                            <textarea
-                                                                value={comments[pdt._id]?.body || ''}
-                                                                onChange={(e) => handleInputChange(e, pdt._id)}
-                                                                className='w-full p-2 border border-solid border-gray-300 outline-none'
-                                                                placeholder='Type here...'
-                                                                name="body"
-                                                            ></textarea>
-                                                            <button
-                                                                type="submit"
-                                                                className='w-fit bg-[#7F55DE] p-1.5 px-3 text-white text-base font-medium rounded-lg'
-                                                            >
-                                                                Send
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            ) :
-                                            (
-                                                <div className="w-full flex items-start justify-center gap-3 text-black">
-                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <span className='font-semibold'>{pdt.type}:</span>
-                                                            <span>{pdt.title} ({pdt.productDetails.code})</span>
-                                                        </div>
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
-                                                    </div>
+                                                                    <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                    <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
+                                                                </div>
+                                                                <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                                    <div className="w-full flex items-center justify-start font-semibold">Description</div>
+                                                                    <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                    <div className="w-full flex items-center justify-start">{pdt.desc}</div>
+                                                                </div>
+                                                                <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                                    <div className="w-full flex items-center justify-between">
+                                                                        <div className="font-semibold">Comments</div>
+                                                                    </div>
+                                                                    <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                    {
+                                                                        pdt.comments.length === 0 ?
+                                                                            <div className="w-full items-center justify-start">No comment yet!</div> :
+                                                                            pdt.comments.map(comment => (
+                                                                                <div key={comment._id} className="w-full flex flex-col items-center bg-[#F8F9FD] gap-1">
+                                                                                    <div className="w-full flex items-center justify-start p-2 text-base font-medium gap-2">
+                                                                                        <FaUserCircle className='text-xl' />
+                                                                                        <div>{comment.name}</div>
+                                                                                        <div className='text-sm'>{new Intl.DateTimeFormat('en-US', options).format(new Date(comment.createdAt))}</div>
+                                                                                    </div>
+                                                                                    <div className="w-full flex items-center justify-start p-2 bg-white">{comment.body}</div>
+                                                                                </div>
+                                                                            ))
+                                                                    }
+                                                                    <form onSubmit={(e) => createNewComment(e, pdt._id)} className="w-full flex items-start gap-3 mt-4">
+                                                                        <textarea
+                                                                            value={comments[pdt._id]?.body || ''}
+                                                                            onChange={(e) => handleInputChange(e, pdt._id)}
+                                                                            className='w-full p-2 border border-solid border-gray-300 outline-none'
+                                                                            placeholder='Type here...'
+                                                                            name="body"
+                                                                        ></textarea>
+                                                                        <button
+                                                                            type="submit"
+                                                                            className='w-fit bg-[#7F55DE] p-1.5 px-3 text-white text-base font-medium rounded-lg'
+                                                                        >
+                                                                            Send
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        ) :
+                                                        (
+                                                            <div className="w-full flex items-start justify-center gap-3 text-black">
+                                                                <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                                    <div className="w-full flex items-center justify-start gap-2">
+                                                                        <span className='font-semibold'>{pdt.type}:</span>
+                                                                        <span>{pdt.title} ({pdt.productDetails.code})</span>
+                                                                    </div>
+                                                                    <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                    <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
+                                                                </div>
 
-                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
-                                                        <div className="w-full flex items-center justify-start font-semibold">Description</div>
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        {
-                                                            pdt.desc ? <div className="w-full flex items-center justify-start">{pdt.desc}</div> :
-                                                                <div className="w-full flex items-center justify-start">Not available</div>
-                                                        }
-                                                        <div className="w-full h-[1.5px] bg-gray-300"></div>
-                                                        {
-                                                            pdt.productDetails.unit && <div className="w-full flex items-center justify-start gap-2">
-                                                                <div className='font-medium'>Dimension:</div>
-                                                                <div className="w-full flex flex-wrap items-center justify-start gap-2">
-                                                                    {pdt.productDetails.len ? <div><span className='text-black font-medium'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                    {pdt.productDetails.wid ? <div><span className='text-black font-medium'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                    {pdt.productDetails.dia ? <div><span className='text-black font-medium'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                        {
-                                                            pdt.productDetails.color && <div className="w-full flex items-center justify-start gap-2">
-                                                                <div className='font-medium'>Color:</div>
-                                                                <div className="flex items-center justify-center gap-2">
-                                                                    <div className={`w-7 h-5 rounded-sm`} style={{ backgroundColor: pdt.productDetails.color }}></div>
-                                                                    <div>{pdt.productDetails.color}</div>
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                        {
-                                                            pdt.productDetails.material && <div className="w-full flex items-center justify-start gap-2">
-                                                                <div className='font-medium'>Material:</div>
-                                                                <div>{pdt.productDetails.material}</div>
-                                                            </div>
-                                                        }
-                                                        {
-                                                            pdt.productDetails.insert && <div className="w-full flex items-center justify-start gap-2">
-                                                                <div className='font-medium'>Insert:</div>
-                                                                <div>{pdt.productDetails.insert}</div>
-                                                            </div>
-                                                        }
-                                                        {
-                                                            pdt.productDetails.finish && <div className="w-full flex items-center justify-start gap-2">
-                                                                <div className='font-medium'>Finish:</div>
-                                                                <div>{pdt.productDetails.finish}</div>
-                                                            </div>
-                                                        }
-                                                        {/* <div className="w-full flex items-center justify-start gap-2">
+                                                                <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                                    <div className="w-full flex items-center justify-start font-semibold">Description</div>
+                                                                    <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                    {
+                                                                        pdt.desc ? <div className="w-full flex items-center justify-start">{pdt.desc}</div> :
+                                                                            <div className="w-full flex items-center justify-start">Not available</div>
+                                                                    }
+                                                                    <div className="w-full h-[1.5px] bg-gray-300"></div>
+                                                                    {
+                                                                        pdt.productDetails.unit && <div className="w-full flex items-center justify-start gap-2">
+                                                                            <div className='font-medium'>Dimension:</div>
+                                                                            <div className="w-full flex flex-wrap items-center justify-start gap-2">
+                                                                                {pdt.productDetails.len ? <div><span className='text-black font-medium'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                                {pdt.productDetails.wid ? <div><span className='text-black font-medium'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                                {pdt.productDetails.dia ? <div><span className='text-black font-medium'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    {
+                                                                        pdt.productDetails.color && <div className="w-full flex items-center justify-start gap-2">
+                                                                            <div className='font-medium'>Color:</div>
+                                                                            <div className="flex items-center justify-center gap-2">
+                                                                                <div className={`w-7 h-5 rounded-sm`} style={{ backgroundColor: pdt.productDetails.color }}></div>
+                                                                                <div>{pdt.productDetails.color}</div>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    {
+                                                                        pdt.productDetails.material && <div className="w-full flex items-center justify-start gap-2">
+                                                                            <div className='font-medium'>Material:</div>
+                                                                            <div>{pdt.productDetails.material}</div>
+                                                                        </div>
+                                                                    }
+                                                                    {
+                                                                        pdt.productDetails.insert && <div className="w-full flex items-center justify-start gap-2">
+                                                                            <div className='font-medium'>Insert:</div>
+                                                                            <div>{pdt.productDetails.insert}</div>
+                                                                        </div>
+                                                                    }
+                                                                    {
+                                                                        pdt.productDetails.finish && <div className="w-full flex items-center justify-start gap-2">
+                                                                            <div className='font-medium'>Finish:</div>
+                                                                            <div>{pdt.productDetails.finish}</div>
+                                                                        </div>
+                                                                    }
+                                                                    {/* <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>Quantity:</div>
                                                             <div>{pdt.productDetails.qty}</div>
                                                         </div>
@@ -763,48 +766,50 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                             <div className='font-medium'>Selling price ($):</div>
                                                             <div>{pdt.productDetails.sellCost}</div>
                                                         </div> */}
-                                                    </div>
+                                                                </div>
 
-                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
-                                                        <div className="w-full flex items-center justify-between">
-                                                            <div className="font-semibold">Comments</div>
-                                                        </div>
-                                                        <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        {
-                                                            pdt.comments.length === 0 ?
-                                                                <div className="w-full items-center justify-start">No comment yet!</div> :
-                                                                pdt.comments.map(comment => (
-                                                                    <div key={comment._id} className="w-full flex flex-col items-center bg-[#F8F9FD] gap-1">
-                                                                        <div className="w-full flex items-center justify-start p-2 text-base font-medium gap-2">
-                                                                            <FaUserCircle className='text-xl' />
-                                                                            <div>{comment.name}</div>
-                                                                            <div className='text-sm'>{new Intl.DateTimeFormat('en-US', options).format(new Date(comment.createdAt))}</div>
-                                                                        </div>
-                                                                        <div className="w-full flex items-center justify-start p-2 bg-white">{comment.body}</div>
+                                                                <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                                    <div className="w-full flex items-center justify-between">
+                                                                        <div className="font-semibold">Comments</div>
                                                                     </div>
-                                                                ))
-                                                        }
-                                                        <form onSubmit={(e) => createNewComment(e, pdt._id)} className="w-full flex items-start gap-3 mt-4">
-                                                            <textarea
-                                                                value={comments[pdt._id]?.body || ''}
-                                                                onChange={(e) => handleInputChange(e, pdt._id)}
-                                                                className='w-full p-2 border border-solid border-gray-300 outline-none'
-                                                                placeholder='Type here...'
-                                                                name="body"
-                                                            ></textarea>
-                                                            {
-                                                                saveLoader ? <CircularProgress /> :
-                                                                    <button
-                                                                        type="submit"
-                                                                        className='w-fit bg-[#7F55DE] p-1.5 px-3 text-white text-base font-medium rounded-lg'
-                                                                    >
-                                                                        Send
-                                                                    </button>
-                                                            }
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            )
+                                                                    <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                    {
+                                                                        pdt.comments.length === 0 ?
+                                                                            <div className="w-full items-center justify-start">No comment yet!</div> :
+                                                                            pdt.comments.map(comment => (
+                                                                                <div key={comment._id} className="w-full flex flex-col items-center bg-[#F8F9FD] gap-1">
+                                                                                    <div className="w-full flex items-center justify-start p-2 text-base font-medium gap-2">
+                                                                                        <FaUserCircle className='text-xl' />
+                                                                                        <div>{comment.name}</div>
+                                                                                        <div className='text-sm'>{new Intl.DateTimeFormat('en-US', options).format(new Date(comment.createdAt))}</div>
+                                                                                    </div>
+                                                                                    <div className="w-full flex items-center justify-start p-2 bg-white">{comment.body}</div>
+                                                                                </div>
+                                                                            ))
+                                                                    }
+                                                                    <form onSubmit={(e) => createNewComment(e, pdt._id)} className="w-full flex items-start gap-3 mt-4">
+                                                                        <textarea
+                                                                            value={comments[pdt._id]?.body || ''}
+                                                                            onChange={(e) => handleInputChange(e, pdt._id)}
+                                                                            className='w-full p-2 border border-solid border-gray-300 outline-none'
+                                                                            placeholder='Type here...'
+                                                                            name="body"
+                                                                        ></textarea>
+                                                                        {
+                                                                            saveLoader ? <CircularProgress /> :
+                                                                                <button
+                                                                                    type="submit"
+                                                                                    className='w-fit bg-[#7F55DE] p-1.5 px-3 text-white text-base font-medium rounded-lg'
+                                                                                >
+                                                                                    Send
+                                                                                </button>
+                                                                        }
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                }
+                                            </div>
                                     }
                                 </div>
                             ))
