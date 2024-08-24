@@ -8,6 +8,22 @@ import CircularProgress from '@mui/material/CircularProgress';
 import toast from 'react-hot-toast';
 import { FiSearch } from 'react-icons/fi';
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
+import ViewHardware from '../../components/view/hardware';
+import ViewArtwork from '../../components/view/artwork';
+import ViewCasegood from '../../components/view/casegood';
+import ViewAcessory from '../../components/view/accessory';
+import ViewArearug from '../../components/view/arearug';
+import ViewEquipment from '../../components/view/equipment';
+import ViewFabric from '../../components/view/fabric';
+import ViewHardwired from '../../components/view/lightfixture';
+import ViewDecorativeLighting from '../../components/view/decoretivelighting';
+import ViewMirror from '../../components/view/mirror';
+import ViewMiscellaneous from '../../components/view/miscellaneous';
+import ViewTable from '../../components/view/table';
+import ViewSeating from '../../components/view/seating';
+import ViewWallpaper from '../../components/view/wallpaper';
+import ViewUpholstery from '../../components/view/upholstery';
+import ViewWindowTreatment from '../../components/view/windowtreatment';
 
 const Out = () => {
 
@@ -152,7 +168,7 @@ const Out = () => {
     const createProductsArray = (products) => {
         return products.map(product => ({
             id: product._id,
-            qty: Number(qty[product._id])
+            qty: Number(qty[product._id]),
         }));
     };
 
@@ -161,6 +177,7 @@ const Out = () => {
     const handleSaveOutDoc = async () => {
 
         try {
+            console.log(selectedProducts)
             const array = createProductsArray(selectedProducts);
 
             const inavlidArray = array.filter(pdt => pdt.qty <= 0 || isNaN(pdt.qty));
@@ -302,6 +319,7 @@ const Out = () => {
                         open={addModal}
                         handler={handleAddModal}
                         className="bg-transparent shadow-none w-full flex items-center justify-center"
+                        style={{ width: '60%', maxWidth: '90%', minWidth: '300px', height: '60%' }}
                     >
                         {
                             isAddPdt ?
@@ -320,44 +338,124 @@ const Out = () => {
                                                     </div>
                                                     <div className="w-full flex flex-col items-center gap-4 max-h-[30rem] overflow-y-scroll scroll-smooth text-black" style={{ scrollbarWidth: 'thin' }}>
                                                         {
-                                                            addPdts.length === 0 ?
-                                                                <div className="w-full text-left text-lg font-medium">
-                                                                    No product found!
-                                                                </div>
-                                                                :
-                                                                addPdts.map(pdt => {
-                                                                    return (
-                                                                        <div key={pdt._id} className="w-full flex items-center justify-center gap-2">
-                                                                            <input type="checkbox"
-                                                                                checked={selectedProducts.some(p => p._id === pdt._id)}
-                                                                                onChange={() => handleCheckboxChange(pdt)} />
-                                                                            <div className="w-full flex items-start justify-center bg-[#F8F9FD] p-2 rounded-lg">
-                                                                                <div className="w-full flex flex-col items-center gap-2">
-                                                                                    <div className="w-full text-left font-semibold">{pdt.title} ({pdt.productDetails.code})</div>
-                                                                                    <div className="w-full flex items-center justify-center">
-                                                                                        <img className='max-w-[10rem]' src={pdt.imageUrl} alt="" />
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div className="w-full flex flex-col items-start justify-start gap-1">
-                                                                                    {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                                    {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                                    {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
-                                                                                    {
-                                                                                        pdt.productDetails.color ?
-                                                                                            <div className="w-full flex items-center justify-start gap-2">
-                                                                                                <div className='font-semibold'>Color:</div>
-                                                                                                <div className="flex items-center justify-center gap-2">
-                                                                                                    <div className={`w-7 h-5 rounded-sm`} style={{ backgroundColor: pdt.productDetails.color }}></div>
-                                                                                                    <div>{pdt.productDetails.color}</div>
-                                                                                                </div>
-                                                                                            </div> : ''
-                                                                                    }
-                                                                                    {pdt.productDetails.material ? <div><span className='font-semibold'>Material:</span> {pdt.productDetails.material}</div> : ''}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    )
-                                                                })
+                                                            addPdts.length === 0 ? <div className="w-full text-left font-medium">No product is added!</div>
+                                                            :
+                                                            <div className="w-full flex items-start justify-center max-h-[15rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                                                                <table className='w-full border-collapse mt-2'>
+                                                                    <thead>
+                                                                        <tr className='text-gray-700 text-lg text-nowrap'>
+                                                                            <th>Action</th>
+                                                                            <th>Product Code</th>
+                                                                            <th>Product Name</th>                                                                                                                                
+                                                                            <th>Image</th>
+                                                                            <th>Specification</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {
+                                                                            addPdts.map(pdt => {
+                                                                                return (
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <input type="checkbox"
+                                                                                            checked={selectedProducts.some(p => p._id === pdt._id)}
+                                                                                            onChange={() => handleCheckboxChange(pdt)} />
+
+                                                                                        </td>
+                                                                                        <td>{pdt.code}</td>
+                                                                                        <td>{pdt.title}</td>
+                                                                                        <td>
+                                                                                            <div className="flex items-center justify-center">
+                                                                                                <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                                            <div className='font-medium'>SKU:</div>
+                                                                                            <div>{pdt.sku}</div>
+                                                                                        </div>                                                        
+                                                                                        <div className="w-full flex items-center justify-start gap-2">
+                                                                                            <div className='font-medium'>Quantity:</div>
+                                                                                            <div>{pdt.qty}</div>
+                                                                                        </div>
+                                                                                            {pdt.furnishing === 'Accessory' ? (
+                                                                                                <ViewAcessory
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Area Rug' ? (
+                                                                                                <ViewArearug
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Equipment' ? (
+                                                                                                <ViewEquipment
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Hardware' ? (
+                                                                                                <ViewHardware
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Artwork' ? (
+                                                                                                <ViewArtwork
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Casegood' ? (
+                                                                                                <ViewCasegood
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Fabric' ? (
+                                                                                                <ViewFabric
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Light Fixture (hardwired)' ? (
+                                                                                                <ViewHardwired
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Decorative Lighting' ? (
+                                                                                                <ViewDecorativeLighting
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Mirror' ? (
+                                                                                                <ViewMirror
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Miscellaneous' ? (
+                                                                                                <ViewMiscellaneous
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Table' ? (
+                                                                                                <ViewTable
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Seating' ? (
+                                                                                                <ViewSeating
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Wallpaper' ? (
+                                                                                                <ViewWallpaper
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Upholstery' ? (
+                                                                                                <ViewUpholstery
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Window Treatment' ? (
+                                                                                                <ViewWindowTreatment
+                                                                                                    pdt={pdt}
+                                                                                                />                      
+                                                                                            )   
+                                                                                            
+                                                                                            
+                                                                                            : <></>
+                                                                                            }
+                                                                                    </td>
+                                                                                    </tr>
+                                                                                )
+                                                                            })
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+
                                                         }
                                                     </div>
                                                 </div>
@@ -412,6 +510,7 @@ const Out = () => {
                                                                         <table className='w-full border-collapse mt-2'>
                                                                             <thead>
                                                                                 <tr className='text-gray-700 text-lg text-nowrap'>
+                                                                                    <th>Product Code</th>
                                                                                     <th>Product Name</th>
                                                                                     <th>Image</th>
                                                                                     <th>Specification</th>
@@ -424,6 +523,7 @@ const Out = () => {
                                                                                     selectedProducts.map(pdt => {
                                                                                         return (
                                                                                             <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                                                <td>{pdt.code}</td>
                                                                                                 <td>{pdt.title}</td>
                                                                                                 <td>
                                                                                                     <div className="w-full flex items-center justify-center">
@@ -431,11 +531,75 @@ const Out = () => {
                                                                                                     </div>
                                                                                                 </td>
                                                                                                 <td>
-                                                                                                    <div className="w-full flex flex-col items-start justify-start gap-1">
-                                                                                                        {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                                                        {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                                                        {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
-                                                                                                    </div>
+                                                                                                    {pdt.furnishing === 'Accessory' ? (
+                                                                                                        <ViewAcessory
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Area Rug' ? (
+                                                                                                        <ViewArearug
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Equipment' ? (
+                                                                                                        <ViewEquipment
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Hardware' ? (
+                                                                                                        <ViewHardware
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Artwork' ? (
+                                                                                                        <ViewArtwork
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Casegood' ? (
+                                                                                                        <ViewCasegood
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Fabric' ? (
+                                                                                                        <ViewFabric
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Light Fixture (hardwired)' ? (
+                                                                                                        <ViewHardwired
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Decorative Lighting' ? (
+                                                                                                        <ViewDecorativeLighting
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Mirror' ? (
+                                                                                                        <ViewMirror
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Miscellaneous' ? (
+                                                                                                        <ViewMiscellaneous
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Table' ? (
+                                                                                                        <ViewTable
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Seating' ? (
+                                                                                                        <ViewSeating
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Wallpaper' ? (
+                                                                                                        <ViewWallpaper
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Upholstery' ? (
+                                                                                                        <ViewUpholstery
+                                                                                                            pdt={pdt}
+                                                                                                        />
+                                                                                                    )   : pdt.furnishing === 'Window Treatment' ? (
+                                                                                                        <ViewWindowTreatment
+                                                                                                            pdt={pdt}
+                                                                                                        />                      
+                                                                                                    )   
+                                                                                                    
+                                                                                                    
+                                                                                                    : <></>
+                                                                                                    }
                                                                                                 </td>
                                                                                                 <td>{pdt.totQty}</td>
                                                                                                 <td>

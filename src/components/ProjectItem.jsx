@@ -156,7 +156,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode, client, 
         projectId: id,
         type: 'Product',
         name: editItem.title || '',
-        code: editItem.productDetails?.code || '',
+        code: editItem.code || '',
         furnishing: editItem.furnishing || '',
         qty: editItem.qty || '',
         sku: editItem.sku || '',
@@ -693,7 +693,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode, client, 
                 type: 'Product',
                 furnishing: editItem.furnishing || '',
                 name: editItem.title || '',
-                code: editItem.productDetails?.code || '',
+                code: editItem.code || '',
                 qty: editItem.qty || '',
                 sku: editItem.sku || '',
                 imageUrl: editItem.imageUrl || '',
@@ -1303,6 +1303,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode, client, 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log(formData)
         if (formData.name.length === 0 || formData.code.length === 0 || (!isEditMode && !selectedFile)) {
             toast.error("Fill the mandatory fields");
             handleClose();

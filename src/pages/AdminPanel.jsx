@@ -67,10 +67,10 @@ const AdminPanel = () => {
                                     onClick={() => handleMenuID(2)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 2 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
                                     <AiOutlineProduct className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 2 ? 'text-black' : 'text-gray-800'}`} />
-                                    <div className={`font-medium text-base text-nowrap ${menuID === 2 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Project Management</div>
+                                    <div className={`font-medium text-base text-nowrap ${menuID === 2 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Project Management</div>
                                 </div>
                             )}
-                            {true && (
+                            {action.includes(GlobalVariable.ActionRole.EmployeeRegistrationNavigation) && (
                                 <div
                                     onClick={() => handleMenuID(3)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 3 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
@@ -94,7 +94,7 @@ const AdminPanel = () => {
                                     <div className={`font-medium text-base text-nowrap ${menuID === 5 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Client Registration</div>
                                 </div>
                             )}
-                            {true && (
+                            {action.includes(GlobalVariable.ActionRole.RoleRegistrationNavigation) && (
                                 <div
                                     onClick={() => handleMenuID(9)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 9 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
@@ -102,7 +102,7 @@ const AdminPanel = () => {
                                     <div className={`font-medium text-base text-nowrap ${menuID === 9 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Role Registration</div>
                                 </div>
                             )}
-                            {true && (   
+                            {action.includes(GlobalVariable.ActionRole.AuthorizationRoleNavigation) && (   
                                 <div
                                     onClick={() => handleMenuID(6)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 6 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>

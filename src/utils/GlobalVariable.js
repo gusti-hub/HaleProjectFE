@@ -15,7 +15,8 @@ export default class GlobalVariable {
         RejectDesign : 'Reject Design',
         ApproveProposal : 'Approve Proposal',
         RejectProposal : 'Reject Proposal',
-        DeleteProject : 'Delete Project'
+        DeleteProject : 'Delete Project',
+        CreateProject : 'Create Project'
     }
 
     static Progress = {
@@ -34,7 +35,7 @@ export default class GlobalVariable {
     }
 
     static ProductStatus = {
-        WaitingForClientApproval: 'Waiting For Client Approval',
+        WaitingForClientApproval: 'Waiting for Client Approval',
         ClientApproved: 'Client Approved',
         ClientRejected: 'Client Rejected',
     }

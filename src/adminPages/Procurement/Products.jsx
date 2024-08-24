@@ -1291,7 +1291,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
         doc.text('(808) 515-1212 | henderson@henderson.house | henderson.house', doc.internal.pageSize.getWidth() / 2, footerY + 10, { align: 'center' });
     
         // Save the PDF
-        doc.save('design-proposal.pdf');
+        doc.save('rfq.pdf');
     };
       
 
@@ -1436,7 +1436,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                     <th>Quantity</th>
                                                     <th>Image</th>
                                                     <th>Specification</th>
-                                                    <th>Price USD</th>
+                                                    <th>Price per Unit (USD)</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -1626,14 +1626,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                                             <td >{pdt.code}</td>
                                                                             <td >{pdt.title}</td>
                                                                             <td >{pdt.qty}</td>
-                                                                            <td style={{ 
-                                                                                display: 'flex', 
-                                                                                justifyContent: 'center', 
-                                                                                alignItems: 'center', 
-                                                                                padding: '10px', // Optional: Add padding for spacing
-                                                                                height: '200px' // Ensure height is sufficient to fit the image
-                                                                            }}>
-                                                                                <img src={pdt.imageUrl} alt="Product Image" style={{ maxWidth: '200px', maxHeight: '200px', height: 'auto', width: 'auto' }} />
+                                                                            <td>
+                                                                                <div className="flex items-center justify-center">
+                                                                                    <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
+                                                                                </div>
                                                                             </td>
                                                                             <td>
                                                                                 <div className="w-full flex items-center justify-start gap-2">
