@@ -6,6 +6,7 @@ import { backendServer } from '../utils/info';
 import toast from 'react-hot-toast';
 import { MdDeleteOutline } from 'react-icons/md';
 import { FaEdit, FaUserCircle } from 'react-icons/fa';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     const initialFormData = isEditMode ? editItem : { projectId: id, type: 'Reference', title: '', desc: '' };
@@ -58,10 +59,14 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         }
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaveLoader(true);
         if (formData.title.length === 0 || formData.desc.length === 0 || (!isEditMode && !selectedFile)) {
             toast.error("Fill the mandatory fields!");
+            setSaveLoader(false);
             handleClose();
         } else {
             try {
@@ -81,8 +86,10 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 handleClose();
                 fetchDetails();
                 resetForm();
+                setSaveLoader(false);
             } catch (error) {
                 toast.error(error.message);
+                setSaveLoader(false);
             }
         }
     };
@@ -109,9 +116,12 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 <input className='w-fit' type="file" onChange={handleFileChange} name='file' />
             </div>
             {fileName && <div className="w-full text-left text-sm">Uploaded file: {fileName}</div>}
-            <button type="submit" className='w-full p-1.5 rounded-lg bg-[#7F55DE] text-white font-medium'>
-                {isEditMode ? 'Update Item' : 'Add Item'}
-            </button>
+            {
+                saveLoader ? <div className="w-full text-center"> <CircularProgress /> </div> :
+                    <button type="submit" className='w-full p-1.5 rounded-lg bg-[#7F55DE] text-white font-medium'>
+                        {isEditMode ? 'Update Item' : 'Add Item'}
+                    </button>
+            }
         </form>
     );
 };
@@ -224,11 +234,15 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         }
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSubmit = async (e) => {
+        setSaveLoader(true);
         e.preventDefault();
         if (formData.name.length === 0 || formData.code.length === 0 || (!isEditMode && !selectedFile)) {
             toast.error("Fill the mandatory fields");
             handleClose();
+            setSaveLoader(false);
         } else {
             try {
                 const uploadedImageUrl = await handleUpload();
@@ -246,9 +260,11 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                     handleClose();
                     fetchDetails();
                     resetForm();
+                    setSaveLoader(false);
                 }
             } catch (error) {
                 toast.error(error.message);
+                setSaveLoader(false);
             }
         }
     };
@@ -319,7 +335,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 </div>
             </div>
 
-            <div className="w-full flex items-center justify-start gap-2">
+            <div className="w-full flex items-center justify-start">
                 <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                     <label htmlFor="unit">Size Unit:</label>
                     <select
@@ -331,24 +347,29 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                         <option value="inch">inch</option>
                     </select>
                 </div>
-                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                    <label htmlFor="len">L:</label>
-                    <input value={formData.len} onChange={handleInputChange}
-                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                        type="number" name='len' placeholder='Length' />
-                </div>
-                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                    <label htmlFor="wid">W:</label>
-                    <input value={formData.wid} onChange={handleInputChange}
-                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                        type="number" name='wid' placeholder='Width' />
-                </div>
-                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                    <label htmlFor="dia">Dia:</label>
-                    <input value={formData.dia} onChange={handleInputChange}
-                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
-                        type="number" name='dia' placeholder='Dia' />
-                </div>
+                {
+                    formData.unit &&
+                    <div className="flex items-center justify-start">
+                        <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                            <label htmlFor="len">L:</label>
+                            <input value={formData.len} onChange={handleInputChange}
+                                className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                                type="number" name='len' placeholder='Length' />
+                        </div>
+                        <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                            <label htmlFor="wid">W:</label>
+                            <input value={formData.wid} onChange={handleInputChange}
+                                className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                                type="number" name='wid' placeholder='Width' />
+                        </div>
+                        <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                            <label htmlFor="dia">Dia:</label>
+                            <input value={formData.dia} onChange={handleInputChange}
+                                className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                                type="number" name='dia' placeholder='Dia' />
+                        </div>
+                    </div>
+                }
             </div>
 
             <div className="w-full flex items-center justify-center gap-4">
@@ -440,9 +461,12 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
 
             {fileName && <div className="w-full text-left text-sm">Uploaded file: {fileName}</div>}
 
-            <button type="submit" className='w-full p-1.5 rounded-lg bg-[#7F55DE] text-white font-medium'>
-                {isEditMode ? 'Update Item' : 'Add Item'}
-            </button>
+            {
+                saveLoader ? <div className="w-full text-center"><CircularProgress /></div> :
+                    <button type="submit" className='w-full p-1.5 rounded-lg bg-[#7F55DE] text-white font-medium'>
+                        {isEditMode ? 'Update Item' : 'Add Item'}
+                    </button>
+            }
         </form>
     );
 };
@@ -497,6 +521,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
     };
 
     const fetchProductDetails = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/allProducts/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -509,10 +534,14 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
         }
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const createNewComment = async (e, _id) => {
         e.preventDefault();
+        setSaveLoader(true);
         if (comments[_id].body.length === 0) {
             toast.error("Can't submit empty comment!");
+            setSaveLoader(false);
         }
         try {
             if (comments[_id].body.length > 0) {
@@ -520,9 +549,11 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                 toast.success(response.data.message);
                 resetCommentForm(_id);
                 fetchProductDetails();
+                setSaveLoader(false);
             }
         } catch (error) {
             toast.error(error.response.data.message);
+            setSaveLoader(false);
         }
     };
 
@@ -606,7 +637,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                         pdt.type === 'Reference' ?
                                             (
                                                 <div className="w-full flex items-start justify-center gap-3 text-black">
-                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <span className='font-semibold'>{pdt.type}:</span>
                                                             <span>{pdt.title}</span>
@@ -614,12 +645,12 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                                         <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
                                                     </div>
-                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-start font-semibold">Description</div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
                                                         <div className="w-full flex items-center justify-start">{pdt.desc}</div>
                                                     </div>
-                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-between">
                                                             <div className="font-semibold">Comments</div>
                                                         </div>
@@ -658,7 +689,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                             ) :
                                             (
                                                 <div className="w-full flex items-start justify-center gap-3 text-black">
-                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-start gap-2">
                                                             <span className='font-semibold'>{pdt.type}:</span>
                                                             <span>{pdt.title} ({pdt.productDetails.code})</span>
@@ -667,38 +698,51 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                         <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
                                                     </div>
 
-                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-start font-semibold">Description</div>
                                                         <div className="w-full h-[2px] bg-gray-300"></div>
-                                                        <div className="w-full flex items-center justify-start">{pdt.desc}</div>
+                                                        {
+                                                            pdt.desc ? <div className="w-full flex items-center justify-start">{pdt.desc}</div> :
+                                                                <div className="w-full flex items-center justify-start">Not available</div>
+                                                        }
                                                         <div className="w-full h-[1.5px] bg-gray-300"></div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Dimension:</div>
-                                                            <div className="w-full flex flex-wrap items-center justify-start gap-2">
-                                                                {pdt.productDetails.len ? <div><span className='text-black font-medium'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                {pdt.productDetails.wid ? <div><span className='text-black font-medium'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                {pdt.productDetails.dia ? <div><span className='text-black font-medium'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                        {
+                                                            pdt.productDetails.unit && <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Dimension:</div>
+                                                                <div className="w-full flex flex-wrap items-center justify-start gap-2">
+                                                                    {pdt.productDetails.len ? <div><span className='text-black font-medium'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                    {pdt.productDetails.wid ? <div><span className='text-black font-medium'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                    {pdt.productDetails.dia ? <div><span className='text-black font-medium'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Color:</div>
-                                                            <div className="flex items-center justify-center gap-2">
-                                                                <div className={`w-7 h-5 rounded-sm`} style={{ backgroundColor: pdt.productDetails.color }}></div>
-                                                                <div>{pdt.productDetails.color}</div>
+                                                        }
+                                                        {
+                                                            pdt.productDetails.color && <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Color:</div>
+                                                                <div className="flex items-center justify-center gap-2">
+                                                                    <div className={`w-7 h-5 rounded-sm`} style={{ backgroundColor: pdt.productDetails.color }}></div>
+                                                                    <div>{pdt.productDetails.color}</div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Material:</div>
-                                                            <div>{pdt.productDetails.material}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Insert:</div>
-                                                            <div>{pdt.productDetails.insert}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Finish:</div>
-                                                            <div>{pdt.productDetails.finish}</div>
-                                                        </div>
+                                                        }
+                                                        {
+                                                            pdt.productDetails.material && <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Material:</div>
+                                                                <div>{pdt.productDetails.material}</div>
+                                                            </div>
+                                                        }
+                                                        {
+                                                            pdt.productDetails.insert && <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Insert:</div>
+                                                                <div>{pdt.productDetails.insert}</div>
+                                                            </div>
+                                                        }
+                                                        {
+                                                            pdt.productDetails.finish && <div className="w-full flex items-center justify-start gap-2">
+                                                                <div className='font-medium'>Finish:</div>
+                                                                <div>{pdt.productDetails.finish}</div>
+                                                            </div>
+                                                        }
                                                         {/* <div className="w-full flex items-center justify-start gap-2">
                                                             <div className='font-medium'>Quantity:</div>
                                                             <div>{pdt.productDetails.qty}</div>
@@ -721,7 +765,7 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                         </div> */}
                                                     </div>
 
-                                                    <div style={{scrollbarWidth: 'thin'}} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
+                                                    <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
                                                         <div className="w-full flex items-center justify-between">
                                                             <div className="font-semibold">Comments</div>
                                                         </div>
@@ -748,12 +792,15 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                                 placeholder='Type here...'
                                                                 name="body"
                                                             ></textarea>
-                                                            <button
-                                                                type="submit"
-                                                                className='w-fit bg-[#7F55DE] p-1.5 px-3 text-white text-base font-medium rounded-lg'
-                                                            >
-                                                                Send
-                                                            </button>
+                                                            {
+                                                                saveLoader ? <CircularProgress /> :
+                                                                    <button
+                                                                        type="submit"
+                                                                        className='w-fit bg-[#7F55DE] p-1.5 px-3 text-white text-base font-medium rounded-lg'
+                                                                    >
+                                                                        Send
+                                                                    </button>
+                                                            }
                                                         </form>
                                                     </div>
                                                 </div>

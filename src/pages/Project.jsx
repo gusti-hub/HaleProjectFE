@@ -48,6 +48,7 @@ const Project = () => {
 
     const handleOpenForm = () => {
         setOpenForm(state => !state);
+        setSecSaveLoader(false);
     }
 
     const [imgModal, setImgModal] = useState(false);
@@ -92,16 +93,19 @@ const Project = () => {
         }
     };
 
+    const [secLoader, setSecLoader] = useState(false);
+
     const fetchSections = async () => {
+        setSecLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/getsections/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setSections(response.data.sectionData);
-            setLoading(false);
+            setSecLoader(false);
         } catch (err) {
             setError(err.message);
-            setLoading(false);
+            setSecLoader(false);
         }
     }
 
@@ -136,8 +140,12 @@ const Project = () => {
         }
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+    const [saveSecLoader, setSecSaveLoader] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaveLoader(true);
         try {
             const uploadedImageUrl = await handleUpload();
 
@@ -148,16 +156,19 @@ const Project = () => {
                 toast.success(response.data.message);
                 fetchDetails();
                 setLoading(false);
+                setSaveLoader(false);
             }
         } catch (err) {
             toast.error(err.message);
             setError(err.message);
             setLoading(false);
+            setSaveLoader(false);
         }
     }
 
     const addSection = async (e) => {
         e.preventDefault();
+        setSecSaveLoader(true);
         if (section.secname.length === 0) {
             toast.error("Fill the mandatory field!");
             setOpenForm(false);
@@ -168,9 +179,11 @@ const Project = () => {
                 toast.success(response.data.message);
                 setOpenForm(false);
                 fetchSections();
+                setSecSaveLoader(false);
             } catch (error) {
                 toast.error(error.response.data.message);
                 setOpenForm(false);
+                setSecSaveLoader(false);
             }
         }
     }
@@ -272,10 +285,13 @@ const Project = () => {
                                                     </div>
                                                 </Dialog>
                                                 <div className="w-full flex items-center justify-end">
-                                                    <button onClick={handleSubmit}
-                                                        type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>
-                                                        Save
-                                                    </button>
+                                                    {
+                                                        saveLoader ? <CircularProgress /> :
+                                                            <button onClick={handleSubmit}
+                                                                type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>
+                                                                Save
+                                                            </button>
+                                                    }
                                                 </div>
                                             </form>
                                         </div>
@@ -291,48 +307,56 @@ const Project = () => {
                                             Project Sections
                                         </div>
                                         <div className="w-full h-[2px] bg-gray-300"></div>
-                                        <div className="w-full flex items-center justify-start">
-                                            <button onClick={handleOpenForm}
-                                                type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg flex items-center justify-center gap-2'>
-                                                <IoMdAdd className='text-xl' />
-                                                <div className='text-nowrap'>Add Section</div>
-                                            </button>
-                                            <Dialog
-                                                size="sm"
-                                                open={openForm}
-                                                handler={handleOpenForm}
-                                                className="bg-transparent shadow-none w-full flex items-center justify-center"
-                                            >
-                                                <form onSubmit={addSection} className='w-full flex items-center justify-center bg-white p-4 rounded-lg text-black'>
-                                                    <div className="w-full flex items-center justify-between">
-                                                        <div className="flex items-center justify-center gap-2">
-                                                            <label htmlFor="secname" className='font-medium'>Section:</label>
-                                                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                                                            <input value={section.secname} onChange={handleInputChange}
-                                                                className='outline-none p-1 border-b border-solid border-black' type="text" name="secname" />
-                                                        </div>
-                                                        <button type='submit' className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>Add</button>
+                                        {
+                                            secLoader ? <div className="w-full text-center my-8"><CircularProgress /></div> :
+                                                <div className="w-full flex flex-col items-start">
+                                                    <div className="w-full flex items-center justify-start">
+                                                        <button onClick={handleOpenForm}
+                                                            type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg flex items-center justify-center gap-2'>
+                                                            <IoMdAdd className='text-xl' />
+                                                            <div className='text-nowrap'>Add Section</div>
+                                                        </button>
+                                                        <Dialog
+                                                            size="sm"
+                                                            open={openForm}
+                                                            handler={handleOpenForm}
+                                                            className="bg-transparent shadow-none w-full flex items-center justify-center"
+                                                        >
+                                                            <form onSubmit={addSection} className='w-full flex items-center justify-center bg-white p-4 rounded-lg text-black'>
+                                                                <div className="w-full flex items-center justify-between">
+                                                                    <div className="flex items-center justify-center gap-2">
+                                                                        <label htmlFor="secname" className='font-medium'>Section:</label>
+                                                                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                                                        <input value={section.secname} onChange={handleInputChange}
+                                                                            className='outline-none p-1 border-b border-solid border-black' type="text" name="secname" />
+                                                                    </div>
+                                                                    {
+                                                                        saveSecLoader ? <CircularProgress /> :
+                                                                        <button type='submit' className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>Add</button>
+                                                                    }
+                                                                </div>
+                                                            </form>
+                                                        </Dialog>
                                                     </div>
-                                                </form>
-                                            </Dialog>
-                                        </div>
-                                        <div className="w-full flex flex-col items-center">
-                                            {
-                                                sections.length == 0 ? <div className="w-full items-center justify-start font-medium py-2">Add new section to begin.</div> :
-                                                    sections.map(section => (
-                                                        <ProjectItem
-                                                            key={section._id}
-                                                            name={section.secname}
-                                                            id={section._id}
-                                                            isOpen={dialogOpen && activeProjectId === section._id}
-                                                            handleOpen={() => handleOpen(section._id)}
-                                                            handleClose={handleClose}
-                                                            addressID={address.id}
-                                                            fetchSections={fetchSections}
-                                                        />
-                                                    ))
-                                            }
-                                        </div>
+                                                    <div className="w-full flex flex-col items-center">
+                                                        {
+                                                            sections.length == 0 ? <div className="w-full items-center justify-start font-medium py-2">Add new section to begin.</div> :
+                                                                sections.map(section => (
+                                                                    <ProjectItem
+                                                                        key={section._id}
+                                                                        name={section.secname}
+                                                                        id={section._id}
+                                                                        isOpen={dialogOpen && activeProjectId === section._id}
+                                                                        handleOpen={() => handleOpen(section._id)}
+                                                                        handleClose={handleClose}
+                                                                        addressID={address.id}
+                                                                        fetchSections={fetchSections}
+                                                                    />
+                                                                ))
+                                                        }
+                                                    </div>
+                                                </div>
+                                        }
                                     </div>
                                 </div>
                             </div>
