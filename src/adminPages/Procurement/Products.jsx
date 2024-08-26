@@ -59,6 +59,7 @@ const PO = ({ fetchAllProductsMain }) => {
         setAddPO(curr => !curr);
         setTotalPrice(null);
         setClicked(false);
+        setFieldError(null);
     }
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -185,6 +186,8 @@ const PO = ({ fetchAllProductsMain }) => {
 
     const [saveLoader, setSaveLoader] = useState(false);
 
+    const [fieldError, setFieldError] = useState(null);
+
     const handleSavePO = async (e) => {
         e.preventDefault();
 
@@ -216,6 +219,7 @@ const PO = ({ fetchAllProductsMain }) => {
             }
         } else {
             toast.error("Fill all the mandatory fields!");
+            setFieldError("Fill all the mandatory (*) fields!");
             setSaveLoader(false);
         }
     };
@@ -420,12 +424,9 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                 <td>{po.receive}</td>
                                                                 <td>{po.vendor}</td>
                                                                 <td>{po.totalPrice}</td>
-                                                                {
-                                                                    po.status === 'Approved' ?
-                                                                        <td className='font-medium text-green-700'>{po.status}</td> :
-                                                                        <td>{po.status}</td>
-                                                                }
-
+                                                                <td className={`${po.status === 'Approved' ? 'font-medium text-green-700' : 'font-normal'}`}>
+                                                                    {po.status}
+                                                                </td>
                                                             </tr>
                                                         )
                                                     })
@@ -608,6 +609,11 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                 <div className="w-full flex items-center justify-end text-black text-lg font-medium">
                                                                     Total amount: {totalPrice}
                                                                 </div>
+                                                                {
+                                                                    fieldError && <div className="w-full flex items-center justify-start -my-3">
+                                                                        <div className='text-xs text-red-600 italic font-medium'>{fieldError}</div>
+                                                                    </div>
+                                                                }
                                                                 <div className="w-full flex items-center justify-end">
                                                                     {
                                                                         saveLoader ?

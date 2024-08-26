@@ -629,7 +629,8 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                         handler={handleImgModal}
                                         className="bg-transparent shadow-none w-full flex items-center justify-center"
                                     >
-                                        <div className="w-full flex items-center justify-center bg-white p-4 rounded-lg text-black">
+                                        <div style={{scrollbarWidth: 'thin'}}
+                                        className="w-full max-h-[40rem] flex items-start justify-center bg-white p-4 rounded-lg text-black overflow-y-scroll scroll-smooth">
                                             <img className='w-full aspect-auto' src={showImageUrl} alt="" />
                                         </div>
                                     </Dialog>

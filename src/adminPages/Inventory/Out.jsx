@@ -119,7 +119,7 @@ const Out = () => {
             const response = await axios.get(`${backendServer}/api/findProducts-out/${_id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setAddPdts(response.data.filter(pdt => pdt.type === 'Product'));
+            setAddPdts(response.data.filter(pdt => pdt.type === 'Product' && pdt.totQty != 0));
             setAddPdtLoader(false);
         } catch (error) {
             setAddPdtError(error.response.data.message);
@@ -172,6 +172,7 @@ const Out = () => {
 
             if (inavlidArray.length > 0) {
                 setZeroQty(true);
+                setSaveLoader(false);
             } else {
                 const response = await axios.put(`${backendServer}/api/updateOutDoc`, {
                     array,
@@ -256,7 +257,7 @@ const Out = () => {
                                     {
                                         filteredDocs.length === 0 ?
                                             <div className="w-full flex items-center justify-start text-lg font-medium">
-                                                No PO found!
+                                                No OUT document found!
                                             </div> :
                                             <div className="w-full flex flex-col items-center">
                                                 <table className='w-full border-collapse'>
