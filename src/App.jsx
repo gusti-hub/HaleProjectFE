@@ -9,6 +9,7 @@ import Products from './adminPages/Procurement/Products';
 import Test from './Test';
 import In from './adminPages/Inventory/In';
 import Out from './adminPages/Inventory/Out';
+import PrjCollab from './pages/PrjCollab';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/admin-panel" element={<ProtectedRoute element={<AdminPanel />} />} />
         <Route path="/project/:id" element={<ProtectedRoute element={<Project />} />} />
+        <Route path="/project-collab/:id" element={<ProtectedRoute element={<PrjCollab />} />} />
         <Route path="/products/:id" element={<ProtectedRoute element={<Products />} />} />
         <Route path="/inventory_in" element={<ProtectedRoute element={<In />} />} />
         <Route path="/inventory_out" element={<ProtectedRoute element={<Out />} />} />

@@ -629,8 +629,8 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                         handler={handleImgModal}
                                         className="bg-transparent shadow-none w-full flex items-center justify-center"
                                     >
-                                        <div style={{scrollbarWidth: 'thin'}}
-                                        className="w-full max-h-[40rem] flex items-start justify-center bg-white p-4 rounded-lg text-black overflow-y-scroll scroll-smooth">
+                                        <div style={{ scrollbarWidth: 'thin' }}
+                                            className="w-full max-h-[40rem] flex items-start justify-center bg-white p-4 rounded-lg text-black overflow-y-scroll scroll-smooth">
                                             <img className='w-full aspect-auto' src={showImageUrl} alt="" />
                                         </div>
                                     </Dialog>
@@ -747,26 +747,27 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                                             <div>{pdt.productDetails.finish}</div>
                                                                         </div>
                                                                     }
+
                                                                     {/* <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Quantity:</div>
-                                                            <div>{pdt.productDetails.qty}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Vendor:</div>
-                                                            <div>{pdt.productDetails.vendor}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Budget ($):</div>
-                                                            <div>{pdt.productDetails.budget}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Buying price ($):</div>
-                                                            <div>{pdt.productDetails.buyCost}</div>
-                                                        </div>
-                                                        <div className="w-full flex items-center justify-start gap-2">
-                                                            <div className='font-medium'>Selling price ($):</div>
-                                                            <div>{pdt.productDetails.sellCost}</div>
-                                                        </div> */}
+                                                                        <div className='font-medium'>Quantity:</div>
+                                                                        <div>{pdt.productDetails.qty}</div>
+                                                                    </div>
+                                                                    <div className="w-full flex items-center justify-start gap-2">
+                                                                        <div className='font-medium'>Vendor:</div>
+                                                                        <div>{pdt.productDetails.vendor}</div>
+                                                                    </div>
+                                                                    <div className="w-full flex items-center justify-start gap-2">
+                                                                        <div className='font-medium'>Budget ($):</div>
+                                                                        <div>{pdt.productDetails.budget}</div>
+                                                                    </div>
+                                                                    <div className="w-full flex items-center justify-start gap-2">
+                                                                        <div className='font-medium'>Buying price ($):</div>
+                                                                        <div>{pdt.productDetails.buyCost}</div>
+                                                                    </div>
+                                                                    <div className="w-full flex items-center justify-start gap-2">
+                                                                        <div className='font-medium'>Selling price ($):</div>
+                                                                        <div>{pdt.productDetails.sellCost}</div>
+                                                                    </div> */}
                                                                 </div>
 
                                                                 <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
