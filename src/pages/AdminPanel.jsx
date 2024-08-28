@@ -41,12 +41,14 @@ const AdminPanel = () => {
     return (
         <div className="w-full flex items-center justify-center">
             <div className="w-full flex items-start justify-center border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg">
-                <div className={`${isExpanded ? "w-[20%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
+                <div className={`${isExpanded ? userType === 'Employee' ? "w-[20%]" : "w-[15%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
                     <div className="w-full flex flex-col items-center justify-start px-2">
                         <div className={`w-full flex items-center p-4 ${isExpanded ? 'flex-row justify-between' : 'flex-col justify-center'}`}>
                             <img className={`w-[6rem] ${isExpanded ? 'block' : 'hidden'}`} src="images/logoBlue.png" alt="" />
-                            <IoIosArrowBack onClick={() => setExpanded(false)}
-                                className={`text-lg cursor-pointer text-gray-600 ${isExpanded ? "block" : "hidden"}`} />
+                            {
+                                userType === 'Employee' && <IoIosArrowBack onClick={() => setExpanded(false)}
+                                    className={`text-lg cursor-pointer text-gray-600 ${isExpanded ? "block" : "hidden"}`} />
+                            }
                             <IoIosArrowForward onClick={() => setExpanded(true)}
                                 className={`text-lg cursor-pointer text-gray-600 ${!isExpanded ? "block my-2" : "hidden"}`} />
                         </div>
@@ -106,14 +108,6 @@ const AdminPanel = () => {
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 8 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
                                     <MdOutlineInventory2 className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 8 ? 'text-black' : 'text-gray-800'}`} />
                                     <div className={`font-medium text-base text-nowrap ${menuID === 8 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Inventory</div>
-                                </div>
-                            </div>
-                        }
-                        {
-                            userType === 'Client' && <div className="w-full flex flex-col items-center justify-start m-6">
-                                <div className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} bg-[#E9ECF5] rounded-[30px]`}>
-                                    <MdManageSearch className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} text-black`} />
-                                    <div className={`font-medium text-base text-nowrap text-black ${isExpanded ? "block" : "hidden"}`}>Client Collaboration</div>
                                 </div>
                             </div>
                         }

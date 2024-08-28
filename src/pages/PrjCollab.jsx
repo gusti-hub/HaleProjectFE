@@ -42,7 +42,6 @@ const PrjCollab = () => {
     }
 
     const fetchSecWithPdts = async () => {
-        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/project-collab/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -137,7 +136,7 @@ const PrjCollab = () => {
                                                                         pdt.type === 'Product' && <div className="w-full flex flex-col items-center border-2 border-solid border-gray-300 p-4 rounded-lg gap-4">
                                                                             <div className="w-full text-left text-lg font-medium">{pdt.title}</div>
                                                                             <div className="w-full flex items-start justify-center gap-4">
-                                                                                <div className="w-[60%] flex items-center justify-center border-2 border-solid border-gray-300 p-4 rounded-lg">
+                                                                                <div className="w-[60%] flex items-center justify-center border-2 border-solid border-gray-300 p-4 rounded-lg h-[46.8rem] overflow-y-scroll scroll-smooth" style={{scrollbarWidth: 'thin'}}>
                                                                                     <img className='w-full' src={pdt.imageUrl} alt="" />
                                                                                 </div>
                                                                                 <div className="w-[40%] flex flex-col items-center gap-4 border-2 border-solid border-gray-300 p-4 rounded-lg">
@@ -172,7 +171,7 @@ const PrjCollab = () => {
                                                                                                         </div> : ''
                                                                                         }
                                                                                     </div>
-                                                                                    <div className="w-full flex flex-col items-center gap-2 border-2 border-solid border-gray-300 rounded-lg p-2.5">
+                                                                                    <div className="w-full flex flex-col items-center gap-2 border-2 border-solid border-gray-300 rounded-lg p-2.5 h-[15rem] overflow-y-scroll scroll-smooth" style={{scrollbarWidth: 'thin'}}>
                                                                                         <div className="w-full flex items-center justify-start gap-2">
                                                                                             <div className='font-semibold'>Description:</div>
                                                                                             {
@@ -224,7 +223,7 @@ const PrjCollab = () => {
                                                                                             <div className='w-full text-left font-semibold'>Chat here:</div>
                                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
                                                                                             <div className="w-full flex flex-col items-center gap-2 bg-[#F8F9FD] p-2 rounded-lg">
-                                                                                                <div className="w-full flex flex-col items-center gap-1.5 bg-white p-2 max-h-[15rem] overflow-y-scroll scroll-smooth" style={{scrollbarWidth: 'thin'}}>
+                                                                                                <div className="w-full flex flex-col items-center gap-1.5 bg-white p-2 h-[15rem] overflow-y-scroll scroll-smooth" style={{scrollbarWidth: 'thin'}}>
                                                                                                     {
                                                                                                         pdt.chats.length === 0 ?
                                                                                                             <div className='w-full text-left mb-8'>No chat found!</div> :

@@ -97,7 +97,6 @@ const Inventory = () => {
                                         <table className='w-full border-collapse'>
                                             <thead>
                                                 <tr className='text-gray-700 text-lg text-nowrap'>
-                                                    <th>#</th>
                                                     <th>Product ID</th>
                                                     <th>Product Name</th>
                                                     <th>Project ID</th>
@@ -111,7 +110,6 @@ const Inventory = () => {
                                                     currentSales.map((pdt, index) => {
                                                         return (
                                                             <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                                                <td>{indexOfFirstItem + index + 1}</td>
                                                                 <td>{pdt.productDetails.code ? pdt.productDetails.code : null}</td>
                                                                 <td>{pdt.title ? pdt.title : null}</td>
                                                                 <td>{pdt.projectId ? pdt.projectId : null}</td>

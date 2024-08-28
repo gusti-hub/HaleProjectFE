@@ -619,9 +619,27 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                         ) : (
                             products.map(pdt => (
                                 <div key={pdt._id} className="w-full flex flex-col items-center gap-3 border-2 border-solid border-gray-300 rounded-lg p-3">
-                                    <div className="w-full flex items-center justify-end gap-1">
-                                        <FaEdit onClick={() => handleEdit(pdt)} className='text-xl cursor-pointer' />
-                                        <MdDeleteOutline onClick={() => handleDeleteItem(pdt._id)} className='text-2xl text-red-600 cursor-pointer' />
+                                    <div className="w-full flex items-center justify-between">
+                                        {
+                                            pdt.type === 'Product' ?
+                                                pdt.status === 'Pending' ?
+                                                    <div className="w-fit p-1 px-3 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium">
+                                                        Waiting for approval
+                                                    </div> :
+                                                    pdt.status === 'Approved' ?
+                                                        <div className="w-fit p-1 px-3 bg-green-50 text-green-700 rounded-3xl font-medium">
+                                                            {pdt.status}
+                                                        </div>
+                                                        :
+                                                        <div className="w-fit p-1 px-3 bg-red-50 text-red-700 rounded-3xl font-medium">
+                                                            {pdt.status}
+                                                        </div>
+                                                : <div></div>
+                                        }
+                                        <div className="flex items-center justify-center gap-1">
+                                            <FaEdit onClick={() => handleEdit(pdt)} className='text-xl cursor-pointer' />
+                                            <MdDeleteOutline onClick={() => handleDeleteItem(pdt._id)} className='text-2xl text-red-600 cursor-pointer' />
+                                        </div>
                                     </div>
                                     <Dialog
                                         size='md'

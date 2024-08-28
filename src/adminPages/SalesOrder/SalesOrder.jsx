@@ -320,7 +320,6 @@ const SalesOrder = () => {
                                         <table className='w-full border-collapse mt-4'>
                                             <thead>
                                                 <tr className='text-gray-700 text-lg text-nowrap'>
-                                                    <th>#</th>
                                                     <th>Action</th>
                                                     <th>Project Id</th>
                                                     <th>Project Name</th>
@@ -336,7 +335,6 @@ const SalesOrder = () => {
                                                     currentSales.map((pdt, index) => {
                                                         return (
                                                             <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                                                <td>{indexOfFirstItem + index + 1}</td>
                                                                 <td>
                                                                     <div className="w-full flex items-start justify-center gap-2 relative">
                                                                         {
