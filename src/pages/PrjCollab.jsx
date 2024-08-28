@@ -5,11 +5,23 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { backendServer } from '../utils/info';
 import CircularProgress from '@mui/material/CircularProgress';
 import toast from 'react-hot-toast';
+import { LuSend } from "react-icons/lu";
 
 const PrjCollab = () => {
 
     const navigate = useNavigate();
     const address = useParams();
+
+    const options = {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
 
     const token = localStorage.getItem('token');
     const loggedInUser = localStorage.getItem('name');
@@ -18,7 +30,16 @@ const PrjCollab = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [statusLoader, setStatusLoader] = useState('');
+    const [sendLoader, setSendLoader] = useState(false);
+
     const [data, setData] = useState([]);
+
+    const [chatBody, setChatBody] = useState('');
+
+    const handleInputChange = (e) => {
+        setChatBody(e.target.value);
+    }
 
     const fetchSecWithPdts = async () => {
         setLoading(true);
@@ -34,8 +55,6 @@ const PrjCollab = () => {
         }
     };
 
-    const [statusLoader, setStatusLoader] = useState('');
-
     const handleStatus = async (id, status) => {
         setStatusLoader(id);
         try {
@@ -46,6 +65,30 @@ const PrjCollab = () => {
         } catch (error) {
             toast.error(error.response.data.message);
             setStatusLoader('');
+        }
+    };
+
+    const sendChat = async (id) => {
+        setSendLoader(true);
+
+        if (chatBody.length === 0) {
+            toast.error('Unable to send empty chat!');
+            setSendLoader(false);
+        } else {
+            try {
+                const response = await axios.put(`${backendServer}/api/newChat/${id}`, {
+                    name: loggedInUser,
+                    body: chatBody,
+                    userType: userType
+                });
+                toast.success(response.data.message);
+                fetchSecWithPdts();
+                setSendLoader(false);
+                setChatBody('');
+            } catch (error) {
+                toast.error(error.response.data.message);
+                setSendLoader(false);
+            }
         }
     };
 
@@ -177,6 +220,53 @@ const PrjCollab = () => {
                                                                                         }
                                                                                     </div>
                                                                                     <div className="w-full flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg p-2.5">
+                                                                                        <div className="w-full flex flex-col items-center justify-start gap-2">
+                                                                                            <div className='w-full text-left font-semibold'>Chat here:</div>
+                                                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                                            <div className="w-full flex flex-col items-center gap-2 bg-[#F8F9FD] p-2 rounded-lg">
+                                                                                                <div className="w-full flex flex-col items-center gap-1.5 bg-white p-2 max-h-[15rem] overflow-y-scroll scroll-smooth" style={{scrollbarWidth: 'thin'}}>
+                                                                                                    {
+                                                                                                        pdt.chats.length === 0 ?
+                                                                                                            <div className='w-full text-left mb-8'>No chat found!</div> :
+                                                                                                            pdt.chats.map(chat => {
+                                                                                                                return (
+                                                                                                                    chat.userType === userType ?
+                                                                                                                        <div className="w-full flex items-center justify-end">
+                                                                                                                            <div className="max-w-[60%] min-w-[40%] flex flex-col items-center gap-0.5 bg-green-50 p-1 px-2 rounded-l-md rounded-tr-md">
+                                                                                                                                <div className="w-full text-left text-[0.6rem] text-gray-600">{chat.name}</div>
+                                                                                                                                <div className="w-full text-sm">{chat.body}</div>
+                                                                                                                                <div className="w-full text-end text-[0.6rem] text-gray-600">
+                                                                                                                                    {new Intl.DateTimeFormat('en-US', options).format(new Date(chat.createdAt))}
+                                                                                                                                </div>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                        :
+                                                                                                                        <div className="w-full flex items-center justify-start">
+                                                                                                                            <div className="max-w-[60%] min-w-[40%] flex flex-col items-center gap-0.5 bg-blue-50 p-1 px-2 rounded-r-md rounded-tl-md">
+                                                                                                                                <div className="w-full text-left text-[0.6rem] text-gray-600">{chat.name}</div>
+                                                                                                                                <div className="w-full text-sm">{chat.body}</div>
+                                                                                                                                <div className="w-full text-end text-[0.6rem] text-gray-600">
+                                                                                                                                    {new Intl.DateTimeFormat('en-US', options).format(new Date(chat.createdAt))}
+                                                                                                                                </div>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                )
+                                                                                                            })
+                                                                                                    }
+                                                                                                </div>
+                                                                                                <div className="w-full flex items-start gap-2">
+                                                                                                    <textarea value={chatBody} onChange={handleInputChange}
+                                                                                                        className='w-full outline-none p-2 border border-solid border-gray-300 text-sm'
+                                                                                                        placeholder='Type here...' rows="2"></textarea>
+                                                                                                    {
+                                                                                                        sendLoader ? <CircularProgress /> :
+                                                                                                            <button onClick={() => sendChat(pdt._id)} className="flex items-center justify-center">
+                                                                                                                <LuSend className='text-[#7F55DE] text-2xl' />
+                                                                                                            </button>
+                                                                                                    }
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
