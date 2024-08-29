@@ -112,7 +112,14 @@ const SalesOrder = () => {
         } else {
             try {
                 if (formData.name.length > 0 && formData.owner.length > 0 && formData.client.length > 0) {
-                    const response = await axios.post(`${backendServer}/api/productreg`, formData);
+                    const response = await axios.post(`${backendServer}/api/productreg`, {
+                        name: formData.name,
+                        code: `PRJ-${formData.client.split('-')[0]}-00${allSales.length + 1}`,
+                        desc: formData.desc,
+                        owner: formData.owner,
+                        ownerId: formData.ownerId,
+                        client: formData.client
+                    });
                     toast.success(response.data.message);
                     resetForm();
                     fetchSalesData();
@@ -321,7 +328,7 @@ const SalesOrder = () => {
                                             <thead>
                                                 <tr className='text-gray-700 text-lg text-nowrap'>
                                                     <th>Action</th>
-                                                    <th>Project Id</th>
+                                                    <th>Project Code</th>
                                                     <th>Project Name</th>
                                                     <th>Description</th>
                                                     <th>Project Owner</th>
@@ -401,9 +408,9 @@ const SalesOrder = () => {
                                                                 <td>
                                                                     {
                                                                         pdt.progress === "Not Started" ?
-                                                                            <div className=''>{pdt._id}</div> :
+                                                                            <div className=''>{pdt.code}</div> :
                                                                             <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
-                                                                                {pdt._id}
+                                                                                {pdt.code}
                                                                             </div>
                                                                     }
                                                                 </td>
