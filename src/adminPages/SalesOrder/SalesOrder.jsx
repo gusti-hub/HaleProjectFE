@@ -392,7 +392,7 @@ const SalesOrder = () => {
                                                                     className='cursor-pointer text-xl' />
                                                         }
                                                         <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[13rem] flex flex-col items-start justify-start gap-1 p-2 fixed bg-white ml-[14rem] -mt-[0.5rem]`}>
+                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[15rem] flex flex-col items-start justify-start gap-1 p-2 fixed bg-white ml-[16rem] -mt-[0.5rem]`}>
 
                                                             {(pdt.progress == GlobalVariable.Progress.NotStarted && pdt.owner === name) ?                                                         
                                                                 <>

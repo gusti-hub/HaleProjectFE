@@ -42,8 +42,7 @@ const AdminPanel = () => {
 
     return (
         <div className="w-full flex items-center justify-center">
-            <div className="w-full flex items-start justify-center border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg">
-                <div className={`${isExpanded ? "w-[20%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
+                <div className={`${isExpanded ? "w-[18%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
                     <div className="w-full flex flex-col items-center justify-start px-2">
                         <div className={`w-full flex items-center p-4 ${isExpanded ? 'flex-row justify-between' : 'flex-col justify-center'}`}>
                             <img className={`w-[6rem] ${isExpanded ? 'block' : 'hidden'}`} src="images/logoBlue.png" alt="" />
@@ -166,7 +165,6 @@ const AdminPanel = () => {
                                                             : menuID === 10 ? <Configurations /> : ""
                     }
                 </div>
-            </div>
         </div>
     );
 };
