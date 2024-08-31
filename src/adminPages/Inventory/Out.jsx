@@ -229,7 +229,9 @@ const Out = () => {
         setViewLoader(true);
 
         try {
-            const response = await axios.get(`${backendServer}/api/viewOutDoc/${_id}`);
+            const response = await axios.get(`${backendServer}/api/viewOutDoc/${_id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setViewPdts(response.data);
             setViewLoader(false);
         } catch (error) {
@@ -410,7 +412,7 @@ const Out = () => {
 
                     {/* Add Doc */}
                     <Dialog
-                        size={isAddPdt ? 'md' : 'lg'}
+                        size={isAddPdt || selectedProducts.length === 0 ? 'md' : 'lg'}
                         open={addModal}
                         handler={handleAddModal}
                         className="bg-transparent shadow-none w-full flex items-center justify-center"

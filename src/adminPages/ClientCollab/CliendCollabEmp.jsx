@@ -115,9 +115,9 @@ const ClientCollabEmp = () => {
                                                                 <td>
                                                                     {
                                                                         pdt.progress === "Not Started" ?
-                                                                            <div className=''>{pdt._id}</div> :
+                                                                            <div className=''>{pdt.code}</div> :
                                                                             <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project-collab/${pdt._id}`)}>
-                                                                                {pdt._id}
+                                                                                {pdt.code}
                                                                             </div>
                                                                     }
                                                                 </td>

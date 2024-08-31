@@ -94,7 +94,7 @@ const Procurement = () => {
                                         <table className='w-full border-collapse mt-4'>
                                             <thead>
                                                 <tr className='text-gray-700 text-lg text-nowrap'>
-                                                    <th>Project Id</th>
+                                                    <th>Project Code</th>
                                                     <th>Project Name</th>
                                                     <th>Project Owner</th>
                                                     <th>Client Name</th>
@@ -108,7 +108,7 @@ const Procurement = () => {
                                                             <tr key={pdt._id} className='text-base text-center text-gray-700'>
                                                                 <td>
                                                                     <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/products/${pdt._id}`)}>
-                                                                        {pdt._id}
+                                                                        {pdt.code}
                                                                     </div>
                                                                 </td>
                                                                 <td>{pdt.name}</td>

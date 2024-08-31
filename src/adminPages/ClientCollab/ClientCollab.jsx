@@ -98,7 +98,7 @@ const ClientCollab = () => {
                                         <table className='w-full border-collapse mt-4'>
                                             <thead>
                                                 <tr className='text-gray-700 text-lg text-nowrap'>
-                                                    <th>Project Id</th>
+                                                    <th>Project Code</th>
                                                     <th>Project Name</th>
                                                     <th>Description</th>
                                                     <th>Project Owner</th>
@@ -115,9 +115,9 @@ const ClientCollab = () => {
                                                                 <td>
                                                                     {
                                                                         pdt.progress === "Not Started" ?
-                                                                            <div className=''>{pdt._id}</div> :
+                                                                            <div className=''>{pdt.code}</div> :
                                                                             <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project-collab/${pdt._id}`)}>
-                                                                                {pdt._id}
+                                                                                {pdt.code}
                                                                             </div>
                                                                     }
                                                                 </td>
