@@ -380,7 +380,7 @@ const In = () => {
                                                             <th>PO Number</th>
                                                             <th>PO Date</th>
                                                             <th>Estimation Delivery</th>
-                                                            <th>Estimation Received</th>
+                                                            <th>Received Date</th>
                                                             <th>Vendor Name</th>
                                                             <th>Status</th>
                                                         </tr>
@@ -429,7 +429,7 @@ const In = () => {
                                                                         <td>{po.poId}</td>
                                                                         <td>{po.createdAt.split('T')[0]}</td>
                                                                         <td>{po.delivery}</td>
-                                                                        <td>{po.receive}</td>
+                                                                        <td>{po.recDate}</td>
                                                                         <td>{po.vendor}</td>
                                                                         <td>
                                                                             {

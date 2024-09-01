@@ -850,7 +850,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
         setQty({});
         setZeroQty(false);
         setSelectedProducts([]);
-        setAdd(curr => !curr)
+        setAdd(curr => !curr);
+        setAddPdt(false);
     };
 
     const handleSaveRFQ = async () => {
@@ -1666,8 +1667,9 @@ const Products = () => {
                                                                     <td>{pdt.productDetails.code}</td>
                                                                     <td>{pdt.title}</td>
                                                                     {
-                                                                        pdt.status === "Pending" ?
-                                                                            <td>Approval pending</td> : ''
+                                                                        pdt.status === "Pending" ? <td className='font-medium text-gray-600'>Approval pending</td> :
+                                                                            pdt.status === "Approved" ? <td className='font-medium text-green-600'>Approved</td> :
+                                                                                pdt.status === "Rejected" ? <td className='font-medium text-red-600'>Rejected</td> : ''
                                                                     }
                                                                     <td>{pdt.rfqNumber}</td>
                                                                     <td>{pdt.rfqSentDate}</td>

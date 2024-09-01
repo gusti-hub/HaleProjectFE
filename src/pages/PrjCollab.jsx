@@ -154,18 +154,18 @@ const PrjCollab = () => {
                                                                                                                 className='bg-red-600 text-white w-[7rem] py-1.5 rounded-md'>
                                                                                                                 Reject
                                                                                                             </button>
-                                                                                                        </div> : <div className='w-full text-left'>
-                                                                                                            <div className="w-fit p-1 px-3 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium">
+                                                                                                        </div> : <div className='w-full flex items-center justify-center'>
+                                                                                                            <div className="w-fit p-1 px-8 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium">
                                                                                                                 Waiting for approval
                                                                                                             </div>
                                                                                                         </div>
-                                                                                                    : pdt.status === 'Approved' ? <div className='w-full text-left'>
-                                                                                                        <div className="w-fit p-1 px-3 bg-green-50 text-green-700 rounded-3xl font-medium">
+                                                                                                    : pdt.status === 'Approved' ? <div className='w-full flex items-center justify-center'>
+                                                                                                        <div className="w-fit p-1 px-8 bg-green-50 text-green-700 rounded-3xl font-medium">
                                                                                                             {pdt.status}
                                                                                                         </div>
                                                                                                     </div>
-                                                                                                        : pdt.status === 'Rejected' ? <div className='w-full text-left'>
-                                                                                                            <div className="w-fit p-1 px-3 bg-red-50 text-red-700 rounded-3xl font-medium">
+                                                                                                        : pdt.status === 'Rejected' ? <div className='w-full flex items-center justify-center'>
+                                                                                                            <div className="w-fit p-1 px-8 bg-red-50 text-red-700 rounded-3xl font-medium">
                                                                                                                 {pdt.status}
                                                                                                             </div>
                                                                                                         </div> : ''
