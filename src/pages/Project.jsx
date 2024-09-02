@@ -338,7 +338,7 @@ const Project = () => {
                                                             </form>
                                                         </Dialog>
                                                     </div>
-                                                    <div className="w-full flex flex-col items-center">
+                                                    <div className="w-full flex flex-col items-center mt-4">
                                                         {
                                                             sections.length == 0 ? <div className="w-full items-center justify-start font-medium py-2">Add new section to begin.</div> :
                                                                 sections.map(section => (

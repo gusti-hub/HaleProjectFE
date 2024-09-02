@@ -88,7 +88,7 @@ const Procurement = () => {
                             {
                                 filteredSales.length === 0 ?
                                     <div className="w-full flex items-center justify-start text-lg font-medium mt-4">
-                                        No records found!
+                                        No record found!
                                     </div> :
                                     <div className="w-full flex flex-col items-center">
                                         <table className='w-full border-collapse mt-4'>

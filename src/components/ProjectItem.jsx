@@ -138,7 +138,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         len: editItem.productDetails?.len || '',
         wid: editItem.productDetails?.wid || '',
         dia: editItem.productDetails?.dia || '',
-        color: editItem.productDetails?.color || '',
+        color: editItem.productDetails?.color || '#000000',
         material: editItem.productDetails?.material || '',
         insert: editItem.productDetails?.insert || '',
         finish: editItem.productDetails?.finish || '',
@@ -146,7 +146,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         // vendor: editItem.productDetails?.vendor || '',
         // budget: editItem.productDetails?.budget || '',
         // buyCost: editItem.productDetails?.buyCost || '',
-        // sellCost: editItem.productDetails?.sellCost || '',
+        sellCost: editItem.productDetails?.sellCost || '',
         desc: editItem.desc || '',
         imageUrl: editItem.imageUrl || ''
     } : {
@@ -158,7 +158,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         len: null,
         wid: null,
         dia: null,
-        color: '',
+        color: '#000000',
         material: '',
         insert: '',
         finish: '',
@@ -166,7 +166,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
         // vendor: '',
         // budget: null,
         // buyCost: null,
-        // sellCost: null,
+        sellCost: null,
         desc: '',
         imageUrl: ''
     };
@@ -188,7 +188,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 len: editItem.productDetails?.len || '',
                 wid: editItem.productDetails?.wid || '',
                 dia: editItem.productDetails?.dia || '',
-                color: editItem.productDetails?.color || '',
+                color: editItem.productDetails?.color || '#000000',
                 material: editItem.productDetails?.material || '',
                 insert: editItem.productDetails?.insert || '',
                 finish: editItem.productDetails?.finish || '',
@@ -196,7 +196,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                 // vendor: editItem.productDetails?.vendor || '',
                 // budget: editItem.productDetails?.budget || '',
                 // buyCost: editItem.productDetails?.buyCost || '',
-                // sellCost: editItem.productDetails?.sellCost || '',
+                sellCost: editItem.productDetails?.sellCost || '',
                 desc: editItem.desc || '',
                 imageUrl: editItem.imageUrl || ''
             });
@@ -239,7 +239,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
     const handleSubmit = async (e) => {
         setSaveLoader(true);
         e.preventDefault();
-        if (formData.name.length === 0 || formData.code.length === 0 || (!isEditMode && !selectedFile)) {
+        if (formData.name.length === 0 || formData.code.length === 0 || (!isEditMode && !selectedFile) || Number(formData.sellCost) <= 0) {
             toast.error("Fill the mandatory fields");
             handleClose();
             setSaveLoader(false);
@@ -279,7 +279,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             len: null,
             wid: null,
             dia: null,
-            color: '',
+            color: '#000000',
             material: '',
             insert: '',
             finish: '',
@@ -287,7 +287,7 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             // vendor: '',
             // budget: null,
             // buyCost: null,
-            // sellCost: null,
+            sellCost: null,
             desc: '',
             imageUrl: ''
         });
@@ -445,6 +445,17 @@ const PdtForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
                         type="number" name='sellCost' placeholder='Type here...' />
                 </div>
             </div> */}
+
+            <div className="w-full flex items-center justify-start">
+                <div className="w-full max-w-[50%] flex items-center justify-start gap-2 text-black text-nowrap">
+                    <label htmlFor="sellCost">Selling cost ($):</label>
+                    <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                    <input value={formData.sellCost} onChange={handleInputChange}
+                        className='w-full outline-none border-b border-solid border-b-black p-[2px]'
+                        min={0}
+                        type="number" name='sellCost' placeholder='0' />
+                </div>
+            </div>
 
             <div className="w-full flex items-start justify-start gap-2 text-black">
                 <label htmlFor="desc">Description:</label>
@@ -717,7 +728,9 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                                         <span>{pdt.title} ({pdt.productDetails.code})</span>
                                                                     </div>
                                                                     <div className="w-full h-[2px] bg-gray-300"></div>
-                                                                    <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
+                                                                    <div className="w-full h-svh flex items-center justify-center">
+                                                                        <img onClick={() => showImage(pdt.imageUrl)} className='max-w-[15rem] cursor-pointer' src={pdt.imageUrl} alt="" />
+                                                                    </div>
                                                                 </div>
 
                                                                 <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">
@@ -781,11 +794,14 @@ const ProjectItem = ({ name, id, isOpen, handleOpen, handleClose, addressID, fet
                                                                     <div className="w-full flex items-center justify-start gap-2">
                                                                         <div className='font-medium'>Buying price ($):</div>
                                                                         <div>{pdt.productDetails.buyCost}</div>
-                                                                    </div>
+                                                                    </div>*/}
                                                                     <div className="w-full flex items-center justify-start gap-2">
-                                                                        <div className='font-medium'>Selling price ($):</div>
-                                                                        <div>{pdt.productDetails.sellCost}</div>
-                                                                    </div> */}
+                                                                        <div className='font-medium'>Selling price:</div>
+                                                                        <div>{new Intl.NumberFormat('en-US', {
+                                                                            style: 'currency',
+                                                                            currency: 'USD',
+                                                                        }).format(pdt.productDetails.sellCost)}</div>
+                                                                    </div>
                                                                 </div>
 
                                                                 <div style={{ scrollbarWidth: 'thin' }} className="w-full flex flex-col items-center border-2 border-solid border-gray-300 rounded-lg p-3 gap-2 h-[20rem] overflow-y-scroll scroll-smooth">

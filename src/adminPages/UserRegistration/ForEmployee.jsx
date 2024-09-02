@@ -320,7 +320,7 @@ const ForEmployee = () => {
             {
                 filteredUsers.length === 0 ?
                     <div className="w-full flex items-center justify-start text-lg font-medium">
-                        No records found!
+                        No record found!
                     </div> :
                     <div className="w-full flex flex-col items-center">
                         <table className='w-full border-collapse'>

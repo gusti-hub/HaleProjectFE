@@ -70,16 +70,18 @@ const Inventory = () => {
                             Error: {error}
                         </div> :
                         <div className="w-full flex flex-col items-center gap-6">
-                            <div className="w-full flex items-center justify-between">
-                                <div className="flex items-center justify-center gap-6">
-                                    <button onClick={() => navigate('/inventory_in')}
-                                        className='w-20 px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>IN</button>
-                                    <button onClick={() => navigate('/inventory_out')}
-                                        className='w-20 px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>OUT</button>
+                            {
+                                allPdts.length != 0 && <div className="w-full flex items-center justify-between">
+                                    <div className="flex items-center justify-center gap-6">
+                                        <button onClick={() => navigate('/inventory_in')}
+                                            className='w-20 px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>IN</button>
+                                        <button onClick={() => navigate('/inventory_out')}
+                                            className='w-20 px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>OUT</button>
+                                    </div>
+                                    <button onClick={() => navigate('/stock-adjustment')}
+                                        className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>Stock Adjustment</button>
                                 </div>
-                                <button onClick={() => navigate('/stock-adjustment')}
-                                    className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>Stock Adjustment</button>
-                            </div>
+                            }
                             {
                                 allPdts.length != 0 &&
                                 <div className="w-full flex items-center justify-end">
@@ -94,7 +96,7 @@ const Inventory = () => {
                             }
                             {
                                 filteredSales.length === 0 ?
-                                    <div className="w-full flex items-center justify-start text-lg font-medium">
+                                    <div className="w-full flex items-center justify-start text-lg font-medium mt-4">
                                         No product found!
                                     </div> :
                                     <div className="w-full flex flex-col items-center">
@@ -118,8 +120,14 @@ const Inventory = () => {
                                                                 <td>{pdt.title ? pdt.title : null}</td>
                                                                 <td>{pdt.projectId ? pdt.projectId : null}</td>
                                                                 <td>{pdt.totalRecQty}</td>
-                                                                <td></td>
-                                                                <td></td>
+                                                                <td>{new Intl.NumberFormat('en-US', {
+                                                                    style: 'currency',
+                                                                    currency: 'USD',
+                                                                }).format(pdt.buyPrice)}</td>
+                                                                <td>{new Intl.NumberFormat('en-US', {
+                                                                    style: 'currency',
+                                                                    currency: 'USD',
+                                                                }).format(pdt.productDetails.sellCost)}</td>
                                                             </tr>
                                                         )
                                                     })
