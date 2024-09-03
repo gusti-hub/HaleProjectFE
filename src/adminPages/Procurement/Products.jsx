@@ -32,7 +32,7 @@ import html2canvas from 'html2canvas';
 
 //PO
 
-const PO = ({ fetchAllProductsMain }) => {
+const PO = ({ fetchAllProductsMain, projectDetails }) => {
 
     const token = localStorage.getItem('token');
     const address = useParams();
@@ -364,10 +364,12 @@ const PO = ({ fetchAllProductsMain }) => {
                         :
                         <div className="w-full flex flex-col items-center gap-4">
                             <div className="w-full flex items-center justify-start">
+                            {(projectDetails.progress == GlobalVariable.Progress.ProjectImplementation) &&  
                                 <button onClick={() => setAddPO(state => !state)}
                                     className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
                                     ADD NEW PO
                                 </button>
+                            }
                             </div>
                             <div className="w-full flex items-center justify-center text-black">
                                 {
@@ -886,7 +888,7 @@ const PO = ({ fetchAllProductsMain }) => {
 
 //RFQ
 
-const RFQ = ({ fetchAllProductsMain }) => {
+const RFQ = ({ fetchAllProductsMain, projectDetails }) => {
 
     const token = localStorage.getItem('token');
     const address = useParams();
@@ -962,6 +964,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
             }
         });
     };
+
 
     const handleSave = () => {
         setAddPdt(false);
@@ -1343,9 +1346,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
     
         // Save the PDF
         doc.save('rfq.pdf');
-    };      
-
-
+    };
+      
     return (
         <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
             {
@@ -1360,10 +1362,12 @@ const RFQ = ({ fetchAllProductsMain }) => {
                         :
                         <div className="w-full flex flex-col items-center justify-start gap-4">
                             <div className="w-full flex items-center justify-start">
+                            {(projectDetails.progress != GlobalVariable.Progress.NotStarted) && (projectDetails.progress != GlobalVariable.Progress.ProjectCompleted) && 
                                 <button onClick={handleAddNew}
                                     className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
                                     ADD NEW RFQ
                                 </button>
+                            }
                             </div>
                             <div className="w-full flex items-center justify-center text-black">
                                 {
@@ -1966,7 +1970,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                             {zeroQty && <div className="w-full text-left text-xs italic text-red-600">Quantity must be greater than zero.</div>}
                             {
                                 selectedProducts.length != 0 &&
-                                <div className="w-full flex items-center justify-start">
+                                <div className="w-full flex items-center justify-end">
                                     {
                                         saveLoader ?
                                             <div className='flex items-center justify-center m-4'>
@@ -2017,8 +2021,25 @@ const Products = () => {
 
     const onlyProducts = products.filter(product => product.type === "Product");
 
+    const fetchProjectDetails = async () => {
+        try {
+            const response = await axios.get(`${backendServer}/api/project/${address.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const project = response.data;
+            setProjectDetails(project);
+            setLoading(false);
+        } catch (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    }
+
+    const [projectDetails, setProjectDetails] = useState([]);
+
     useEffect(() => {
         fetchAllProducts();
+        fetchProjectDetails();
     }, []);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -2083,9 +2104,9 @@ const Products = () => {
                                                         <th>Product Code</th>
                                                         <th>Product Name</th>
                                                         <th>Item Status</th>
-                                                        <th>RFQ Number</th>
-                                                        <th>RFQ Sent Date</th>
-                                                        <th>RFQ Receive Date</th>
+                                                        <th>Latest RFQ Number</th>
+                                                        <th>Latest RFQ Sent Date</th>
+                                                        <th>Latest RFQ Receive Date</th>
                                                         <th>PO Number</th>
                                                     </tr>
                                                 </thead>
@@ -2137,7 +2158,10 @@ const Products = () => {
                 handler={handleRFQ}
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
-                <RFQ fetchAllProductsMain={fetchAllProducts} />
+                <RFQ 
+                    fetchAllProductsMain={fetchAllProducts} 
+                    projectDetails={projectDetails}
+                />
             </Dialog>
 
             <Dialog
@@ -2146,7 +2170,10 @@ const Products = () => {
                 handler={handlePO}
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
-                <PO fetchAllProductsMain={fetchAllProducts} />
+                <PO 
+                    fetchAllProductsMain={fetchAllProducts}
+                    projectDetails={projectDetails} 
+                />
             </Dialog>
         </div>
     );
