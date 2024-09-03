@@ -46,6 +46,7 @@ const In = () => {
     }
 
     const fetchAllPOs = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/getAllPOs`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -69,7 +70,7 @@ const In = () => {
     );
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(6);
+    const [itemsPerPage] = useState(7);
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -98,7 +99,7 @@ const In = () => {
 
     const [isBackOrder, setIsBackOrder] = useState(false);
 
-    const handleRecModal = () => { setRecLoader(true); setRecError(null); setRecModal(curr => !curr); resetRecModal(); };
+    const handleRecModal = () => { setRecLoader(true); setRecError(null); setRecModal(curr => !curr); resetRecModal(); setCnfWindow(false); };
 
     const handleViewModal = () => { setRecLoader(true); setRecError(null); setViewModal(curr => !curr); resetViewModal(); };
 
@@ -218,7 +219,7 @@ const In = () => {
 
             const response = await axios.post(`${backendServer}/api/createBackOrder/${poId}`, {
                 backOrderProducts: backOrderProducts,
-                docNum: `IN-00${allDocs.length + 2}`
+                docNum: `${isBackOrder ? `IN-00${allDocs.length + 1}` : `IN-00${allDocs.length + 2}`}`
             });
 
             toast.success(response.data.message);
@@ -227,47 +228,102 @@ const In = () => {
         }
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleReceiveDoc = async () => {
+
+        setSaveLoader(true);
+
         try {
             const updatedProducts = updateProductsArray(currPO.currPdts);
 
-            const backOrderProduct = updatedProducts.filter(pdt => pdt.demQty - pdt.recQty > 0);
+            const response = isBackOrder ?
+                await axios.put(`${backendServer}/api/update-recBackOrder-qty/${currPO._id}`,
+                    {
+                        products: updatedProducts,
+                        status: "Done"
+                    })
+                :
+                await axios.put(`${backendServer}/api/update-rec-qty/${currPO._id}`,
+                    {
+                        docNumber: `IN-00${allDocs.length + 1}`,
+                        products: updatedProducts,
+                        status: "Done"
+                    });
 
-            const invalidProduct = updatedProducts.filter(product => product.recQty <= 0);
-
-            if (invalidProduct.length > 0) {
-                setZeroError(true);
-                toast.error("Cannot update: Quantity cannot be less than or equals to zero!");
-            } else {
-                const response = isBackOrder ?
-                    await axios.put(`${backendServer}/api/update-recBackOrder-qty/${currPO._id}`,
-                        {
-                            products: updatedProducts,
-                            status: "Done"
-                        })
-                    :
-                    await axios.put(`${backendServer}/api/update-rec-qty/${currPO._id}`,
-                        {
-                            docNumber: `IN-00${allDocs.length + 1}`,
-                            products: updatedProducts,
-                            status: "Done"
-                        });
-
-
-                if (backOrderProduct.length > 0) {
-                    await createBackOrder(response.data.docDetails.poId, response.data.docDetails.pdts);
-                }
-
-                toast.success(response.data.message);
-                fetchAllPOs();
-                fetchAllDocs();
-                handleRecModal();
-            }
+            toast.success(response.data.message);
+            fetchAllPOs();
+            fetchAllDocs();
+            handleRecModal();
+            setSaveLoader(false);
         } catch (error) {
             toast.error(error.response.data.message);
+            setSaveLoader(false);
         }
 
+        setCnfWindow(false);
+
     };
+
+    const handleReceiveBackDoc = async () => {
+
+        setSaveLoader(true);
+
+        try {
+            const updatedProducts = updateProductsArray(currPO.currPdts);
+
+            const response = isBackOrder ?
+                await axios.put(`${backendServer}/api/update-recBackOrder-qty/${currPO._id}`,
+                    {
+                        products: updatedProducts,
+                        status: "Done"
+                    })
+                :
+                await axios.put(`${backendServer}/api/update-rec-qty/${currPO._id}`,
+                    {
+                        docNumber: `IN-00${allDocs.length + 1}`,
+                        products: updatedProducts,
+                        status: "Done"
+                    });
+
+
+            await createBackOrder(response.data.docDetails.poId, response.data.docDetails.pdts);
+
+
+            toast.success(response.data.message);
+            fetchAllPOs();
+            fetchAllDocs();
+            handleRecModal();
+            setSaveLoader(false);
+        } catch (error) {
+            toast.error(error.response.data.message);
+            setSaveLoader(false);
+        }
+
+        setCnfWindow(false);
+
+    };
+
+    const [cnfWindow, setCnfWindow] = useState(false);
+
+    const handleSave = async () => {
+        const updatedProducts = updateProductsArray(currPO.currPdts);
+
+        const backOrderProduct = updatedProducts.filter(pdt => pdt.demQty - pdt.recQty > 0);
+
+        const invalidProduct = updatedProducts.filter(product => product.recQty <= 0);
+
+        if (invalidProduct.length > 0) {
+            setZeroError(true);
+            toast.error("Cannot update: Quantity cannot be less than or equals to zero!");
+        } else {
+            if (backOrderProduct.length > 0) {
+                setCnfWindow(true);
+            } else {
+                await handleReceiveDoc(updatedProducts);
+            }
+        }
+    }
 
     useEffect(() => {
         fetchAllPOs();
@@ -324,6 +380,7 @@ const In = () => {
                                                             <th>PO Number</th>
                                                             <th>PO Date</th>
                                                             <th>Estimation Delivery</th>
+                                                            <th>Received Date</th>
                                                             <th>Vendor Name</th>
                                                             <th>Status</th>
                                                         </tr>
@@ -372,6 +429,7 @@ const In = () => {
                                                                         <td>{po.poId}</td>
                                                                         <td>{po.createdAt.split('T')[0]}</td>
                                                                         <td>{po.delivery}</td>
+                                                                        <td>{po.recDate}</td>
                                                                         <td>{po.vendor}</td>
                                                                         <td>
                                                                             {
@@ -410,90 +468,117 @@ const In = () => {
 
                 {/* Receive Modal */}
                 <Dialog
-                    size="lg"
+                    size={`${cnfWindow ? 'xs' : 'lg'}`}
                     open={recModal}
                     handler={handleRecModal}
                     className="bg-transparent shadow-none w-full flex items-center justify-center"
                 >
-                    <div className="w-full flex items-center justify-center bg-white p-3 rounded-lg">
-                        {
-                            recLoader ?
-                                <div className='w-full flex items-center justify-center my-4'> <CircularProgress /> </div> :
-                                recError ?
-                                    <div className="w-full flex items-center justify-center text-red-600 font-medium my-4"> Error: {recError} </div> :
-                                    <div className="w-full flex flex-col items-center">
-                                        <div className="w-full text-left font-semibold text-black mb-1">PO Number: <span className="font-normal">{currPO.currPO}</span></div>
-                                        <div className="w-full text-left font-semibold text-black">Vendor: <span className="font-normal">{currPO.vendor}</span></div>
-                                        <div className="w-full flex flex-col items-center gap-4">
-                                            <div className="w-full flex items-start justify-start max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
-                                                {
-                                                    pdtArray.length === 0 ? <div className="w-full text-left mt-4">No product found!</div>
-                                                        :
-                                                        <table className='w-full border-collapse mt-4'>
-                                                            <thead>
-                                                                <tr className='text-gray-700 text-lg text-nowrap'>
-                                                                    <th>Product Name</th>
-                                                                    <th>Image</th>
-                                                                    <th>Specification</th>
-                                                                    <th>Quantity Demand</th>
-                                                                    <th>Quantity Received</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {
-                                                                    pdtArray.map(pdt => {
-                                                                        return (
-                                                                            <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                                                                <td>{pdt.title}</td>
-                                                                                <td>
-                                                                                    <div className="flex items-center justify-center">
-                                                                                        <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <div className="flex flex-col items-start">
-                                                                                        {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                                        {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                                        {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>{pdt.qty}</td>
-                                                                                <td>
-                                                                                    <div className="flex items-center justify-center">
-                                                                                        <input
-                                                                                            value={qty[pdt._id]?.qty || ''}
-                                                                                            onChange={(e) => handleQtyChange(e, pdt._id, pdt.qty)}
-                                                                                            className={`w-[4rem] p-2 py-1 outline-none bg-[#F8F9FD] 
-                                                                                ${qty[pdt._id]?.qty <= 0 || qty[pdt._id]?.qty > pdt.qty ? 'border border-solid border-red-600' : 'border-none'}`}
-                                                                                            placeholder='1'
-                                                                                            min={1}
-                                                                                            max={pdt.qty}
-                                                                                            type="number"
-                                                                                            name="qty"
-                                                                                        />
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        )
-                                                                    })
-                                                                }
-                                                            </tbody>
-                                                        </table>
-                                                }
+                    {
+                        cnfWindow ?
+                            <div className="w-full flex items-center justify-center bg-white text-black p-3 rounded-lg">
+                                {
+                                    saveLoader ? <div className="w-full text-center my-6"><CircularProgress /></div> :
+                                        <div className="w-[70%] flex flex-col items-center gap-3">
+                                            <div className="w-full text-center text-lg">
+                                                Do you want to create Back Order?
                                             </div>
-                                            {
-                                                zeroError && <div className="w-full text-left text-xs text-red-600 italic mt-2">Cannot update: Quantity cannot be less than or equals to zero!</div>
-                                            }
-                                            <div className="w-full flex items-center justify-end my-1">
+                                            <div className="w-full flex items-center justify-center gap-4">
+                                                <button onClick={handleReceiveBackDoc}
+                                                    className='flex items-center justify-center px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                    Yes
+                                                </button>
                                                 <button onClick={handleReceiveDoc}
                                                     className='flex items-center justify-center px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                    Save
+                                                    No
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>
-                        }
-                    </div>
+                                }
+                            </div>
+                            :
+                            <div className="w-full flex items-center justify-center bg-white p-3 rounded-lg">
+                                {
+                                    recLoader ?
+                                        <div className='w-full flex items-center justify-center my-4'> <CircularProgress /> </div> :
+                                        recError ?
+                                            <div className="w-full flex items-center justify-center text-red-600 font-medium my-4"> Error: {recError} </div> :
+                                            <div className="w-full flex flex-col items-center">
+                                                <div className="w-full text-left font-semibold text-black mb-1">PO Number: <span className="font-normal">{currPO.currPO}</span></div>
+                                                <div className="w-full text-left font-semibold text-black">Vendor: <span className="font-normal">{currPO.vendor}</span></div>
+                                                <div className="w-full flex flex-col items-center gap-4">
+                                                    <div className="w-full flex items-start justify-start max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                                                        {
+                                                            pdtArray.length === 0 ? <div className="w-full text-left mt-4">No product found!</div>
+                                                                :
+                                                                <table className='w-full border-collapse mt-4'>
+                                                                    <thead>
+                                                                        <tr className='text-gray-700 text-lg text-nowrap'>
+                                                                            <th>Product Name</th>
+                                                                            <th>Image</th>
+                                                                            <th>Specification</th>
+                                                                            <th>Quantity Demand</th>
+                                                                            <th>Quantity Received</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {
+                                                                            pdtArray.map(pdt => {
+                                                                                return (
+                                                                                    <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                                        <td>{pdt.title}</td>
+                                                                                        <td>
+                                                                                            <div className="flex items-center justify-center">
+                                                                                                <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div className="flex flex-col items-start">
+                                                                                                {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                                                {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                                                {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>{pdt.qty}</td>
+                                                                                        <td>
+                                                                                            <div className="flex items-center justify-center">
+                                                                                                <input
+                                                                                                    value={qty[pdt._id]?.qty || ''}
+                                                                                                    onChange={(e) => handleQtyChange(e, pdt._id, pdt.qty)}
+                                                                                                    className={`w-[4rem] p-2 py-1 outline-none bg-[#F8F9FD] 
+                                                                                ${qty[pdt._id]?.qty <= 0 || qty[pdt._id]?.qty > pdt.qty ? 'border border-solid border-red-600' : 'border-none'}`}
+                                                                                                    placeholder='1'
+                                                                                                    min={1}
+                                                                                                    max={pdt.qty}
+                                                                                                    type="number"
+                                                                                                    name="qty"
+                                                                                                />
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                )
+                                                                            })
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                        }
+                                                    </div>
+                                                    {
+                                                        zeroError && <div className="w-full text-left text-xs text-red-600 italic mt-2">Cannot update: Quantity cannot be less than or equals to zero!</div>
+                                                    }
+                                                    <div className="w-full flex items-center justify-end my-1">
+                                                        {
+                                                            saveLoader ? <CircularProgress /> :
+                                                                <button onClick={handleSave}
+                                                                    className='flex items-center justify-center px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                                    Save
+                                                                </button>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                }
+                            </div>
+                    }
                 </Dialog>
 
                 {/* View Modal */}
@@ -544,18 +629,7 @@ const In = () => {
                                                                                     {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
                                                                                 </div>
                                                                             </td>
-                                                                            <td className='max-w-[12rem]'>
-                                                                                {
-                                                                                    pdt.demQty - pdt.recQty === 0 ?
-                                                                                        pdt.demQty :
-                                                                                        <div className="w-full flex flex-col items-center gap-2">
-                                                                                            <div>{pdt.demQty}</div>
-                                                                                            <div className="w-full text-left text-xs italic text-orange-800">
-                                                                                                * Back Order is created for remaining <span className='font-semibold'>{pdt.demQty - pdt.recQty}</span> demanded quantities.
-                                                                                            </div>
-                                                                                        </div>
-                                                                                }
-                                                                            </td>
+                                                                            <td>{pdt.demQty}</td>
                                                                             <td>{pdt.recQty}</td>
                                                                         </tr>
                                                                     )

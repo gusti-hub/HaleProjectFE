@@ -21,12 +21,14 @@ const Comments = ({ id }) => {
         hour12: true
     };
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [comment, setComment] = useState([]);
     const [newComment, setNewComment] = useState({
         projectId: id, userName: loggedInUser, body: ''
     });
+
+    const [saveLoader, setSaveLoader] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -41,10 +43,17 @@ const Comments = ({ id }) => {
     }
 
     const fetchAllComments = async () => {
-        const response = await axios.get(`${backendServer}/api/getComments/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        setComment(response.data);
+        setLoading(true);
+        try {
+            const response = await axios.get(`${backendServer}/api/getComments/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setComment(response.data);
+            setLoading(false);
+        } catch (error) {
+            setError(error.response.data.message);
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -53,6 +62,7 @@ const Comments = ({ id }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaveLoader(true);
         if (newComment.body.length === 0) {
             toast.error("Can't submit empty comment!");
         }
@@ -63,17 +73,19 @@ const Comments = ({ id }) => {
                 toast.success(response.data.message);
                 fetchAllComments();
                 resetForm();
+                setSaveLoader(false);
             }
         } catch (error) {
             setLoading(false);
             setError(error.message);
             toast.error(error.message);
             resetForm();
+            setSaveLoader(false);
         }
     }
 
     if (loading) return (
-        <div className='w-full flex items-center justify-center p-4'>
+        <div className='w-full flex items-center justify-center p-4 py-24'>
             <CircularProgress />
         </div>
     );
@@ -115,10 +127,13 @@ const Comments = ({ id }) => {
                         className='w-full p-2 border border-solid border-gray-300 outline-none'
                         placeholder='Type here...'
                         name="body" id="" rows="2"></textarea>
-                    <button onClick={handleSubmit}
-                        type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>
-                        Send
-                    </button>
+                    {
+                        saveLoader ? <CircularProgress /> :
+                            <button onClick={handleSubmit}
+                                type="button" className='w-fit bg-[#7F55DE] p-2 px-3 text-white text-base font-medium rounded-lg'>
+                                Send
+                            </button>
+                    }
                 </form>
             </div>
         </div>

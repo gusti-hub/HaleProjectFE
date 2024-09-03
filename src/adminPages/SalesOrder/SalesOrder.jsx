@@ -65,6 +65,7 @@ const SalesOrder = () => {
     };
 
     const fetchSalesData = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/sales`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -84,6 +85,7 @@ const SalesOrder = () => {
     }, []);
 
     const handleOpen = () => {
+        setSaveError(null);
         setOpen((cur) => !cur);
         if (!cur) {
             resetForm();
@@ -99,32 +101,41 @@ const SalesOrder = () => {
         setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
+    const [saveError, setSaveError] = useState(null);
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formData);
-        if (formData.name.length ===  0) {
-            toast.error("Can't submit empty Project Name!");
-            setOpen(false);
-        }
-
-        if (formData.client.length === 0) {
-            toast.error("Can't submit empty Client Name!");
-            setOpen(false);
-        }
-
-        try {
-            if (formData.name.length > 0 && formData.client.length > 0) {
-                const response = await axios.post(`${backendServer}/api/productreg`, formData);
-                toast.success(response.data.message);
-                resetForm();
-                fetchSalesData();
+        setSaveLoader(true);
+        if (formData.name.length === 0 || formData.owner.length === 0 || formData.client.length === 0) {
+            setSaveError("Can't submit empty fields!");
+            setSaveLoader(false);
+        } else {
+            try {
+                if (formData.name.length > 0 && formData.owner.length > 0 && formData.client.length > 0) {
+                    const response = await axios.post(`${backendServer}/api/productreg`, {
+                        name: formData.name,
+                        code: `PRJ-${formData.client.split('-')[0]}-00${allSales.length + 1}`,
+                        desc: formData.desc,
+                        owner: formData.owner,
+                        ownerId: formData.ownerId,
+                        client: formData.client
+                    });
+                    toast.success(response.data.message);
+                    resetForm();
+                    fetchSalesData();
+                    setOpen(false);
+                    setSaveLoader(false);
+                }
+            } catch (err) {
+                toast.error(err.response.data.message);
                 setOpen(false);
+                setSaveLoader(false);
             }
-        } catch (err) {
-            toast.error(err.response.data.message);
-            setOpen(false);
         }
     };
+
+    const [menuSaveLoader, setMenuSaveLoader] = useState(false);
 
     const openMenu = (_id) => {
         if (menuOpen === _id) {
@@ -134,69 +145,84 @@ const SalesOrder = () => {
         }
     };
 
+    const [userListLoader, setUserListLoader] = useState(false);
+
     const getUserListHandler = async (_id) => {
+        setUserListLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/project/${_id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setCurrProject(response.data);
             setUserList(response.data.invitedUsers);
+            setUserListLoader(false);
         } catch (error) {
-
+            setUserListLoader(false);
         }
     }
 
     const handleInviteMenu = async (_id) => {
         setInviteMenu(state => !state);
-
         await getUserListHandler(_id);
     }
 
     const updateInviteUser = async (name) => {
+        setUserListLoader(true);
         try {
             const response = await axios.put(`${backendServer}/api/addinviteduser/${currProject._id}`, { name: name });
             toast.success(response.data.message);
             await getUserListHandler(currProject._id);
             fetchSalesData();
+            setUserListLoader(false);
         } catch (error) {
             toast.error(error.message);
+            setUserListLoader(false);
             await getUserListHandler(currProject._id);
         }
     }
 
     const removeInvitedUser = async (name) => {
+        setUserListLoader(true);
         try {
             const response = await axios.put(`${backendServer}/api/removeinviteduser/${currProject._id}`, { name: name });
             toast.success(response.data.message);
+            setUserListLoader(false);
             await getUserListHandler(currProject._id);
             fetchSalesData();
         } catch (error) {
             toast.error(error.message);
+            setUserListLoader(false);
             await getUserListHandler(currProject._id);
         }
     }
 
     //button actions
     const progressButtonClick = async (_id, status) => {
+        setMenuSaveLoader(true);
         try {
             const response = await axios.put(`${backendServer}/api/setprogress/${_id}`, { progress: status });
             toast.success(response.data.message);
             fetchSalesData();
             setMenuOpen(null);
+            setMenuSaveLoader(false);
         } catch (error) {
             toast.error(error.response.data.message);
             console.log(error);
             setMenuOpen(null);
+            setMenuSaveLoader(false);
         }
     }
 
     const handleDeleteProject = async (_id) => {
+        setMenuSaveLoader(true);
         try {
             const response = await axios.delete(`${backendServer}/api/project/${_id}`);
             toast.success(response.data.message);
             fetchSalesData();
+            setMenuSaveLoader(false);
         } catch (error) {
             toast.error(error.response.data.message);
+            setMenuSaveLoader(false);
         }
     };
 
@@ -229,6 +255,7 @@ const SalesOrder = () => {
     };
 
     const handleDownload = async (id, name) => {
+        setMenuSaveLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/products/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -243,8 +270,10 @@ const SalesOrder = () => {
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
             XLSX.writeFile(workbook, `Summary_${name}.xlsx`);
+            setMenuSaveLoader(false);
         } catch (error) {
             console.log(error);
+            setMenuSaveLoader(false);
         }
     };
 
@@ -261,138 +290,77 @@ const SalesOrder = () => {
         setCurrentPage(pageNumber);
     };
 
-    if (loading) return (
-        <div className='w-full flex items-center justify-center'>
-            <CircularProgress />
-        </div>
-    );
-
-    if (error) return (
-        <div className="w-full flex items-center justify-center text-red-600 font-medium">
-            Error: {error}
-        </div>
-    );
-
     return (
         <div className="w-full flex flex-col items-start justify-center gap-[1.1rem]">
             <div className="w-full text-left text-gray-900 text-2xl font-medium">Project Management</div>
             <div className="w-full h-[2px] bg-gray-300"></div>
 
-            <Dialog
-                size="sm"
-                open={open}
-                handler={handleOpen}
-                className="bg-transparent shadow-none w-full flex items-center justify-center"
-            >
-                <form onSubmit={handleSubmit}
-                    className='w-full flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
-                    <div className="w-full flex items-center justify-end">
-                        <MdClose onClick={() => setOpen(false)}
-                            className='cursor-pointer text-xl' />
-                    </div>
-                    <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="name">Project Name:</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                        </div>
-                        <input
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="name" id="name" />
-                    </div>
-                    <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="desc">Project Description:</label>
-                        </div>
-                        <input
-                            value={formData.desc}
-                            onChange={handleInputChange}
-                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="desc" id="desc" />
-                    </div>
-                    <div className="w-full flex items-center justify-start gap-2 text-base">
-                        <label htmlFor="client">For Client:</label>
-                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                        <select
-                            value={formData.clientName}
-                            onChange={handleInputChange}
-                            className='p-1 outline-none' name="client" id="client">
-                            <option value="" disabled>Select an option</option>
-                            {clients.map((client) => (
-                                <option key={client.id} value={`${client.code}-${client.name}`}>{client.code}-{client.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="w-full flex items-center justify-center">
-                        <button onClick={handleSubmit}
-                            type="button" className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
-                            Create project
-                        </button>
-                    </div>
-                </form>
-            </Dialog>
-            <div className="w-full flex items-center justify-between">
-                {
-                    action.includes(GlobalVariable.ActionRole.CreateProject) &&
-                    <button onClick={handleOpen}
-                        className='flex items-center justify-center gap-3 px-5 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
-                        <IoMdAdd className='text-xl' />
-                        <div>Create</div>
-                    </button>
-                }
-                {
-                    sales.length != 0 ?
-                        <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
-                            <FiSearch className='text-xl text-gray-600 ml-2' />
-                            <input value={searchQuery} onChange={handleSearchChange}
-                                className='w-[18rem] outline-none p-2 mr-1 text-gray-600'
-                                type="search" placeholder='Search by name'
-                            />
-                        </div> : <div></div>
-                }
-            </div>
             {
-                filteredSales.length === 0 ?
-                    <div className="w-full flex items-center justify-start text-lg font-medium mt-4">
-                        No records found!
+                loading ?
+                    <div className='w-full flex items-center justify-center'>
+                        <CircularProgress />
                     </div> :
-                    <div className="w-full flex flex-col items-center">
-                        <table className='w-full border-collapse mt-4'>
-                            <thead>
-                                <tr className='text-gray-700 text-lg text-nowrap'>
-                                    <th>#</th>
-                                    <th>Action</th>
-                                    <th>Project Id</th>
-                                    <th>Project Name</th>
-                                    <th>Description</th>
-                                    <th>Project Owner</th>
-                                    <th>Client Name</th>
-                                    <th>Progress</th>
-                                    <th>Date Created</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                    error ?
+                        <div className="w-full flex items-center justify-center text-red-600 font-medium">
+                            Error: {error}
+                        </div> :
+
+                        <div className="w-full flex flex-col items-center">
+                            <div className="w-full flex items-center justify-between">
+                                <button onClick={handleOpen}
+                                    className='flex items-center justify-center gap-3 px-5 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
+                                    <IoMdAdd className='text-xl' />
+                                    <div>Create</div>
+                                </button>
                                 {
-                                    currentSales.map((pdt, index) => {
-                                        return (
-                                            <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                                <td>{indexOfFirstItem + index + 1}</td>
-                                                <td>
-                                                    <div className="w-full flex items-start justify-center gap-2 relative">
-                                                        {
-                                                            menuOpen != pdt._id ?
-                                                                <MdOutlineMoreVert
-                                                                    onClick={() => openMenu(pdt._id)}
-                                                                    className='cursor-pointer text-xl' />
-                                                                :
-                                                                <IoCloseSharp
-                                                                    onClick={() => openMenu(pdt._id)}
-                                                                    className='cursor-pointer text-xl' />
-                                                        }
-                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[13rem] flex flex-col items-start justify-start gap-1 p-2 fixed bg-white ml-[14rem] -mt-[0.5rem]`}>
+                                    sales.length != 0 &&
+                                    <div className="flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg">
+                                        <FiSearch className='text-xl text-gray-600 ml-2' />
+                                        <input value={searchQuery} onChange={handleSearchChange}
+                                            className='w-[18rem] outline-none p-2 mr-1 text-gray-600'
+                                            type="search" placeholder='Search by name'
+                                        />
+                                    </div>
+                                }
+                            </div>
+                            {
+                                filteredSales.length === 0 ?
+                                    <div className="w-full flex items-center justify-start text-lg font-medium mt-4">
+                                        No records found!
+                                    </div> :
+                                    <div className="w-full flex flex-col items-center">
+                                        <table className='w-full border-collapse mt-4'>
+                                            <thead>
+                                                <tr className='text-gray-700 text-lg text-nowrap'>
+                                                    <th>Action</th>
+                                                    <th>Project Code</th>
+                                                    <th>Project Name</th>
+                                                    <th>Description</th>
+                                                    <th>Project Owner</th>
+                                                    <th>Client Name</th>
+                                                    <th>Progress</th>
+                                                    <th>Date Created</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    currentSales.map((pdt, index) => {
+                                                        return (
+                                                            <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                <td>
+                                                                    <div className="w-full flex items-start justify-center gap-2 relative">
+                                                                        {
+                                                                            menuOpen != pdt._id ?
+                                                                                <MdOutlineMoreVert
+                                                                                    onClick={() => openMenu(pdt._id)}
+                                                                                    className='cursor-pointer text-xl' />
+                                                                                :
+                                                                                <IoCloseSharp
+                                                                                    onClick={() => openMenu(pdt._id)}
+                                                                                    className='cursor-pointer text-xl' />
+                                                                        }
+                                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[12rem] flex flex-col items-start justify-start p-2 fixed bg-white ml-[14rem] mt-[0.5rem]`}>
 
                                                             {(pdt.progress == GlobalVariable.Progress.NotStarted && pdt.owner === name) ?                                                         
                                                                 <>
@@ -577,9 +545,9 @@ const SalesOrder = () => {
                                                 <td>
                                                     {
                                                         pdt.progress === GlobalVariable.Progress.NotStarted ?
-                                                            <div className=''>{pdt._id}</div> :
+                                                            <div className=''>{pdt.code}</div> :
                                                             <div className='cursor-pointer text-blue-900' onClick={() => navigate(`/project/${pdt._id}`)}>
-                                                                {pdt._id}
+                                                                {pdt.code}
                                                             </div>
                                                     }
                                                 </td>
@@ -625,21 +593,87 @@ const SalesOrder = () => {
                         </table>
                         <div className='w-full flex items-center justify-end gap-2 mt-4'>
 
-                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
-                                <MdOutlineKeyboardArrowLeft className='text-xl' />
-                            </button>
+                                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">
+                                                <MdOutlineKeyboardArrowLeft className='text-xl' />
+                                            </button>
 
-                            <div className='text-gray-700'>
-                                Page {currentPage} of {totalPages}
-                            </div>
+                                            <div className='text-gray-700'>
+                                                Page {currentPage} of {totalPages}
+                                            </div>
 
-                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
-                                <MdOutlineKeyboardArrowRight className='text-xl' />
-                            </button>
+                                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center cursor-pointer">
+                                                <MdOutlineKeyboardArrowRight className='text-xl' />
+                                            </button>
 
+                                        </div>
+                                    </div>
+                            }
                         </div>
-                    </div>
             }
+
+            <Dialog
+                size="sm"
+                open={open}
+                handler={handleOpen}
+                className="bg-transparent shadow-none w-full flex items-center justify-center"
+            >
+                <form onSubmit={handleSubmit}
+                    className='w-full flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
+                    <div className="w-full flex items-center justify-end">
+                        <MdClose onClick={() => setOpen(false)}
+                            className='cursor-pointer text-xl' />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="name">Project Name:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
+                        <input
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="name" id="name" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <div className="w-full flex items-center justify-start gap-2">
+                            <label htmlFor="desc">Project Description:</label>
+                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        </div>
+                        <input
+                            value={formData.desc}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="desc" id="desc" />
+                    </div>
+                    <div className="w-full flex items-center justify-start gap-2 text-base">
+                        <label htmlFor="client">For Client:</label>
+                        <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                        <select
+                            value={formData.client}
+                            onChange={handleInputChange}
+                            className='p-1 outline-none' name="client" id="client">
+                            <option value="" disabled>Select an option</option>
+                            {clients.map((client) => (
+                                <option key={client.id} value={`${client.code}-${client.name}`}>{client.code}-{client.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {
+                        saveError && <div className="w-full text-left text-xs text-red-600 italic font-medium">Error: {saveError}</div>
+                    }
+
+                    <div className="w-full flex items-center justify-center">
+                        {
+                            saveLoader ? <CircularProgress /> :
+                                <button onClick={handleSubmit}
+                                    type="button" className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
+                                    Create project
+                                </button>
+                        }
+                    </div>
+                </form>
+            </Dialog>
 
             <Dialog
                 size="sm"
@@ -648,61 +682,64 @@ const SalesOrder = () => {
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
                 <div className="w-full flex items-center justify-center bg-white p-2 rounded-lg">
-                    <table className='w-full border-collapse'>
-                        <thead>
-                            <tr className='text-gray-700'>
-                                <th>Listed Users</th>
-                                <th>Invited Users</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div className="w-full flex flex-col items-start justify-start gap-1.5">
-                                        {
-                                            employees
-                                                .filter(employee => !userList.includes(employee.name))
-                                                .length === 0 ? (
-                                                <div>All users are added!</div>
-                                            ) : (
-                                                employees
-                                                    .filter(employee => !userList.includes(employee.name))
-                                                    .map((employee) => {
-                                                        return (
-                                                            <div key={employee._id} className="w-full flex items-center justify-between">
-                                                                <div>{employee.name}</div>
-                                                                <IoMdAddCircleOutline onClick={() => updateInviteUser(employee.name)}
-                                                                    className='cursor-pointer text-lg' />
-                                                            </div>
-                                                        )
-                                                    })
-                                            )
-                                        }
-
-                                    </div>
-                                </td>
-                                <td>
-                                    <div className="w-full flex flex-col items-start justify-start">
-                                        <div className="w-full flex flex-col items-start justify-start gap-1.5">
-                                            {
-                                                userList.map(user => {
-                                                    return (
-                                                        currProject.owner === user ?
-                                                            <div>{user} (Owner)</div> :
-                                                            <div className="w-full flex items-center justify-between">
-                                                                <div>{user}</div>
-                                                                <FiMinusCircle onClick={() => removeInvitedUser(user)}
-                                                                    className='cursor-pointer text-base' />
-                                                            </div>
+                    {
+                        userListLoader ? <div className="w-full text-center my-4"><CircularProgress /></div> :
+                            <table className='w-full border-collapse'>
+                                <thead>
+                                    <tr className='text-gray-700'>
+                                        <th>Listed Users</th>
+                                        <th>Invited Users</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div className="w-full flex flex-col items-start justify-start gap-1.5">
+                                                {
+                                                    employees
+                                                        .filter(employee => !userList.includes(employee.name))
+                                                        .length === 0 ? (
+                                                        <div>All users are added!</div>
+                                                    ) : (
+                                                        employees
+                                                            .filter(employee => !userList.includes(employee.name))
+                                                            .map((employee) => {
+                                                                return (
+                                                                    <div key={employee._id} className="w-full flex items-center justify-between">
+                                                                        <div>{employee.name}</div>
+                                                                        <IoMdAddCircleOutline onClick={() => updateInviteUser(employee.name)}
+                                                                            className='cursor-pointer text-lg' />
+                                                                    </div>
+                                                                )
+                                                            })
                                                     )
-                                                })
-                                            }
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                                }
+
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="w-full flex flex-col items-start justify-start">
+                                                <div className="w-full flex flex-col items-start justify-start gap-1.5">
+                                                    {
+                                                        userList.map(user => {
+                                                            return (
+                                                                currProject.owner === user ?
+                                                                    <div>{user} (Owner)</div> :
+                                                                    <div className="w-full flex items-center justify-between">
+                                                                        <div>{user}</div>
+                                                                        <FiMinusCircle onClick={() => removeInvitedUser(user)}
+                                                                            className='cursor-pointer text-base' />
+                                                                    </div>
+                                                            )
+                                                        })
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    }
                 </div>
             </Dialog>
 

@@ -47,6 +47,7 @@ const ForClient = () => {
     };
 
     const fetchUsers = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/clients`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -66,11 +67,14 @@ const ForClient = () => {
         setOpen(true);
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaveLoader(true);
 
         if (formData.name.length === 0 || formData.code.length === 0 || formData.email.length === 0) {
-            toast.error("Can't submit empty form or check password!"); setOpen(false);
+            toast.error("Can't submit empty form or check password!"); setOpen(false); setSaveLoader(false);
         }
 
         if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0 && (editMode || formData.password.length >= 8)) {
@@ -82,10 +86,12 @@ const ForClient = () => {
                 fetchUsers();
                 resetForm();
                 setOpen(false);
+                setSaveLoader(false);
             } catch (error) {
                 toast.error(error.response.data.message);
                 resetForm();
                 setOpen(false);
+                setSaveLoader(false);
             }
         }
     };
@@ -225,9 +231,12 @@ const ForClient = () => {
                             type="text" placeholder='Type here...' name="address" id="address" />
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <button className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
-                            {editMode ? 'Update' : 'Register'}
-                        </button>
+                        {
+                            saveLoader ? <CircularProgress /> :
+                                <button className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
+                                    {editMode ? 'Update' : 'Register'}
+                                </button>
+                        }
                     </div>
                 </form>
             </Dialog>

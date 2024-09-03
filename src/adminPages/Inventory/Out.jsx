@@ -24,6 +24,7 @@ import ViewSeating from '../../components/view/seating';
 import ViewWallpaper from '../../components/view/wallpaper';
 import ViewUpholstery from '../../components/view/upholstery';
 import ViewWindowTreatment from '../../components/view/windowtreatment';
+import { FaEye } from 'react-icons/fa';
 
 const Out = () => {
 
@@ -135,7 +136,7 @@ const Out = () => {
             const response = await axios.get(`${backendServer}/api/findProducts-out/${_id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setAddPdts(response.data.filter(pdt => pdt.type === 'Product'));
+            setAddPdts(response.data.filter(pdt => pdt.type === 'Product' && pdt.totQty != 0));
             setAddPdtLoader(false);
         } catch (error) {
             setAddPdtError(error.response.data.message);
@@ -144,6 +145,7 @@ const Out = () => {
     };
 
     const fetchOutDocs = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/outDocs`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -167,14 +169,18 @@ const Out = () => {
 
     const createProductsArray = (products) => {
         return products.map(product => ({
-            id: product._id,
-            qty: Number(qty[product._id]),
+            pdtid: product._id,
+            qty: Number(qty[product._id])
         }));
     };
 
     const [zeroQty, setZeroQty] = useState(false);
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSaveOutDoc = async () => {
+
+        setSaveLoader(true);
 
         try {
             console.log(selectedProducts)
@@ -184,20 +190,24 @@ const Out = () => {
 
             if (inavlidArray.length > 0) {
                 setZeroQty(true);
+                setSaveLoader(false);
             } else {
                 const response = await axios.put(`${backendServer}/api/updateOutDoc`, {
                     array,
                     docNum: `OUT-00${outDocs.length + 1}`,
                     projectId: formData.prj,
-                    reason: formData.reason
+                    reason: formData.reason,
+                    products: array
                 });
                 toast.success(response.data.message);
                 fetchOutDocs();
                 handleAddModal();
+                setSaveLoader(false);
             }
         } catch (error) {
             toast.error("Can't update the inventory. Try again later.")
             handleAddModal();
+            setSaveLoader(false);
         }
     };
 
@@ -223,6 +233,41 @@ const Out = () => {
         setCurrentPage(pageNumber);
     };
 
+    const [viewModal, setViewModal] = useState(false);
+    const [viewLoader, setViewLoader] = useState(false);
+    const [viewError, setViewError] = useState(null);
+    const [viewPdts, setViewPdts] = useState([]);
+    const [viewDocDetails, setViewDocDetails] = useState({
+        docNum: '',
+        projectName: ''
+    });
+
+    const fetchViewDoc = async (_id) => {
+        setViewLoader(true);
+
+        try {
+            const response = await axios.get(`${backendServer}/api/viewOutDoc/${_id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setViewPdts(response.data);
+            setViewLoader(false);
+        } catch (error) {
+            setViewError(error.response.data.message);
+            setViewLoader(false);
+        }
+    };
+
+    const handleViewModal = async (_id, num, prj) => {
+        setViewModal(curr => !curr);
+        setViewError(null);
+        setViewLoader(false);
+        setViewDocDetails({
+            docNum: num,
+            projectName: prj
+        });
+        await fetchViewDoc(_id);
+    };
+
     useEffect(() => {
         fetchOutDocs();
     }, []);
@@ -241,9 +286,6 @@ const Out = () => {
                 <div className="w-full flex flex-col items-center p-8 gap-4">
                     <div className="w-full text-left text-gray-900 text-2xl font-medium">Inventory (OUT)</div>
                     <div className="w-full h-[2px] bg-gray-300"></div>
-                    <div className="w-full flex items-center justify-start">
-                        <button onClick={handleAddModal} className='w-20 px-5 py-2 rounded-md bg-[#7F55DE] text-white text-lg'>ADD</button>
-                    </div>
 
                     {
                         loading ?
@@ -251,6 +293,9 @@ const Out = () => {
                             error ?
                                 <div className="w-full flex items-center justify-center text-red-600 font-medium my-4"> Error: {error} </div> :
                                 <div className="w-full flex flex-col items-center gap-4">
+                                    <div className="w-full flex items-center justify-start">
+                                        <button onClick={handleAddModal} className='w-20 px-5 py-2 rounded-md bg-[#7F55DE] text-white text-lg'>ADD</button>
+                                    </div>
                                     {
                                         outDocs.length != 0 &&
                                         <div className="w-full flex items-center justify-end">
@@ -266,15 +311,17 @@ const Out = () => {
                                     {
                                         filteredDocs.length === 0 ?
                                             <div className="w-full flex items-center justify-start text-lg font-medium">
-                                                No PO found!
+                                                No OUT document found!
                                             </div> :
                                             <div className="w-full flex flex-col items-center">
                                                 <table className='w-full border-collapse'>
                                                     <thead>
                                                         <tr className='text-gray-700 text-lg text-nowrap'>
+                                                            <th>View Document</th>
                                                             <th>Document Number</th>
                                                             <th>Project Name</th>
                                                             <th>Reason</th>
+                                                            <th>Date Created</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -282,9 +329,15 @@ const Out = () => {
                                                             currentDocs.map((doc) => {
                                                                 return (
                                                                     <tr key={doc._id} className='text-base text-center text-gray-700'>
+                                                                        <td>
+                                                                            <div className="flex items-center justify-center">
+                                                                                <FaEye onClick={() => handleViewModal(doc._id, doc.docNum, doc.projectName)} className='text-xl cursor-pointer' />
+                                                                            </div>
+                                                                        </td>
                                                                         <td>{doc.docNum}</td>
                                                                         <td>{doc.projectName}</td>
                                                                         <td>{doc.reason}</td>
+                                                                        <td>{doc.createdAt.split('T')[0]}</td>
                                                                     </tr>
                                                                 )
                                                             })
@@ -313,9 +366,70 @@ const Out = () => {
 
                     }
 
+
+                    {/* View Doc */}
+                    <Dialog
+                        size='lg'
+                        open={viewModal}
+                        handler={handleViewModal}
+                        className="bg-transparent shadow-none w-full flex items-center justify-center"
+                    >
+                        <div className="w-full flex items-center justify-center bg-white text-black p-3 rounded-lg">
+                            {
+                                viewLoader ?
+                                    <div className='w-full flex items-center justify-center my-4'> <CircularProgress /> </div> :
+                                    viewError ?
+                                        <div className="w-full flex items-center justify-center text-red-600 font-medium my-4"> Error: {viewError} </div> :
+                                        <div className="w-full flex flex-col items-center gap-4">
+                                            <div className="w-full flex flex-col items-center gap-1">
+                                                <div className="w-full text-left"><span className='font-semibold'>Document Number: </span>{viewDocDetails.docNum}</div>
+                                                <div className="w-full text-left"><span className='font-semibold'>Project Name: </span>{viewDocDetails.projectName}</div>
+                                            </div>
+                                            <div className="w-full flex items-start justify-start max-h-[30rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                                                <table className='w-full border-collapse mt-4'>
+                                                    <thead>
+                                                        <tr className='text-gray-700 text-lg text-nowrap'>
+                                                            <th>Product Name</th>
+                                                            <th>Image</th>
+                                                            <th>Specification</th>
+                                                            <th>Out Quantity</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {
+                                                            viewPdts.map(pdt => {
+                                                                return (
+                                                                    <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                        <td>{pdt.title}</td>
+                                                                        <td>
+                                                                            <div className="flex items-center justify-center">
+                                                                                <img className='w-[10rem]' src={pdt.imageUrl} alt="" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div className="flex flex-col items-start">
+                                                                                {pdt.productDetails.len ? <div><span className='font-semibold'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
+                                                                                {pdt.productDetails.wid ? <div><span className='font-semibold'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
+                                                                                {pdt.productDetails.dia ? <div><span className='font-semibold'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>{pdt.outQty}</td>
+                                                                    </tr>
+                                                                )
+                                                            })
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                            }
+                        </div>
+                    </Dialog>
+
+
                     {/* Add Doc */}
                     <Dialog
-                        size={isAddPdt ? 'md' : 'lg'}
+                        size={isAddPdt || selectedProducts.length === 0 ? 'md' : 'lg'}
                         open={addModal}
                         handler={handleAddModal}
                         className="bg-transparent shadow-none w-full flex items-center justify-center"
@@ -635,9 +749,12 @@ const Out = () => {
 
                                                     {
                                                         selectedProducts.length != 0 && <div className="w-full flex items-center justify-end mt-2">
-                                                            <button onClick={handleSaveOutDoc} className='px-5 py-2 rounded-md bg-[#7F55DE] text-white text-nowrap'>
-                                                                Save Doc
-                                                            </button>
+                                                            {
+                                                                saveLoader ? <CircularProgress /> :
+                                                                    <button onClick={handleSaveOutDoc} className='px-5 py-2 rounded-md bg-[#7F55DE] text-white text-nowrap'>
+                                                                        Save Doc
+                                                                    </button>
+                                                            }
                                                         </div>
                                                     }
                                                 </div>

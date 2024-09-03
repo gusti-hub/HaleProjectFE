@@ -78,6 +78,7 @@ const PO = ({ fetchAllProductsMain }) => {
         setAddPO(curr => !curr);
         setTotalPrice(null);
         setClicked(false);
+        setFieldError(null);
     }
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -93,6 +94,7 @@ const PO = ({ fetchAllProductsMain }) => {
     };
 
     const fetchPODetails = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/poDetails/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -118,16 +120,21 @@ const PO = ({ fetchAllProductsMain }) => {
         }
     };
 
+    const [rfqLoader, setRfqLoader] = useState(false);
+
     const fetchRFQDetails = async () => {
+        setRfqLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/rfqDetails/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setRfqs(response.data.allRFQs);
             setLoading1(false);
+            setRfqLoader(false);
         } catch (error) {
             setLoading1(false);
             setError1(error.response.data.message);
+            setRfqLoader(false);
         }
     }
 
@@ -176,9 +183,11 @@ const PO = ({ fetchAllProductsMain }) => {
             setPdts(response.data.response);
             handleTotalPrice(response.data.response);
             setLoadPdts(false);
+            setPoMenuLoader(false);
         } catch (error) {
             setErrPdts(error.response.data.message);
             setLoadPdts(false);
+            setPoMenuLoader(false);
         }
     }
 
@@ -195,6 +204,8 @@ const PO = ({ fetchAllProductsMain }) => {
     };
 
     const [saveLoader, setSaveLoader] = useState(false);
+
+    const [fieldError, setFieldError] = useState(null);
 
     const handleSavePO = async (e) => {
         e.preventDefault();
@@ -227,6 +238,7 @@ const PO = ({ fetchAllProductsMain }) => {
             }
         } else {
             toast.error("Fill all the mandatory fields!");
+            setFieldError("Fill all the mandatory (*) fields!");
             setSaveLoader(false);
         }
     };
@@ -253,8 +265,11 @@ const PO = ({ fetchAllProductsMain }) => {
         poId: '', vendor: ''
     })
 
+    const [poMenuLoader, setPoMenuLoader] = useState(false);
+
     const viewPODetails = (poId, rfqId, vendor) => {
         setLoadPdts(true);
+        setPoMenuLoader(true);
         setViewPO(curr => !curr);
         setPODetails({
             poId: poId, vendor: vendor
@@ -263,12 +278,15 @@ const PO = ({ fetchAllProductsMain }) => {
     }
 
     const approvePO = async (_id) => {
+        setPoMenuLoader(true);
         try {
             const response = await axios.put(`${backendServer}/api/updatePOStatus/${_id}`);
             fetchPODetails();
             toast.success(response.data.message);
+            setPoMenuLoader(false);
         } catch (error) {
             toast.error(error.response.data.message);
+            setPoMenuLoader(false);
         }
     }
 
@@ -300,6 +318,7 @@ const PO = ({ fetchAllProductsMain }) => {
     };
 
     const handleDownload = async (id) => {
+        setPoMenuLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/getPOPdts/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -312,27 +331,26 @@ const PO = ({ fetchAllProductsMain }) => {
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
             XLSX.writeFile(workbook, 'PO_Details.xlsx');
+            setPoMenuLoader(false);
         } catch (error) {
             console.log(error);
+            setPoMenuLoader(false);
         }
     };
 
     if (rfqs.length === 0 || receivedRFQs.length === 0) {
         return (
             <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
-                <div className="w-full text-left font-medium text-black">No Received RFQ found!</div>
+                {
+                    rfqLoader ? <CircularProgress /> :
+                        <div className="w-full text-left font-medium text-black">No Received RFQ found!</div>
+                }
             </div>
         )
     }
 
     return (
         <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
-            <div className="w-full flex items-center justify-start">
-                <button onClick={() => setAddPO(state => !state)}
-                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                    ADD NEW PO
-                </button>
-            </div>
 
             {
                 loading ?
@@ -344,88 +362,98 @@ const PO = ({ fetchAllProductsMain }) => {
                             Error: {error}
                         </div>
                         :
-                        <div className="w-full flex items-center justify-center text-black">
-                            {
-                                pos.length === 0 ?
-                                    <div className="w-full text-left font-medium">
-                                        No PO detail found!
-                                    </div> :
-                                    <table className='w-full border-collapse'>
-                                        <thead className='text-nowrap'>
-                                            <tr className='text-gray-700 text-lg'>
-                                                <th>Action</th>
-                                                <th>PO Number</th>
-                                                <th>PO Date</th>
-                                                <th>Estimation Delivery</th>
-                                                <th>Estimation Received</th>
-                                                <th>Vendor Name</th>
-                                                <th>Total Price</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                current.map(po => {
-                                                    return (
-                                                        <tr>
-                                                            <td>
-                                                                <div className='flex items-center justify-center relative'>
-                                                                    {
-                                                                        menuOpen != po._id ?
-                                                                            <MdOutlineMoreVert
-                                                                                onClick={() => openMenu(po._id)}
-                                                                                className='cursor-pointer text-xl' />
-                                                                            :
-                                                                            <IoCloseSharp
-                                                                                onClick={() => openMenu(po._id)}
-                                                                                className='cursor-pointer text-xl' />
-                                                                    }
-                                                                    {
-                                                                        menuOpen === po._id &&
-                                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-[5rem] gap-2">
+                        <div className="w-full flex flex-col items-center gap-4">
+                            <div className="w-full flex items-center justify-start">
+                                <button onClick={() => setAddPO(state => !state)}
+                                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                    ADD NEW PO
+                                </button>
+                            </div>
+                            <div className="w-full flex items-center justify-center text-black">
+                                {
+                                    pos.length === 0 ?
+                                        <div className="w-full text-left font-medium">
+                                            No PO detail found!
+                                        </div> :
+                                        <table className='w-full border-collapse'>
+                                            <thead className='text-nowrap'>
+                                                <tr className='text-gray-700 text-lg'>
+                                                    <th>Action</th>
+                                                    <th>PO Number</th>
+                                                    <th>PO Date</th>
+                                                    <th>Estimation Delivery</th>
+                                                    <th>Estimation Received</th>
+                                                    <th>Vendor Name</th>
+                                                    <th>Total Price</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    current.map(po => {
+                                                        return (
+                                                            <tr>
+                                                                <td>
+                                                                    <div className='flex items-center justify-center relative'>
+                                                                        {
+                                                                            menuOpen != po._id ?
+                                                                                <MdOutlineMoreVert
+                                                                                    onClick={() => openMenu(po._id)}
+                                                                                    className='cursor-pointer text-xl' />
+                                                                                :
+                                                                                <IoCloseSharp
+                                                                                    onClick={() => openMenu(po._id)}
+                                                                                    className='cursor-pointer text-xl' />
+                                                                        }
+                                                                        {
+                                                                            menuOpen === po._id &&
+                                                                            <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                                                                className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-[5rem]">
 
-                                                                            {
-                                                                                po.status != 'Approved' &&
-                                                                                <button onClick={() => approvePO(po._id)}
-                                                                                    className='w-full text-left'>Approve PO</button>
-                                                                            }
+                                                                                {
+                                                                                    poMenuLoader ? <div className="w-full text-center my-3.5"> <CircularProgress /> </div> :
+                                                                                        <div className="w-full flex flex-col items-center justify-start gap-2">
+                                                                                            {
+                                                                                                po.status != 'Approved' &&
+                                                                                                <button onClick={() => approvePO(po._id)}
+                                                                                                    className='w-full text-left'>Approve PO</button>
+                                                                                            }
 
-                                                                            {
-                                                                                po.status != 'Approved' && <div className="w-full h-[2px] bg-gray-300"></div>
-                                                                            }
+                                                                                            {
+                                                                                                po.status != 'Approved' && <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                                            }
 
-                                                                            <button onClick={() => viewPODetails(po.poId, po.rfq, po.vendor)}
-                                                                                className='w-full text-left'>View PO</button>
+                                                                                            <button onClick={() => viewPODetails(po.poId, po.rfq, po.vendor)}
+                                                                                                className='w-full text-left'>View PO</button>
 
-                                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                            <button onClick={() => handleDownload(po._id)}
-                                                                                className='w-full text-left'>Download PO</button>
+                                                                                            <button onClick={() => handleDownload(po._id)}
+                                                                                                className='w-full text-left'>Download PO</button>
+                                                                                        </div>
+                                                                                }
 
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                            </td>
-                                                            <td>{po.poId}</td>
-                                                            <td>{po.createdAt.split('T')[0]}</td>
-                                                            <td>{po.delivery}</td>
-                                                            <td>{po.receive}</td>
-                                                            <td>{po.vendor}</td>
-                                                            <td>{po.totalPrice}</td>
-                                                            {
-                                                                po.status === 'Approved' ?
-                                                                    <td className='font-medium text-green-700'>{po.status}</td> :
-                                                                    <td>{po.status}</td>
-                                                            }
-
-                                                        </tr>
-                                                    )
-                                                })
-                                            }
-                                        </tbody>
-                                    </table>
-                            }
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                </td>
+                                                                <td>{po.poId}</td>
+                                                                <td>{po.createdAt.split('T')[0]}</td>
+                                                                <td>{po.delivery}</td>
+                                                                <td>{po.receive}</td>
+                                                                <td>{po.vendor}</td>
+                                                                <td>{po.totalPrice}</td>
+                                                                <td className={`${po.status === 'Approved' ? 'font-medium text-green-700' : 'font-normal'}`}>
+                                                                    {po.status}
+                                                                </td>
+                                                            </tr>
+                                                        )
+                                                    })
+                                                }
+                                            </tbody>
+                                        </table>
+                                }
+                            </div>
                         </div>
             }
 
@@ -664,6 +692,11 @@ const PO = ({ fetchAllProductsMain }) => {
                                                                 <div className="w-full flex items-center justify-end text-black text-lg font-medium">
                                                                     Total amount: {totalPrice}
                                                                 </div>
+                                                                {
+                                                                    fieldError && <div className="w-full flex items-center justify-start -my-3">
+                                                                        <div className='text-xs text-red-600 italic font-medium'>{fieldError}</div>
+                                                                    </div>
+                                                                }
                                                                 <div className="w-full flex items-center justify-end">
                                                                     {
                                                                         saveLoader ?
@@ -870,7 +903,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
             rfqId: '',
             projectId: address.id,
             vendor: '',
-            curr: '',
+            curr: 'USD',
             deadline: ''
         }
     )
@@ -905,6 +938,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
     const [products, setProducts] = useState([]);
 
     const fetchAllProducts = async () => {
+        setLoading1(true);
         try {
             const response = await axios.get(`${backendServer}/api/products/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -947,13 +981,14 @@ const RFQ = ({ fetchAllProductsMain }) => {
                 rfqId: '',
                 projectId: address.id,
                 vendor: '',
-                curr: '',
+                curr: 'USD',
                 deadline: ''
             }
         );
         setZeroQty(false);
         setSelectedProducts([]);
-        setAdd(curr => !curr)
+        setAdd(curr => !curr);
+        setAddPdt(false);
     };
 
     const handleSaveRFQ = async () => {
@@ -1002,6 +1037,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
 
     const fetchRFQDetails = async () => {
+        setLoading2(true);
         try {
             const response = await axios.get(`${backendServer}/api/rfqDetails/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1055,7 +1091,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
         id: '', vendor: ''
     })
 
+    const [rfqMenuLoader, setRfqMenuLoader] = useState(false);
+
     const fetchAddedRFQPdts = async (_id) => {
+        setRfqMenuLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/getRFQPdts/${_id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1068,9 +1107,11 @@ const RFQ = ({ fetchAllProductsMain }) => {
                 vendor: response.data.vendor
             })
             setRrLoading(false);
+            setRfqMenuLoader(false);
         } catch (error) {
             setRrError(error.response.data.message);
             setRrLoading(false);
+            setRfqMenuLoader(false);
         }
     };
 
@@ -1113,7 +1154,10 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     const [zeroPrice, setZeroPrice] = useState(false);
 
+    const [recSaveLoader, setRecSaveLoader] = useState(false);
+
     const handleReceiveRFQ = async () => {
+        setRecSaveLoader(true);
         try {
             const productPrices = reqRFQPdts.map(product => ({
                 productId: product._id,
@@ -1125,6 +1169,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
             if (!allPricesValid || productPrices.length === 0) {
                 setZeroPrice(true);
                 toast.error('All product prices must be greater than 0.');
+                setRecSaveLoader(false);
                 return;
             }
 
@@ -1135,9 +1180,11 @@ const RFQ = ({ fetchAllProductsMain }) => {
             setRrOpen(false);
             setCurrentRFQId(null);
             toast.success('Prices updated successfully!');
+            setRecSaveLoader(false);
         } catch (error) {
             toast.error('Failed to update prices. Please try again.');
             console.error(error);
+            setRecSaveLoader(false);
         }
     };
 
@@ -1187,6 +1234,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
     // };
 
     const handleDownload = async (id, name) => {
+        setRfqMenuLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1199,29 +1247,104 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
             // doc.setFontSize(12);
 
-            // flattenedData.forEach((item, index) => {
-            //     if (index > 0) {
-            //       doc.addPage();
-            //     }
-        
-            //     const x = 10;
-            //     let y = 20; 
-        
-            //     Object.keys(item).forEach((key) => {
-            //       doc.setFont('helvetica', 'bold');
-            //       doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
-            //       const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
-            //       doc.setFont('helvetica', 'normal');
-            //       doc.text(item[key], x + keyWidth, y);
-            //       y += 10;
-            //     });
-            // });
+            flattenedData.forEach((item, index) => {
+                if (index > 0) {
+                    doc.addPage();
+                }
 
-            // doc.save(`RFQ_Details_${name}.pdf`);
+                const x = 10;
+                let y = 20;
+
+                Object.keys(item).forEach((key) => {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
+                    const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(item[key], x + keyWidth, y);
+                    y += 10;
+                });
+            });
+
+            doc.save(`RFQ_Details_${name}.pdf`);
+
+            setRfqMenuLoader(false);
         } catch (error) {
             console.log(error);
+            setRfqMenuLoader(false);
         }
     };
+
+    const generatePDF = () => {
+        const doc = new jsPDF('portrait', 'pt', 'a4');
+        const marginLeft = 40;
+        const startY = 60;
+    
+        // Title
+        doc.setFontSize(20);
+        doc.setTextColor(60, 120, 180);
+        doc.text('HENDERSON', doc.internal.pageSize.getWidth() / 2, startY, { align: 'center' });
+        doc.text('DESIGN GROUP', doc.internal.pageSize.getWidth() / 2, startY + 30, { align: 'center' });
+    
+        // Subtitle and Date
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.text('RFQ 001', marginLeft, startY + 60);
+        doc.text('05.24.24', marginLeft, startY + 75);
+    
+        // Scope
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+        doc.text('Proposed/Requested Scope:', marginLeft, startY + 100);
+        // doc.text('Wall dimensions to be verified', marginLeft, startY + 120);
+
+        // Footer
+        const footerY = doc.internal.pageSize.getHeight() - 40;
+        doc.setFontSize(10);
+        doc.setTextColor(128);
+        doc.text('Henderson | Kahala Coast | San Francisco', doc.internal.pageSize.getWidth() / 2, footerY, { align: 'center' });
+        doc.text('(808) 515-1212 | henderson@henderson.house | henderson.house', doc.internal.pageSize.getWidth() / 2, footerY + 10, { align: 'center' });
+
+        // // Section Heading
+        // doc.setFontSize(16);
+        // doc.setTextColor(0);
+        // doc.text('Primary Bathroom', marginLeft, startY + 150);
+    
+        // // First Diagram
+        // doc.setDrawColor(0);
+        // doc.setLineWidth(1);
+        // doc.line(marginLeft, startY + 170, doc.internal.pageSize.getWidth() - marginLeft, startY + 170);
+        // doc.text('1. Highlighted Stone Sinks + Countertop - Qty 2 (1 on either side of bathroom)', marginLeft, startY + 190);
+        // doc.text('Counter Size: 4\'11.5" L x 2\'7.5" D x TBD H', marginLeft, startY + 210);
+    
+        // // Insert Image or Diagram (replace 'image.png' with the path to your image)
+        // //doc.addImage('/path/to/your/image.png', 'PNG', marginLeft, startY + 220, 200, 150);
+    
+        // // Second Diagram
+        // doc.text('2. Accent Stone Panel Inset at Bath - Qty 1', marginLeft, startY + 400);
+        // doc.text('Panel Size: approx. 30"W x 59"H x TBD thickness', marginLeft, startY + 420);
+        // Add second image if necessary
+    
+        // Add second page with the floor plan image
+        doc.addPage();
+        doc.setFontSize(20);
+        doc.setTextColor(60, 120, 180);
+        doc.text('HENDERSON', doc.internal.pageSize.getWidth() / 2, startY, { align: 'center' });
+        doc.text('DESIGN GROUP', doc.internal.pageSize.getWidth() / 2, startY + 30, { align: 'center' });
+    
+        // Insert Floor Plan
+        //doc.addImage('/path/to/your/floor-plan.png', 'PNG', marginLeft, startY + 50, 500, 500);
+    
+        // Footer
+        //const footerY = doc.internal.pageSize.getHeight() - 40;
+        doc.setFontSize(10);
+        doc.setTextColor(128);
+        doc.text('Henderson | Kahala Coast | San Francisco', doc.internal.pageSize.getWidth() / 2, footerY, { align: 'center' });
+        doc.text('(808) 515-1212 | henderson@henderson.house | henderson.house', doc.internal.pageSize.getWidth() / 2, footerY + 10, { align: 'center' });
+    
+        // Save the PDF
+        doc.save('rfq.pdf');
+    };
+      
 
     const generatePDF = () => {
         const doc = new jsPDF('portrait', 'pt', 'a4');
@@ -1298,12 +1421,6 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
     return (
         <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
-            <div className="w-full flex items-center justify-start">
-                <button onClick={handleAddNew}
-                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                    ADD NEW RFQ
-                </button>
-            </div>
             {
                 loading2 ?
                     <div className='w-full flex items-center justify-center my-4'>
@@ -1314,72 +1431,87 @@ const RFQ = ({ fetchAllProductsMain }) => {
                             Error: {error}
                         </div>
                         :
-                        <div className="w-full flex items-center justify-center text-black">
-                            {
-                                rfqs.length === 0 ?
-                                    <div className="w-full text-left font-medium">
-                                        No RFQ detail found!
-                                    </div> :
-                                    <table className='w-full border-collapse'>
-                                        <thead className='text-nowrap'>
-                                            <tr className='text-gray-700 text-lg'>
-                                                <th>Action</th>
-                                                <th>RFQ Number</th>
-                                                <th>Deadline</th>
-                                                <th>Vendor Name</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                current.map(rfq => {
-                                                    return (
-                                                        <tr>
-                                                            <td>
-                                                                <div className='flex items-center justify-center relative'>
-                                                                    {
-                                                                        menuOpen != rfq._id ?
-                                                                            <MdOutlineMoreVert
-                                                                                onClick={() => openMenu(rfq._id)}
-                                                                                className='cursor-pointer text-xl' />
-                                                                            :
-                                                                            <IoCloseSharp
-                                                                                onClick={() => openMenu(rfq._id)}
-                                                                                className='cursor-pointer text-xl' />
-                                                                    }
-                                                                    {
-                                                                        menuOpen === rfq._id &&
-                                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                                            className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16 gap-2">
-                                                                            {
-                                                                                rfq.status === "Received RFQ" ?
-                                                                                    <button onClick={() => handleViewRFQ(rfq._id)}
-                                                                                        className='w-full text-left'>View RFQ</button>
-                                                                                    :
-                                                                                    <button onClick={() => handleRrOpen(rfq._id)}
-                                                                                        className='w-full text-left'>Receive RFQ</button>
-                                                                            }
+                        <div className="w-full flex flex-col items-center justify-start gap-4">
+                            <div className="w-full flex items-center justify-start">
+                                <button onClick={handleAddNew}
+                                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                    ADD NEW RFQ
+                                </button>
+                            </div>
+                            <div className="w-full flex items-center justify-center text-black">
+                                {
+                                    rfqs.length === 0 ?
+                                        <div className="w-full text-left font-medium">
+                                            No RFQ detail found!
+                                        </div> :
+                                        <table className='w-full border-collapse'>
+                                            <thead className='text-nowrap'>
+                                                <tr className='text-gray-700 text-lg'>
+                                                    <th>Action</th>
+                                                    <th>RFQ Number</th>
+                                                    <th>Deadline</th>
+                                                    <th>Vendor Name</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    current.map(rfq => {
+                                                        return (
+                                                            <tr>
+                                                                <td>
+                                                                    <div className='flex items-center justify-center relative'>
+                                                                        {
+                                                                            menuOpen != rfq._id ?
+                                                                                <MdOutlineMoreVert
+                                                                                    onClick={() => openMenu(rfq._id)}
+                                                                                    className='cursor-pointer text-xl' />
+                                                                                :
+                                                                                <IoCloseSharp
+                                                                                    onClick={() => openMenu(rfq._id)}
+                                                                                    className='cursor-pointer text-xl' />
+                                                                        }
+                                                                        {
+                                                                            menuOpen === rfq._id &&
+                                                                            <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                                                                className="w-[10rem] flex flex-col items-center p-2 fixed bg-white ml-[12rem] mt-16">
+                                                                                {
+                                                                                    rfqMenuLoader ? <div className="w-full text-center my-4"><CircularProgress /></div> :
+                                                                                        <div className="w-full flex flex-col items-center gap-2">
+                                                                                            {
+                                                                                                rfq.status === "Received RFQ" ?
+                                                                                                    <button onClick={() => handleViewRFQ(rfq._id)}
+                                                                                                        className='w-full text-left'>View RFQ</button>
+                                                                                                    :
+                                                                                                    <button onClick={() => handleRrOpen(rfq._id)}
+                                                                                                        className='w-full text-left'>Receive RFQ</button>
+                                                                                            }
 
-                                                                            <div className="w-full h-[2px] bg-gray-300"></div>
+                                                                                            <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                            <button onClick={() => handleDownload(rfq._id, rfq.rfqId)}
-                                                                                className='w-full text-left'>Download RFQ</button>
-
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                            </td>
-                                                            <td>{rfq.rfqId}</td>
-                                                            <td>{rfq.deadline}</td>
-                                                            <td>{rfq.vendor}</td>
-                                                            <td>{rfq.status}</td>
-                                                        </tr>
-                                                    )
-                                                })
-                                            }
-                                        </tbody>
-                                    </table>
-                            }
+                                                                                            <button onClick={() => handleDownload(rfq._id, rfq.rfqId)}
+                                                                                                className='w-full text-left'>Download RFQ</button>
+                                                                                        </div>
+                                                                                }
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                </td>
+                                                                <td>{rfq.rfqId}</td>
+                                                                <td>{rfq.deadline}</td>
+                                                                <td>{rfq.vendor}</td>
+                                                                {
+                                                                    rfq.status === 'Received RFQ' ?
+                                                                        <td className='text-green-600 font-medium'>{rfq.status}</td> : <td>{rfq.status}</td>
+                                                                }
+                                                            </tr>
+                                                        )
+                                                    })
+                                                }
+                                            </tbody>
+                                        </table>
+                                }
+                            </div>
                         </div>
 
             }
@@ -1556,18 +1688,20 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                         zeroPrice && <div className="w-full text-left text-xs text-red-600 italic -my-2">All product prices must be greater than 0.</div>
                                     }
                                     {
-                                        !viewRFQ ?
-                                            <div className="w-full flex items-center justify-end my-1">
-                                                <button onClick={handleReceiveRFQ}
-                                                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
-                                                    Receive RFQ
-                                                </button>
-                                            </div> : ''
+                                        !viewRFQ &&
+                                        <div className="w-full flex items-center justify-end my-1">
+                                            {
+                                                recSaveLoader ? <CircularProgress /> :
+                                                    <button onClick={handleReceiveRFQ}
+                                                        className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white'>
+                                                        Receive RFQ
+                                                    </button>
+                                            }
+                                        </div>
                                     }
                                 </div>
                     }
                 </div>
-
             </Dialog>
 
             {/* Add Product Section */}
@@ -1754,7 +1888,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                     ))}
                                                 </select>
                                             </div>
-                                            <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                            {/* <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                                                 <label htmlFor="curr">Currency:</label>
                                                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                                                 <select
@@ -1765,7 +1899,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                     <option value="USD">USD</option>
                                                     <option value="IDR">IDR</option>
                                                 </select>
-                                            </div>
+                                            </div> */}
                                             <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                                                 <label htmlFor="deadline">Deadline:</label>
                                                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
@@ -1941,6 +2075,7 @@ const Products = () => {
     const [products, setProducts] = useState([]);
 
     const fetchAllProducts = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/products/${address.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -2035,8 +2170,9 @@ const Products = () => {
                                                                     <td>{pdt.code}</td>
                                                                     <td>{pdt.title}</td>
                                                                     {
-                                                                        pdt.status === "Pending" ?
-                                                                            <td>Approval pending</td> : ''
+                                                                        pdt.status === "Pending" ? <td className='font-medium text-gray-600'>Approval pending</td> :
+                                                                            pdt.status === "Approved" ? <td className='font-medium text-green-600'>Approved</td> :
+                                                                                pdt.status === "Rejected" ? <td className='font-medium text-red-600'>Rejected</td> : ''
                                                                     }
                                                                     <td>{pdt.rfqNumber}</td>
                                                                     <td>{pdt.rfqSentDate}</td>

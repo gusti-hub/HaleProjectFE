@@ -41,6 +41,7 @@ const ForVendor = () => {
     };
 
     const fetchUsers = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(`${backendServer}/api/vendors`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -60,11 +61,14 @@ const ForVendor = () => {
         setOpen(true);
     };
 
+    const [saveLoader, setSaveLoader] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaveLoader(true);
 
         if (formData.name.length === 0 || formData.code.length === 0 || formData.email.length === 0) {
-            toast.error("Can't submit empty form!"); setOpen(false);
+            toast.error("Can't submit empty form!"); setOpen(false); setSaveLoader(false);
         }
 
         if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0) {
@@ -76,10 +80,12 @@ const ForVendor = () => {
                 fetchUsers();
                 resetForm();
                 setOpen(false);
+                setSaveLoader(false);
             } catch (error) {
                 toast.error(error.response.data.message);
                 resetForm();
                 setOpen(false);
+                setSaveLoader(false);
             }
         }
     };
@@ -191,9 +197,12 @@ const ForVendor = () => {
                             type="text" placeholder='Type here...' name="address" id="address" />
                     </div>
                     <div className="w-full flex items-center justify-center">
-                        <button className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
-                            {editMode ? 'Update' : 'Register'}
-                        </button>
+                        {
+                            saveLoader ? <CircularProgress /> :
+                                <button className='w-full bg-[#7F55DE] p-2 text-white text-base font-medium rounded-lg'>
+                                    {editMode ? 'Update' : 'Register'}
+                                </button>
+                        }
                     </div>
                 </form>
             </Dialog>
