@@ -27,7 +27,7 @@ const EmpSales = () => {
     };
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
+    const [itemsPerPage] = useState(4);
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -43,8 +43,8 @@ const EmpSales = () => {
     }, []);
 
     return (
-        <div className="min-w-[25rem] w-full flex flex-col items-center gap-2 bg-[#F8F9FD] p-4 rounded-md border border-solid border-gray-300">
-            <div className="w-full text-left font-semibold">Sales by Employees:</div>
+        <div className="min-w-[25rem] w-full flex flex-col items-center gap-4 bg-[#F8F9FD] p-4 rounded-md border border-solid border-gray-300">
+            <div className="w-full text-left font-semibold text-black">Sales by Employees:</div>
             <div className="w-full flex items-center justify-center">
                 {
                     loading ?

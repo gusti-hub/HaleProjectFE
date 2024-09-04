@@ -4,6 +4,7 @@ import axios from 'axios';
 import { backendServer } from '../../utils/info';
 import BarChart from '../../components/BarChart';
 import EmpSales from './EmpSales';
+import PrjStatus from './PrjStatus';
 
 const Dashboard = () => {
 
@@ -138,7 +139,7 @@ const Dashboard = () => {
                         <div className="w-full flex items-center justify-center text-red-600 font-medium">
                             Error: {error}
                         </div> :
-                        <div className="w-full flex flex-col items-center justify-start gap-4">
+                        <div className="w-full flex flex-col items-center justify-start gap-4 max-h-[36rem] overflow-x-hidden overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
                             <div className="w-full flex items-start justify-center gap-4">
                                 <div className="w-full flex flex-col items-center gap-4">
                                     <div className="w-full flex items-start justify-start gap-4">
@@ -155,7 +156,7 @@ const Dashboard = () => {
                                     <EmpSales />
                                 </div>
                                 {/* Graph section */}
-                                <div className="w-full max-w-[34rem] min-h-[18rem] flex items-center justify-center bg-[#F8F9FD] rounded-md p-4 border border-solid border-gray-300">
+                                <div className="w-full max-w-[34rem] min-h-[18rem] flex items-center justify-center bg-[#F8F9FD] rounded-md p-4 border border-solid border-gray-300 mr-2">
                                     {
                                         chartLoader ?
                                             <div className='w-full flex items-center justify-center'>
@@ -165,8 +166,8 @@ const Dashboard = () => {
                                                 <div className="w-full flex items-center justify-center text-red-600 font-medium">
                                                     Error: {chartError}
                                                 </div> :
-                                                <div className="w-full flex flex-col items-center gap-2.5">
-                                                    <div className="w-full flex flex-col items-center gap-2.5 text-sm">
+                                                <div className="w-full flex flex-col items-center">
+                                                    <div className="w-full flex flex-col items-center gap-1.5 text-sm">
                                                         <div className="w-full text-left font-semibold">Legends:</div>
                                                         <div className="w-full flex flex-col items-center text-xs font-medium gap-2 pl-2">
                                                             <div className="w-full flex items-center justify-start gap-1">
@@ -190,6 +191,11 @@ const Dashboard = () => {
                                                 </div>
                                     }
                                 </div>
+                            </div>
+
+                            {/* Long table */}
+                            <div className="w-full flex items-center justify-center bg-[#F8F9FD] rounded-md p-4 border border-solid border-gray-300">
+                                <PrjStatus />
                             </div>
                         </div>
             }
