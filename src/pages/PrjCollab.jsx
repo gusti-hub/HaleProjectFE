@@ -6,6 +6,23 @@ import { backendServer } from '../utils/info';
 import CircularProgress from '@mui/material/CircularProgress';
 import toast from 'react-hot-toast';
 import { LuSend } from "react-icons/lu";
+import ViewHardware from '../components/view/hardware';
+import ViewArtwork from '../components/view/artwork';
+import ViewCasegood from '../components/view/casegood';
+import ViewAcessory from '../components/view/accessory';
+import ViewArearug from '../components/view/arearug';
+import ViewEquipment from '../components/view/equipment';
+import ViewFabric from '../components/view/fabric';
+import ViewHardwired from '../components/view/lightfixture';
+import ViewDecorativeLighting from '../components/view/decoretivelighting';
+import ViewMirror from '../components/view/mirror';
+import ViewMiscellaneous from '../components/view/miscellaneous';
+import ViewTable from '../components/view/table';
+import ViewSeating from '../components/view/seating';
+import ViewWallpaper from '../components/view/wallpaper';
+import ViewUpholstery from '../components/view/upholstery';
+import ViewWindowTreatment from '../components/view/windowtreatment';
+import GlobalVariable from '../utils/GlobalVariable';
 
 const PrjCollab = () => {
 
@@ -143,7 +160,7 @@ const PrjCollab = () => {
                                                                                     <div className="w-full flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg p-2.5">
                                                                                         {
                                                                                             statusLoader === pdt._id ? <CircularProgress /> :
-                                                                                                pdt.status === 'Pending' ?
+                                                                                                pdt.status === GlobalVariable.ProductStatus.WaitingForClientApproval ?
                                                                                                     userType === 'Client' ?
                                                                                                         <div className="w-full flex items-center justify-center gap-6">
                                                                                                             <button onClick={() => handleStatus(pdt._id, 'Approved')}
@@ -156,7 +173,7 @@ const PrjCollab = () => {
                                                                                                             </button>
                                                                                                         </div> : <div className='w-full flex items-center justify-center'>
                                                                                                             <div className="w-fit p-1 px-8 bg-blue-gray-50 text-gray-700 rounded-3xl font-medium">
-                                                                                                                Waiting for approval
+                                                                                                                {GlobalVariable.ProductStatus.WaitingForClientApproval}
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     : pdt.status === 'Approved' ? <div className='w-full flex items-center justify-center'>
@@ -174,49 +191,86 @@ const PrjCollab = () => {
                                                                                     <div className="w-full flex flex-col items-center gap-2 border-2 border-solid border-gray-300 rounded-lg p-2.5 h-[15rem] overflow-y-scroll scroll-smooth" style={{scrollbarWidth: 'thin'}}>
                                                                                         <div className="w-full flex items-center justify-start gap-2">
                                                                                             <div className='font-semibold'>Description:</div>
-                                                                                            {
-                                                                                                pdt.desc ? <div className="w-full flex items-center justify-start">{pdt.desc}</div> :
-                                                                                                    <div className="w-full flex items-center justify-start">Not available</div>
-                                                                                            }
                                                                                         </div>
                                                                                         <div className="w-full h-[2px] bg-gray-300"></div>
-                                                                                        {
-                                                                                            pdt.productDetails.unit && <div className="w-full flex items-center justify-start gap-2">
-                                                                                                <div className='font-medium'>Dimension:</div>
-                                                                                                <div className="w-full flex flex-wrap items-center justify-start gap-2">
-                                                                                                    {pdt.productDetails.len ? <div><span className='text-black font-medium'>L:</span> {pdt.productDetails.len} {pdt.productDetails.unit}</div> : ''}
-                                                                                                    {pdt.productDetails.wid ? <div><span className='text-black font-medium'>W:</span> {pdt.productDetails.wid} {pdt.productDetails.unit}</div> : ''}
-                                                                                                    {pdt.productDetails.dia ? <div><span className='text-black font-medium'>Dia:</span> {pdt.productDetails.dia} {pdt.productDetails.unit}</div> : ''}
-                                                                                                </div>
+                                                                                       {
+                                                                                            <><div className="w-full flex items-center justify-start gap-2">
+                                                                                                <div className='font-medium'>SKU:</div>
+                                                                                                <div>{pdt.sku}</div>
+                                                                                            </div><div className="w-full flex items-center justify-start gap-2">
+                                                                                                    <div className='font-medium'>Quantity:</div>
+                                                                                                    <div>{pdt.qty}</div>
                                                                                             </div>
+                                                                                            {pdt.furnishing === 'Accessory' ? (
+                                                                                                <ViewAcessory
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Area Rug' ? (
+                                                                                                <ViewArearug
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Equipment' ? (
+                                                                                                <ViewEquipment
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Hardware' ? (
+                                                                                                <ViewHardware
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Artwork' ? (
+                                                                                                <ViewArtwork
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Casegood' ? (
+                                                                                                <ViewCasegood
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Fabric' ? (
+                                                                                                <ViewFabric
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Light Fixture (hardwired)' ? (
+                                                                                                <ViewHardwired
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Decorative Lighting' ? (
+                                                                                                <ViewDecorativeLighting
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Mirror' ? (
+                                                                                                <ViewMirror
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Miscellaneous' ? (
+                                                                                                <ViewMiscellaneous
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Table' ? (
+                                                                                                <ViewTable
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Seating' ? (
+                                                                                                <ViewSeating
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Wallpaper' ? (
+                                                                                                <ViewWallpaper
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Upholstery' ? (
+                                                                                                <ViewUpholstery
+                                                                                                    pdt={pdt}
+                                                                                                />
+                                                                                            )   : pdt.furnishing === 'Window Treatment' ? (
+                                                                                                <ViewWindowTreatment
+                                                                                                    pdt={pdt}
+                                                                                                />                      
+                                                                                            )                                                                                                                                                                                       
+                                                                                            : <></>
+                                                                                            }
+                                                                                            </>
                                                                                         }
-                                                                                        {
-                                                                                            pdt.productDetails.color && <div className="w-full flex items-center justify-start gap-2">
-                                                                                                <div className='font-medium'>Color:</div>
-                                                                                                <div className="flex items-center justify-center gap-2">
-                                                                                                    <div className={`w-7 h-5 rounded-sm`} style={{ backgroundColor: pdt.productDetails.color }}></div>
-                                                                                                    <div>{pdt.productDetails.color}</div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        }
-                                                                                        {
-                                                                                            pdt.productDetails.material && <div className="w-full flex items-center justify-start gap-2">
-                                                                                                <div className='font-medium'>Material:</div>
-                                                                                                <div>{pdt.productDetails.material}</div>
-                                                                                            </div>
-                                                                                        }
-                                                                                        {
-                                                                                            pdt.productDetails.insert && <div className="w-full flex items-center justify-start gap-2">
-                                                                                                <div className='font-medium'>Insert:</div>
-                                                                                                <div>{pdt.productDetails.insert}</div>
-                                                                                            </div>
-                                                                                        }
-                                                                                        {
-                                                                                            pdt.productDetails.finish && <div className="w-full flex items-center justify-start gap-2">
-                                                                                                <div className='font-medium'>Finish:</div>
-                                                                                                <div>{pdt.productDetails.finish}</div>
-                                                                                            </div>
-                                                                                        }
+                                                                                                                                                                                                                                     
                                                                                     </div>
                                                                                     <div className="w-full flex items-center justify-center border-2 border-solid border-gray-300 rounded-lg p-2.5">
                                                                                         <div className="w-full flex flex-col items-center justify-start gap-2">

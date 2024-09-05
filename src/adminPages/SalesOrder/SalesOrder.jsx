@@ -359,8 +359,8 @@ const SalesOrder = () => {
                                                                                     onClick={() => openMenu(pdt._id)}
                                                                                     className='cursor-pointer text-xl' />
                                                                         }
-                                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                                                            className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[12rem] flex flex-col items-start justify-start p-2 fixed bg-white ml-[14rem] mt-[0.5rem]`}>
+                                                        <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                                                className={`${menuOpen === pdt._id ? 'block' : 'hidden'} w-[15rem] flex flex-col items-start justify-start p-2 fixed bg-white ml-[16rem] mt-[0.5rem]`}>
 
                                                             {(pdt.progress == GlobalVariable.Progress.NotStarted && pdt.owner === name) ?                                                         
                                                                 <>
@@ -529,11 +529,11 @@ const SalesOrder = () => {
                                                                 : <></>
                                                             }
 
-                                                            {(pdt.progress == GlobalVariable.Progress.NotStarted || action.includes(GlobalVariable.ActionRole.DeleteProject)) ?                                                         
+                                                            {(true) ?                                                         
                                                                 <>                                                                
 
                                                                     <button onClick={() => handleDeleteProject(pdt._id)} disabled={pdt.progress != GlobalVariable.Progress.NotStarted}
-                                                                        className={`w-full text-left font-normal text-nowrap text-red-600 ${pdt.owner === name ? 'block' : 'hidden'}`}>Delete project</button>
+                                                                        className={`w-full text-left font-normal text-nowrap text-red-600`}>Delete project</button>
                                                                 </>
 
                                                                 : <></>
