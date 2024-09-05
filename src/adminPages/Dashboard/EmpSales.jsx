@@ -48,11 +48,11 @@ const EmpSales = () => {
             <div className="w-full flex items-center justify-center">
                 {
                     loading ?
-                        <div className='w-full flex items-center justify-center my-14'>
+                        <div className='w-full flex items-center justify-center my-[6.375rem]'>
                             <CircularProgress />
                         </div> :
                         error ?
-                            <div className="w-full flex items-center justify-center text-red-600 font-medium my-16">
+                            <div className="w-full flex items-center justify-center text-red-600 font-medium my-[6.875rem]">
                                 Error: {error}
                             </div> :
                             <div className="w-full flex items-center justify-center">
