@@ -120,10 +120,15 @@ const Inventory = () => {
                                                                 <td>{pdt.title ? pdt.title : null}</td>
                                                                 <td>{pdt.projectId ? pdt.projectId : null}</td>
                                                                 <td>{pdt.totalRecQty}</td>
-                                                                <td>{new Intl.NumberFormat('en-US', {
-                                                                    style: 'currency',
-                                                                    currency: 'USD',
-                                                                }).format(pdt.buyPrice)}</td>
+                                                                <td>
+                                                                    {
+                                                                        !pdt.buyPrice ? 0 :
+                                                                        new Intl.NumberFormat('en-US', {
+                                                                            style: 'currency',
+                                                                            currency: 'USD',
+                                                                        }).format(pdt.buyPrice)
+                                                                    }
+                                                                </td>
                                                                 <td>{new Intl.NumberFormat('en-US', {
                                                                     style: 'currency',
                                                                     currency: 'USD',
