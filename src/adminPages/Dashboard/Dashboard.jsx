@@ -116,6 +116,12 @@ const Dashboard = () => {
             y: {
                 display: true,
                 beginAtZero: true,
+                ticks: {
+                    beginAtZero: true,
+                    precision: 0, // Remove decimals
+                    // You can also add stepSize for more control over intervals:
+                    // stepSize: 1,
+                  },
             },
         },
     };
@@ -143,11 +149,11 @@ const Dashboard = () => {
                             <div className="w-full flex items-start justify-center gap-4">
                                 <div className="w-full flex flex-col items-center gap-4">
                                     <div className="w-full flex items-start justify-start gap-4">
-                                        <div className='min-w-[12rem] flex flex-col items-start gap-2 p-3 rounded-md bg-green-100'>
+                                        <div className='min-w-[18rem] flex flex-col items-start gap-2 p-3 rounded-md bg-green-100'>
                                             <div className='font-medium'>Total Revenue</div>
                                             <div className='font-semibold text-3xl'>{formatCurrency(totRev)}</div>
                                         </div>
-                                        <div className='min-w-[12rem] flex flex-col items-start gap-2 p-3 rounded-md bg-[#F8F9FD] border border-solid border-gray-300'>
+                                        <div className='min-w-[18rem] flex flex-col items-start gap-2 p-3 rounded-md bg-[#F8F9FD] border border-solid border-gray-300'>
                                             <div className='font-medium'>Total Projects</div>
                                             <div className='font-semibold text-3xl'>{salesNo}</div>
                                         </div>
