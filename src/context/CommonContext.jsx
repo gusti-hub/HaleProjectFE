@@ -36,8 +36,9 @@ const AppProvider = ({ children }) => {
             const response = await axios.get(`${backendServer}/api/getLoggedInUser/${loggedInUserID}`);
             setLoggedInUserName(response.data);
             setNameLoader(false);
+            setNameError(null);
         } catch (error) {
-            setNameError("Error");
+            setNameError(error.response.data.message);
             setNameLoader(false);
         }
     };
