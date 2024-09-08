@@ -22,7 +22,7 @@ const AdminPanel = () => {
 
     const navigate = useNavigate();
 
-    const { menuID, handleMenuID, nameLoader, loggedInUserName, fetchName } = useContext(AppContext);
+    const { menuID, handleMenuID, nameLoader, loggedInUserName, nameError, fetchName } = useContext(AppContext);
 
     const loggedInUser = localStorage.getItem('name');
 
@@ -119,12 +119,14 @@ const AdminPanel = () => {
 
                     <div className="w-full flex flex-col items-center justify-center">
                         <div className={`w-full flex items-center p-4 pb-0 text-lg gap-3 ${isExpanded ? 'justify-start' : 'justify-center'}`}>
-                            <div className="flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6]">
-                                <FaRegUser className='text-lg' />
+                            <div className={`flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6] ${nameError ? 'border-2 border-solid border-red-600' : 'border-none'}`}>
+                                <FaRegUser className={`text-lg`} />
                             </div>
                             {
-                                nameLoader ? <div className={`w-full flex items-center justify-center ${isExpanded ? "block" : "hidden"}`}><CircularProgress /></div> :
-                                    <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUserName}</div>
+                                nameLoader ?
+                                    <div className={`w-full flex items-center justify-center ${isExpanded ? "block" : "hidden"}`}><CircularProgress /></div> :
+                                    nameError ? <div className={`w-full flex items-center justify-start text-red-600 text-[15px] font-medium ${isExpanded ? "block" : "hidden"}`}>{nameError}</div> :
+                                        <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUserName}</div>
                             }
                         </div>
                         <div

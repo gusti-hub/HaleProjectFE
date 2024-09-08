@@ -28,17 +28,23 @@ const AppProvider = ({ children }) => {
 
     const [loggedInUserName, setLoggedInUserName] = useState(null);
     const [nameLoader, setNameLoader] = useState(false);
+    const [nameError, setNameError] = useState(null);
 
     const fetchName = async () => {
         setNameLoader(true);
-        const response = await axios.get(`${backendServer}/api/getLoggedInUser/${loggedInUserID}`);
-        setLoggedInUserName(response.data);
-        setNameLoader(false);
+        try {
+            const response = await axios.get(`${backendServer}/api/getLoggedInUser/${loggedInUserID}`);
+            setLoggedInUserName(response.data);
+            setNameLoader(false);
+        } catch (error) {
+            setNameError("Error");
+            setNameLoader(false);
+        }
     };
 
     return (
         <AppContext.Provider
-            value={{ menuID, handleMenuID, userReg, handleUserReg, open, handleOpen, nameLoader, loggedInUserName, fetchName }}
+            value={{ menuID, handleMenuID, userReg, handleUserReg, open, handleOpen, nameLoader, loggedInUserName, nameError, fetchName }}
         >
             {children}
         </AppContext.Provider>
