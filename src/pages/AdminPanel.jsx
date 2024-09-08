@@ -37,9 +37,9 @@ const AdminPanel = () => {
 
     const [isExpanded, setExpanded] = useState(true);
 
-    // useEffect(() => {
-    //     fetchName();
-    // }, []);
+    useEffect(() => {
+        fetchName();
+    }, []);
 
     return (
         <div className="w-full flex items-center justify-center">
