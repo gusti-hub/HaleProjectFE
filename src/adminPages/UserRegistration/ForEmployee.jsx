@@ -136,7 +136,7 @@ const ForEmployee = () => {
                 if (isEditing) {
                     if (response.data.userId === loggedInUserID) {
                         localStorage.setItem('name', response.data.userName);
-                        await fetchName();
+                        await fetchName(loggedInUserID);
                     };
                 };
 
