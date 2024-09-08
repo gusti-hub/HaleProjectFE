@@ -24,9 +24,21 @@ const AppProvider = ({ children }) => {
         setOpen((cur) => !cur);
     };
 
+    const loggedInUserID = localStorage.getItem('userId');
+
+    const [loggedInUserName, setLoggedInUserName] = useState(null);
+    const [nameLoader, setNameLoader] = useState(false);
+
+    const fetchName = async () => {
+        setNameLoader(true);
+        const response = await axios.get(`${backendServer}/api/getLoggedInUser/${loggedInUserID}`);
+        setLoggedInUserName(response.data);
+        setNameLoader(false);
+    };
+
     return (
         <AppContext.Provider
-            value={{ menuID, handleMenuID, userReg, handleUserReg, open, handleOpen }}
+            value={{ menuID, handleMenuID, userReg, handleUserReg, open, handleOpen, nameLoader, loggedInUserName, fetchName }}
         >
             {children}
         </AppContext.Provider>

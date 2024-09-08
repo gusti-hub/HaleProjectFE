@@ -97,7 +97,7 @@ const PrjCollab = () => {
 
     return (
         <div className="w-full flex items-center justify-center">
-            <div className="w-full min-h-screen flex flex-col items-center justify-start border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg bg-[#F8F9FD]">
+            <div className="w-full min-h-screen flex flex-col items-center justify-start rounded-lg bg-[#F8F9FD]">
                 <div className="w-full flex items-center justify-start p-6 bg-[#F8F9FD] gap-6">
                     <div onClick={() => navigate(-1)}
                         className="flex items-center justify-center rounded-[50%] bg-[#7F55DE] p-2 cursor-pointer">

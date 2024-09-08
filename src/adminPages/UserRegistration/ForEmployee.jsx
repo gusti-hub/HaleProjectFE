@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { IoPersonAdd } from 'react-icons/io5';
 import { Dialog } from '@material-tailwind/react';
@@ -9,9 +9,14 @@ import toast from 'react-hot-toast';
 import { FaEdit } from 'react-icons/fa';
 import { MdDeleteOutline, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
 import { FiSearch } from 'react-icons/fi';
+import { AppContext } from '../../context/CommonContext';
 
 const ForEmployee = () => {
+
     const token = localStorage.getItem('token');
+    const loggedInUserID = localStorage.getItem('userId');
+
+    const { fetchName } = useContext(AppContext);
 
     const [users, setUsers] = useState([]);
     const [options, setOptions] = useState([]);
@@ -127,6 +132,14 @@ const ForEmployee = () => {
                     ? await axios.put(`${backendServer}/api/employee/${editingUserId}`, formData)
                     : await axios.post(`${backendServer}/api/empreg`, formData);
                 toast.success(response.data.message);
+
+                if (isEditing) {
+                    if (response.data.userId === loggedInUserID) {
+                        localStorage.setItem('name', response.data.userName);
+                        await fetchName();
+                    };
+                };
+
                 resetForm();
                 setOpen(false);
                 fetchUsers();

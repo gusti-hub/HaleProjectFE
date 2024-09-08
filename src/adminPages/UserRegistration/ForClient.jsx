@@ -164,17 +164,19 @@ const ForClient = () => {
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="name" id="name" />
                     </div>
-                    <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="code">Code:</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                    {
+                        !editMode && <div className="w-full flex flex-col items-start gap-1 text-base">
+                            <div className="w-full flex items-center justify-start gap-2">
+                                <label htmlFor="code">Code:</label>
+                                <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                            </div>
+                            <input
+                                value={formData.code}
+                                onChange={handleInputChange}
+                                className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                                type="text" placeholder='Type here...' name="code" id="code" />
                         </div>
-                        <input
-                            value={formData.code}
-                            onChange={handleInputChange}
-                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="code" id="code" />
-                    </div>
+                    }
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
                             <label htmlFor="email">Email:</label>

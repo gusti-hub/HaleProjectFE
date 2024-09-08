@@ -1448,21 +1448,22 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                             Error: {error}
                                         </div>
                                         :
-                                        <form className='w-full flex flex-col items-center'>
-                                            <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                                                <label htmlFor="vendor">Vendor:</label>
-                                                <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                                                <select
-                                                    value={formData.vendor}
-                                                    onChange={handleInputChange}
-                                                    className='p-1 outline-none' name="vendor">
-                                                    <option value="" disabled>Select an option</option>
-                                                    {vendors.map((vendor) => (
-                                                        <option key={vendor.id} value={vendor.name}>{vendor.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            {/* <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                        vendors.length === 0 ? <div className="w-full text-left">No registered vendor found!</div> :
+                                            <form className='w-full flex flex-col items-center'>
+                                                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                                    <label htmlFor="vendor">Vendor:</label>
+                                                    <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                                    <select
+                                                        value={formData.vendor}
+                                                        onChange={handleInputChange}
+                                                        className='p-1 outline-none' name="vendor">
+                                                        <option value="" disabled>Select an option</option>
+                                                        {vendors.map((vendor) => (
+                                                            <option key={vendor.id} value={vendor.name}>{vendor.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                {/* <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
                                                 <label htmlFor="curr">Currency:</label>
                                                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
                                                 <select
@@ -1474,64 +1475,68 @@ const RFQ = ({ fetchAllProductsMain }) => {
                                                     <option value="IDR">IDR</option>
                                                 </select>
                                             </div> */}
-                                            <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
-                                                <label htmlFor="deadline">Deadline:</label>
-                                                <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                                                <input
-                                                    value={formData.deadline}
-                                                    onChange={handleInputChange}
-                                                    className='p-1 outline-none'
-                                                    type="date" name="deadline" id="deadline" min={today} />
-                                            </div>
-                                        </form>
+                                                <div className="w-full flex items-center justify-start gap-2 text-black text-nowrap">
+                                                    <label htmlFor="deadline">Deadline:</label>
+                                                    <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                                                    <input
+                                                        value={formData.deadline}
+                                                        onChange={handleInputChange}
+                                                        className='p-1 outline-none'
+                                                        type="date" name="deadline" id="deadline" min={today} />
+                                                </div>
+                                            </form>
                             }
-                            <div className="w-full flex items-center justify-end">
-                                <button onClick={handleAddPdt}
-                                    className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white my-1'>
-                                    {selectedProducts.length === 0 ? "Add Product" : "Edit Selected Product(s)"}
-                                </button>
-                            </div>
+                            {
+                                vendors.length != 0 && <div className="w-full flex items-center justify-end">
+                                    <button onClick={handleAddPdt}
+                                        className='flex items-center justify-center gap-3 px-5 py-1.5 rounded-lg bg-[#7F55DE] text-white my-1'>
+                                        {selectedProducts.length === 0 ? "Add Product" : "Edit Selected Product(s)"}
+                                    </button>
+                                </div>
+                            }
 
                             {
-                                selectedProducts.length === 0 ? <div className="w-full text-left font-medium">No product is added!</div>
-                                    :
-                                    <div className="w-full flex items-start justify-center max-h-[15rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
-                                        <table className='w-full border-collapse mt-2'>
-                                            <thead>
-                                                <tr className='text-gray-700 text-lg text-nowrap'>
-                                                    <th>Product Name</th>
-                                                    <th>Description</th>
-                                                    <th>Quantity</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    selectedProducts.map(pdt => {
-                                                        return (
-                                                            <tr key={pdt._id} className='text-base text-center text-gray-700'>
-                                                                <td>{pdt.title}</td>
-                                                                <td>{pdt.desc}</td>
-                                                                <td>
-                                                                    <div className="flex items-center justify-center">
-                                                                        <input
-                                                                            value={qty[pdt._id] || ''}
-                                                                            onChange={(e) => handleQtyChange(e, pdt._id)}
-                                                                            className={`w-[4rem] p-2 py-1 outline-none bg-[#F8F9FD] 
+                                vendors.length != 0 && (
+                                    selectedProducts.length === 0 ? <div className="w-full text-left font-medium">No product is added!</div>
+                                        :
+                                        <div className="w-full flex items-start justify-center max-h-[15rem] overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                                            <table className='w-full border-collapse mt-2'>
+                                                <thead>
+                                                    <tr className='text-gray-700 text-lg text-nowrap'>
+                                                        <th>Product Name</th>
+                                                        <th>Description</th>
+                                                        <th>Quantity</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        selectedProducts.map(pdt => {
+                                                            return (
+                                                                <tr key={pdt._id} className='text-base text-center text-gray-700'>
+                                                                    <td>{pdt.title}</td>
+                                                                    <td>{pdt.desc}</td>
+                                                                    <td>
+                                                                        <div className="flex items-center justify-center">
+                                                                            <input
+                                                                                value={qty[pdt._id] || ''}
+                                                                                onChange={(e) => handleQtyChange(e, pdt._id)}
+                                                                                className={`w-[4rem] p-2 py-1 outline-none bg-[#F8F9FD] 
                                                                                 ${qty[pdt._id] <= 0 ? 'border border-solid border-red-600' : 'border-none'}`}
-                                                                            placeholder='1'
-                                                                            min={1}
-                                                                            type="number"
-                                                                            name="qty"
-                                                                        />
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )
-                                                    })
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                                                placeholder='1'
+                                                                                min={1}
+                                                                                type="number"
+                                                                                name="qty"
+                                                                            />
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )
+                                                        })
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                )
                             }
                             {zeroQty && <div className="w-full text-left text-xs italic text-red-600">Quantity must be greater than zero.</div>}
                             {
@@ -1617,7 +1622,7 @@ const Products = () => {
 
     return (
         <div className="w-full flex items-center justify-center">
-            <div className="w-full min-h-screen flex flex-col items-center justify-start border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg">
+            <div className="w-full min-h-screen flex flex-col items-center justify-start rounded-lg">
                 <div className="w-full flex items-center justify-start p-6 bg-[#F8F9FD] gap-6">
                     <div onClick={() => navigate(-1)}
                         className="flex items-center justify-center rounded-[50%] bg-[#7F55DE] p-2 cursor-pointer">
@@ -1635,15 +1640,17 @@ const Products = () => {
                                 Error: {error}
                             </div> :
                             <div className="w-full flex flex-col items-center justify-start p-8">
-                                <div className="w-full flex items-center justify-start gap-6">
-                                    <button onClick={handleRFQ}
-                                        className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>RFQ</button>
-                                    <button onClick={handlePO}
-                                        className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>PO</button>
-                                </div>
+                                {
+                                    onlyProducts.length != 0 && <div className="w-full flex items-center justify-start gap-6">
+                                        <button onClick={handleRFQ}
+                                            className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>RFQ</button>
+                                        <button onClick={handlePO}
+                                            className='px-5 py-1.5 rounded-md bg-[#7F55DE] text-white text-lg'>PO</button>
+                                    </div>
+                                }
                                 {
                                     onlyProducts.length === 0 ?
-                                        <div className="w-full flex items-center justify-start text-lg font-medium mt-6">
+                                        <div className="w-full flex items-center justify-start text-lg font-medium">
                                             No products found!
                                         </div> :
                                         <div className="w-full flex flex-col items-center">

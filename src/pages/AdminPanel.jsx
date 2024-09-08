@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { MdDashboard, MdManageSearch, MdOutlineDashboard, MdOutlineInventory2 } from "react-icons/md";
 import { TbLogout2 } from "react-icons/tb";
 import { AiFillProduct, AiOutlineProduct } from "react-icons/ai";
@@ -16,12 +16,13 @@ import Procurement from '../adminPages/Procurement/Procurement';
 import Inventory from '../adminPages/Inventory/Inventory';
 import ClientCollab from '../adminPages/ClientCollab/ClientCollab';
 import ClientCollabEmp from '../adminPages/ClientCollab/CliendCollabEmp';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const AdminPanel = () => {
 
     const navigate = useNavigate();
 
-    const { menuID, handleMenuID } = useContext(AppContext);
+    const { menuID, handleMenuID, nameLoader, loggedInUserName, fetchName } = useContext(AppContext);
 
     const loggedInUser = localStorage.getItem('name');
 
@@ -36,11 +37,14 @@ const AdminPanel = () => {
 
     const [isExpanded, setExpanded] = useState(true);
 
-    console.log();
+    useEffect(() => {
+        fetchName();
+    }, []);
 
     return (
         <div className="w-full flex items-center justify-center">
-            <div className="w-full flex items-start justify-center border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg">
+            <div className="w-full flex items-start justify-center rounded-lg">
+                {/* border-[0.75rem] border-solid border-[#DCD8FF] */}
                 <div className={`${isExpanded ? userType === 'Employee' ? "w-[20%]" : "w-[15%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
                     <div className="w-full flex flex-col items-center justify-start px-2">
                         <div className={`w-full flex items-center p-4 ${isExpanded ? 'flex-row justify-between' : 'flex-col justify-center'}`}>
@@ -91,12 +95,12 @@ const AdminPanel = () => {
                                     <FiUsers className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 5 ? 'text-black' : 'text-gray-800'}`} />
                                     <div className={`font-medium text-base text-nowrap ${menuID === 5 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Client Registration</div>
                                 </div>
-                                <div
+                                {/* <div
                                     onClick={() => handleMenuID(6)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 6 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
                                     <RiShieldUserLine className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 6 ? 'text-black' : 'text-gray-800'}`} />
                                     <div className={`font-medium text-base text-nowrap ${menuID === 6 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Role Authorization</div>
-                                </div>
+                                </div> */}
                                 <div
                                     onClick={() => handleMenuID(7)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 7 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
@@ -118,7 +122,10 @@ const AdminPanel = () => {
                             <div className="flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6]">
                                 <FaRegUser className='text-lg' />
                             </div>
-                            <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUser}</div>
+                            {
+                                nameLoader ? <div className={`w-full flex items-center justify-center ${isExpanded ? "block" : "hidden"}`}><CircularProgress /></div> :
+                                    <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUserName}</div>
+                            }
                         </div>
                         <div
                             onClick={handleLogout}
