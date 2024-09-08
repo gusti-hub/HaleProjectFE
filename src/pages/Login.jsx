@@ -59,7 +59,7 @@ const Login = () => {
                 localStorage.setItem('name', response.data.name);
                 localStorage.setItem('type', response.data.type);
                 localStorage.setItem('userId', response.data._id);
-                await fetchName();
+                await fetchName(response.data._id);
                 navigate("/admin-panel");
             } catch (error) {
                 setLoading(false);

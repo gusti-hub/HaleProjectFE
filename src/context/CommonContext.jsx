@@ -24,16 +24,14 @@ const AppProvider = ({ children }) => {
         setOpen((cur) => !cur);
     };
 
-    const loggedInUserID = localStorage.getItem('userId');
-
     const [loggedInUserName, setLoggedInUserName] = useState(null);
     const [nameLoader, setNameLoader] = useState(false);
     const [nameError, setNameError] = useState(null);
 
-    const fetchName = async () => {
+    const fetchName = async (userId) => {
         setNameLoader(true);
         try {
-            const response = await axios.get(`${backendServer}/api/getLoggedInUser/${loggedInUserID}`);
+            const response = await axios.get(`${backendServer}/api/getLoggedInUser/${userId}`);
             setLoggedInUserName(response.data);
             setNameLoader(false);
             setNameError(null);

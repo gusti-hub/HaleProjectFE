@@ -38,7 +38,7 @@ const AdminPanel = () => {
     const [isExpanded, setExpanded] = useState(true);
 
     useEffect(() => {
-        fetchName();
+        fetchName(loggedInUserID);
     }, []);
 
     return (
