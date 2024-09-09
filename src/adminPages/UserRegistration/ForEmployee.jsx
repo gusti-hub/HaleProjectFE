@@ -33,8 +33,8 @@ const ForEmployee = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleOpen = () => {
-        setOpen((cur) => !cur);
-        if (!cur) {
+        setOpen(!open);
+        if (!open) {
             resetForm();
         }
     };
@@ -126,7 +126,7 @@ const ForEmployee = () => {
             toast.error("Can't submit empty form or check password!"); setOpen(false); setSaveLoader(false);
         }
 
-        if (formData.name.length > 0 && formData.email.length > 0 && (isEditing || formData.password.length >= 8) && formData.role.length > 0) {
+        if (formData.name.length > 0 && formData.email.length > 0 && formData.role.length > 0) {
             try {
                 const response = isEditing
                     ? await axios.put(`${backendServer}/api/employee/${editingUserId}`, formData)
@@ -141,8 +141,8 @@ const ForEmployee = () => {
                 };
 
                 resetForm();
-                setOpen(false);
                 fetchUsers();
+                setOpen(false);
                 setSaveLoader(false);
             } catch (error) {
                 toast.error(error.response.data.message);
@@ -240,8 +240,8 @@ const ForEmployee = () => {
                     <div className="w-full flex flex-col items-start gap-1 text-base">
 
                         <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="password">Password: {isEditing ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                            <label htmlFor="password">Password: {isEditing ? '(Leave blank to keep current password)' : ''}</label>
+                            {!isEditing && <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>}
                         </div>
                         {
                             isChecked ?

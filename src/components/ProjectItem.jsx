@@ -113,7 +113,7 @@ const RefForm = ({ id, fetchDetails, handleClose, editItem, isEditMode }) => {
             <div className="w-full flex items-start justify-start gap-2 text-black">
                 <label htmlFor="file">Attachment:</label>
                 <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
-                <input className='w-fit' type="file" onChange={handleFileChange} name='file' />
+                <input className='w-fit' type="file" onChange={handleFileChange} name='file' accept="image/*" />
             </div>
             {fileName && <div className="w-full text-left text-sm">Uploaded file: {fileName}</div>}
             {

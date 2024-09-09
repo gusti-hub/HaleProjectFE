@@ -22,7 +22,7 @@ const AdminPanel = () => {
 
     const navigate = useNavigate();
 
-    const { menuID, handleMenuID, nameLoader, loggedInUserName, nameError, fetchName } = useContext(AppContext);
+    const { menuID, handleMenuID, nameLoader, loggedInUserName, loggedInUserPP, nameError, fetchName } = useContext(AppContext);
 
     const loggedInUser = localStorage.getItem('name');
 
@@ -118,17 +118,31 @@ const AdminPanel = () => {
                     </div>
 
                     <div className="w-full flex flex-col items-center justify-center">
-                        <div className={`w-full flex items-center p-4 pb-0 text-lg gap-3 ${isExpanded ? 'justify-start' : 'justify-center'}`}>
-                            <div className={`flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6] ${nameError ? 'border-2 border-solid border-red-600' : 'border-none'}`}>
-                                <FaRegUser className={`text-lg`} />
-                            </div>
-                            {
-                                nameLoader ?
-                                    <div className={`w-full flex items-center justify-center ${isExpanded ? "block" : "hidden"}`}><CircularProgress /></div> :
-                                    nameError ? <div className={`w-full flex items-center justify-start text-red-600 text-[15px] font-medium ${isExpanded ? "block" : "hidden"}`}>{nameError}</div> :
+                        {
+                            nameLoader ?
+                                <div className={`w-full flex items-center justify-center`}><CircularProgress /></div> :
+                                nameError ?
+                                    <div className={`w-full flex items-center px-4 text-lg gap-3 ${isExpanded ? 'justify-start' : 'justify-center'}`}>
+                                        <div className={`flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6] border-2 border-solid border-red-600`}>
+                                            <FaRegUser className={`text-lg`} />
+                                        </div>
+                                        <div className={`w-full flex items-center justify-start text-red-600 text-[15px] font-medium ${isExpanded ? "block" : "hidden"}`}>{nameError}</div>
+                                    </div> :
+                                    <div onClick={() => navigate(`/profile/${loggedInUserID}`)}
+                                        className={`w-full flex items-center px-4 text-lg gap-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
+                                        {
+                                            !loggedInUserPP ?
+                                                <div className={`flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6]`}>
+                                                    <FaRegUser className={`text-lg`} />
+                                                </div> : 
+                                                <div className="flex items-center justify-center">
+                                                    <img className='w-[2.5rem] aspect-square rounded-[50%]' src={loggedInUserPP} />
+                                                </div>
+                                        }
                                         <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUserName}</div>
-                            }
-                        </div>
+                                    </div>
+                        }
+
                         <div
                             onClick={handleLogout}
                             className={`w-full flex items-center justify-start gap-3 p-4 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
