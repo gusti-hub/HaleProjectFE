@@ -17,6 +17,10 @@ import Inventory from '../adminPages/Inventory/Inventory';
 import ClientCollab from '../adminPages/ClientCollab/ClientCollab';
 import ClientCollabEmp from '../adminPages/ClientCollab/CliendCollabEmp';
 import CircularProgress from '@mui/material/CircularProgress';
+import { IoClose, IoNotificationsCircle } from 'react-icons/io5';
+import Notification from '../components/Notification';
+import axios from 'axios';
+import { backendServer } from '../utils/info';
 
 const AdminPanel = () => {
 
@@ -37,8 +41,28 @@ const AdminPanel = () => {
 
     const [isExpanded, setExpanded] = useState(true);
 
+    const [notification, setNotification] = useState(false);
+    const [ntfs, setNtfs] = useState([]);
+    const [ntfLoader, setNtfLoader] = useState(false);
+    const [ntfError, setNtfError] = useState(null);
+
+    const fetchNotifications = async () => {
+
+        setNtfLoader(true);
+
+        try {
+            const response = await axios.get(`${backendServer}/api/getApproachingRFQs`);
+            setNtfs(response.data);
+            setNtfLoader(false);
+        } catch (error) {
+            setNtfError(error.response.data.message);
+            setNtfLoader(false);
+        }
+    };
+
     useEffect(() => {
         fetchName(loggedInUserID);
+        fetchNotifications();
     }, []);
 
     return (
@@ -118,6 +142,33 @@ const AdminPanel = () => {
                     </div>
 
                     <div className="w-full flex flex-col items-center justify-center">
+
+                        {
+                            userType === "Employee" &&
+                            <div className="w-full flex items-end justify-center">
+                                <div onClick={() => setNotification(true)}
+                                    className={`w-full flex items-center cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} px-4 gap-3 relative`}>
+                                    <div className="flex items-start justify-center">
+                                        <IoNotificationsCircle className='text-[34px] text-gray-800' />
+                                        {
+                                            ntfs.length != 0 && <div className="w-[10px] h-[10px] rounded-[50%] bg-red-600 -ml-[13px] mt-[1px]"></div>
+                                        }
+                                    </div>
+                                    <div className={`${isExpanded ? 'block' : 'hidden'}`}>Notification</div>
+                                </div>
+                                <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
+                                    className={`w-[30rem] flex flex-col items-center justify-center absolute ${isExpanded ? 'ml-[15.875rem] mb-4' : 'ml-[30rem] mb-4'} ${notification ? 'block' : 'hidden'} bg-white rounded-md p-2 gap-2`}>
+                                    <div className="w-full flex items-center justify-between">
+                                        <div className='text-gray-800 font-medium'>Notification(s) for you</div>
+                                        <IoClose onClick={() => setNotification(false)} className='text-2xl cursor-pointer' />
+                                    </div>
+                                    <Notification data={ntfs} loader={ntfLoader} error={ntfError} />
+                                </div>
+                            </div>
+                        }
+
+                        {userType === "Employee" && <div className="w-[90%] h-[2px] bg-gray-300 my-2.5"></div>}
+
                         {
                             nameLoader ?
                                 <div className={`w-full flex items-center justify-center`}><CircularProgress /></div> :
@@ -134,9 +185,9 @@ const AdminPanel = () => {
                                             !loggedInUserPP ?
                                                 <div className={`flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6]`}>
                                                     <FaRegUser className={`text-lg`} />
-                                                </div> : 
+                                                </div> :
                                                 <div className="flex items-center justify-center">
-                                                    <img className='w-[2.5rem] aspect-square rounded-[50%]' src={loggedInUserPP} />
+                                                    <img className='w-[2.25rem] aspect-square rounded-[50%]' src={loggedInUserPP} />
                                                 </div>
                                         }
                                         <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUserName}</div>

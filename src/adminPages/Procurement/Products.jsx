@@ -1074,6 +1074,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
             Item_status: item.status,
             Quantity: item.qty ? item.qty.toString() : '',
             Item_price: item.price ? item.price.toString() : '',
+            Image_URL: item.imageUrl || '',
         }));
     };
 
@@ -1096,46 +1097,114 @@ const RFQ = ({ fetchAllProductsMain }) => {
     //     }
     // };
 
+    // const handleDownload = async (id, name) => {
+    //     setRfqMenuLoader(true);
+    //     try {
+    //         const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
+    //             headers: { Authorization: `Bearer ${token}` },
+    //         });
+
+    //         const flattenedData = flattenData(response.data);
+
+    //         const doc = new jsPDF();
+
+    //         doc.setFontSize(12);
+
+    //         flattenedData.forEach((item, index) => {
+    //             if (index > 0) {
+    //                 doc.addPage();
+    //             }
+
+    //             const x = 10;
+    //             let y = 20;
+
+    //             Object.keys(item).forEach((key) => {
+    //                 doc.setFont('helvetica', 'bold');
+    //                 doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
+    //                 const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
+    //                 doc.setFont('helvetica', 'normal');
+    //                 doc.text(item[key], x + keyWidth, y);
+    //                 y += 10;
+    //             });
+    //         });
+
+    //         doc.save(`RFQ_Details_${name}.pdf`);
+
+    //         setRfqMenuLoader(false);
+    //     } catch (error) {
+    //         console.log(error);
+    //         setRfqMenuLoader(false);
+    //     }
+    // };
+
     const handleDownload = async (id, name) => {
         setRfqMenuLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
+    
             const flattenedData = flattenData(response.data);
-
+    
             const doc = new jsPDF();
-
             doc.setFontSize(12);
-
-            flattenedData.forEach((item, index) => {
+    
+            // Helper function to convert image URL to base64
+            const getImageBase64 = (url) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'Anonymous';
+                    img.src = url;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/jpeg'));  // Adjust image format if needed
+                    };
+                    img.onerror = reject;
+                });
+            };
+    
+            for (const [index, item] of flattenedData.entries()) {
                 if (index > 0) {
                     doc.addPage();
                 }
-
+    
                 const x = 10;
                 let y = 20;
-
-                Object.keys(item).forEach((key) => {
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
-                    const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text(item[key], x + keyWidth, y);
-                    y += 10;
-                });
-            });
-
+    
+                for (const key of Object.keys(item)) {
+                    if (key !== 'Image_URL') {  // Skip the image URL here and handle separately
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
+                        const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(item[key], x + keyWidth, y);
+                        y += 10;
+                    } else if (item[key]) {
+                        // Insert image if the image URL is available
+                        const imageUrl = item[key];  // Image_URL field holds the URL
+                        try {
+                            const base64Img = await getImageBase64(imageUrl);
+                            doc.addImage(base64Img, 'JPEG', x, y, 50, 50);  // Adjust size as needed
+                            y += 60;  // Adjust vertical spacing to accommodate the image
+                        } catch (error) {
+                            console.log(`Failed to load image: ${imageUrl}`, error);
+                        }
+                    }
+                }
+            }
+    
             doc.save(`RFQ_Details_${name}.pdf`);
-
+    
             setRfqMenuLoader(false);
         } catch (error) {
             console.log(error);
             setRfqMenuLoader(false);
         }
-    };
-
+    };    
 
     return (
         <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
