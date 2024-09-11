@@ -17,17 +17,24 @@ const Notification = ({ data, loader, error }) => {
                         <div className="w-full flex items-center justify-center text-red-600 font-medium text-sm my-[5.5rem]">
                             Error: {error}
                         </div> :
-                        <div style={{scrollbarWidth: 'thin'}}
-                        className="w-full min-h-[12rem] max-h-[25rem] flex flex-col items-center justify-start gap-2.5 p-2 scroll-smooth overflow-y-scroll">
+                        <div style={{ scrollbarWidth: 'thin' }}
+                            className="w-full min-h-[12rem] max-h-[25rem] flex flex-col items-center justify-start gap-3 p-2 scroll-smooth overflow-y-scroll">
                             {
                                 data.length === 0 ? <div className="w-full text-left text-sm">No new notification for you.</div> :
                                     data.map(ntf => {
                                         return (
                                             <div className="w-full flex items-start justify-start gap-1">
                                                 <AiTwotoneNotification />
-                                                <div className="w-full text-left text-sm">
-                                                    The deadline for the {ntf.rfqId} is {new Date(ntf.deadline).toLocaleDateString('en-US', options)}.
-                                                </div>
+                                                {
+                                                    ntf.type === "RFQ" ?
+                                                        <div className="w-full text-left text-sm">
+                                                            The Deadline for the {ntf.id} is {new Date(ntf.date).toLocaleDateString('en-US', options)}.
+                                                        </div>
+                                                        :
+                                                        <div className="w-full text-left text-sm">
+                                                            The Estimation received date for the {ntf.id} is {new Date(ntf.date).toLocaleDateString('en-US', options)}.
+                                                        </div>
+                                                }
                                             </div>
                                         )
                                     })

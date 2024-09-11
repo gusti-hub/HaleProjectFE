@@ -51,7 +51,7 @@ const AdminPanel = () => {
         setNtfLoader(true);
 
         try {
-            const response = await axios.get(`${backendServer}/api/getApproachingRFQs`);
+            const response = await axios.get(`${backendServer}/api/getApproachingRFQsPOs`);
             setNtfs(response.data);
             setNtfLoader(false);
         } catch (error) {
