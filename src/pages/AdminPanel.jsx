@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { MdDashboard, MdManageSearch, MdOutlineDashboard, MdOutlineInventory2 } from "react-icons/md";
 import { TbLogout2 } from "react-icons/tb";
 import { AiFillProduct, AiOutlineProduct } from "react-icons/ai";
@@ -18,12 +18,13 @@ import Procurement from '../adminPages/Procurement/Procurement';
 import Inventory from '../adminPages/Inventory/Inventory';
 import ClientCollab from '../adminPages/ClientCollab/ClientCollab';
 import ClientCollabEmp from '../adminPages/ClientCollab/CliendCollabEmp';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const AdminPanel = () => {
 
     const navigate = useNavigate();
 
-    const { menuID, handleMenuID } = useContext(AppContext);
+    const { menuID, handleMenuID, nameLoader, loggedInUserName, loggedInUserPP, nameError, fetchName } = useContext(AppContext);
 
     const loggedInUser = localStorage.getItem('name');
 
@@ -40,12 +41,15 @@ const AdminPanel = () => {
 
     const [isExpanded, setExpanded] = useState(userType === 'Employee');
 
-    const shouldShowDashboard = true;
+    useEffect(() => {
+        fetchName(loggedInUserID);
+    }, []);
 
     return (
         <div className="w-full flex items-center justify-center">
-            <div className="w-full flex items-start justify-center border-[0.75rem] border-solid border-[#DCD8FF] rounded-lg">
-                <div className={`${isExpanded ? userType === 'Employee' ? "w-[18%]" : "w-[18%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
+            <div className="w-full flex items-start justify-center rounded-lg">
+                {/* border-[0.75rem] border-solid border-[#DCD8FF] */}
+                <div className={`${isExpanded ? userType === 'Employee' ? "w-[20%]" : "w-[15%]" : "w-[5%]"} flex flex-col items-center justify-between bg-[#F8F9FD] minHeight rounded-l-lg`}>
                     <div className="w-full flex flex-col items-center justify-start px-2">
                         <div className={`w-full flex items-center p-4 ${isExpanded ? 'flex-row justify-between' : 'flex-col justify-center'}`}>
                             <img className={`w-[6rem] ${isExpanded ? 'block' : 'hidden'}`} src="images/logoBlue.png" alt="" />
@@ -155,12 +159,31 @@ const AdminPanel = () => {
                     </div>
 
                     <div className="w-full flex flex-col items-center justify-center">
-                        <div className={`w-full flex items-center p-4 pb-0 text-lg gap-3 ${isExpanded ? 'justify-start' : 'justify-center'}`}>
-                            <div className="flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6]">
-                                <FaRegUser className='text-lg' />
-                            </div>
-                            <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUser}</div>
-                        </div>
+                        {
+                            nameLoader ?
+                                <div className={`w-full flex items-center justify-center`}><CircularProgress /></div> :
+                                nameError ?
+                                    <div className={`w-full flex items-center px-4 text-lg gap-3 ${isExpanded ? 'justify-start' : 'justify-center'}`}>
+                                        <div className={`flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6] border-2 border-solid border-red-600`}>
+                                            <FaRegUser className={`text-lg`} />
+                                        </div>
+                                        <div className={`w-full flex items-center justify-start text-red-600 text-[15px] font-medium ${isExpanded ? "block" : "hidden"}`}>{nameError}</div>
+                                    </div> :
+                                    <div onClick={() => navigate(`/profile/${loggedInUserID}`)}
+                                        className={`w-full flex items-center px-4 text-lg gap-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
+                                        {
+                                            !loggedInUserPP ?
+                                                <div className={`flex items-center justify-center rounded-[50%] p-2.5 bg-[#EAECF6]`}>
+                                                    <FaRegUser className={`text-lg`} />
+                                                </div> : 
+                                                <div className="flex items-center justify-center">
+                                                    <img className='w-[2.5rem] aspect-square rounded-[50%]' src={loggedInUserPP} />
+                                                </div>
+                                        }
+                                        <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUserName}</div>
+                                    </div>
+                        }
+
                         <div
                             onClick={handleLogout}
                             className={`w-full flex items-center justify-start gap-3 p-4 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>

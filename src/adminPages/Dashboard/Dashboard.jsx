@@ -117,14 +117,17 @@ const Dashboard = () => {
                 display: true,
                 beginAtZero: true,
                 ticks: {
-                    beginAtZero: true,
-                    precision: 0, // Remove decimals
-                    // You can also add stepSize for more control over intervals:
-                    // stepSize: 1,
-                  },
+                    callback: function (value) {
+                        if (Number.isInteger(value)) {
+                            return value;
+                        }
+                    },
+                    stepSize: 1,
+                },
             },
         },
     };
+
 
     useEffect(() => {
         fetchSalesNo();
@@ -149,11 +152,11 @@ const Dashboard = () => {
                             <div className="w-full flex items-start justify-center gap-4">
                                 <div className="w-full flex flex-col items-center gap-4">
                                     <div className="w-full flex items-start justify-start gap-4">
-                                        <div className='min-w-[18rem] flex flex-col items-start gap-2 p-3 rounded-md bg-green-100'>
+                                        <div className='min-w-[12rem] w-full flex flex-col items-start gap-2 p-3 rounded-md bg-green-100'>
                                             <div className='font-medium'>Total Revenue</div>
                                             <div className='font-semibold text-3xl'>{formatCurrency(totRev)}</div>
                                         </div>
-                                        <div className='min-w-[18rem] flex flex-col items-start gap-2 p-3 rounded-md bg-[#F8F9FD] border border-solid border-gray-300'>
+                                        <div className='min-w-[12rem] w-full flex flex-col items-start gap-2 p-3 rounded-md bg-[#F8F9FD] border border-solid border-gray-300'>
                                             <div className='font-medium'>Total Projects</div>
                                             <div className='font-semibold text-3xl'>{salesNo}</div>
                                         </div>
@@ -172,28 +175,29 @@ const Dashboard = () => {
                                                 <div className="w-full flex items-center justify-center text-red-600 font-medium">
                                                     Error: {chartError}
                                                 </div> :
-                                                <div className="w-full flex flex-col items-center">
-                                                    <div className="w-full flex flex-col items-center gap-1.5 text-sm">
+                                                <div className="w-full flex flex-col items-center gap-4">
+                                                    <div className="w-full text-left font-semibold text-black">Project Status Data:</div>
+                                                    <BarChart data={data} options={options} />
+                                                    <div className="w-full flex flex-col items-center gap-3.5 text-sm">
                                                         <div className="w-full text-left font-semibold">Legends:</div>
-                                                        <div className="w-full flex flex-col items-center text-xs font-medium gap-2 pl-2">
-                                                            <div className="w-full flex items-center justify-start gap-1">
+                                                        <div className="w-full flex items-center justify-center flex-wrap text-xs font-medium gap-4 pl-2">
+                                                            <div className="flex items-center justify-start gap-1">
                                                                 <div className="w-8 h-4 bg-gray-700 opacity-60"></div><div>Yet to start</div>
                                                             </div>
-                                                            <div className="w-full flex items-center justify-start gap-1">
+                                                            <div className="flex items-center justify-start gap-1">
                                                                 <div className="w-8 h-4 bg-orange-700 opacity-60"></div><div>In progress</div>
                                                             </div>
-                                                            <div className="w-full flex items-center justify-start gap-1">
+                                                            <div className="flex items-center justify-start gap-1">
                                                                 <div className="w-8 h-4 bg-blue-700 opacity-60"></div><div>Request for Approval</div>
                                                             </div>
-                                                            <div className="w-full flex items-center justify-start gap-1">
+                                                            <div className="flex items-center justify-start gap-1">
                                                                 <div className="w-8 h-4 bg-green-700 opacity-60"></div><div>Approved</div>
                                                             </div>
-                                                            <div className="w-full flex items-center justify-start gap-1">
+                                                            <div className="flex items-center justify-start gap-1">
                                                                 <div className="w-8 h-4 bg-red-700 opacity-60"></div><div>Rejected</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <BarChart data={data} options={options} />
                                                 </div>
                                     }
                                 </div>

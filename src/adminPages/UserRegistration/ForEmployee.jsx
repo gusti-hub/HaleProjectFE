@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { IoPersonAdd } from 'react-icons/io5';
 import { Dialog } from '@material-tailwind/react';
@@ -9,9 +9,14 @@ import toast from 'react-hot-toast';
 import { FaEdit } from 'react-icons/fa';
 import { MdDeleteOutline, MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from 'react-icons/md';
 import { FiSearch } from 'react-icons/fi';
+import { AppContext } from '../../context/CommonContext';
 
 const ForEmployee = () => {
+
     const token = localStorage.getItem('token');
+    const loggedInUserID = localStorage.getItem('userId');
+
+    const { fetchName } = useContext(AppContext);
 
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
@@ -145,9 +150,17 @@ const ForEmployee = () => {
                     ? await axios.put(`${backendServer}/api/employee/${editingUserId}`, formData)
                     : await axios.post(`${backendServer}/api/empreg`, formData);
                 toast.success(response.data.message);
+
+                if (isEditing) {
+                    if (response.data.userId === loggedInUserID) {
+                        localStorage.setItem('name', response.data.userName);
+                        await fetchName(loggedInUserID);
+                    };
+                };
+
                 resetForm();
-                setOpen(false);
                 fetchUsers();
+                setOpen(false);
                 setSaveLoader(false);
             } catch (error) {
                 toast.error(error.response.data.message);
@@ -244,8 +257,8 @@ const ForEmployee = () => {
                     <div className="w-full flex flex-col items-start gap-1 text-base">
 
                         <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="password">Password: {isEditing ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                            <label htmlFor="password">Password: {isEditing ? '(Leave blank to keep current password)' : ''}</label>
+                            {!isEditing && <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>}
                         </div>
                         {
                             isChecked ?

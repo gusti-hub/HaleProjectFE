@@ -1,12 +1,15 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { backendServer } from '../utils/info';
 import CircularProgress from '@mui/material/CircularProgress';
+import { AppContext } from '../context/CommonContext';
 
 
 const Login = () => {
+
+    const { fetchName } = useContext(AppContext);
 
     const [isChecked, setIsChecked] = useState(false);
 
@@ -57,6 +60,7 @@ const Login = () => {
                 localStorage.setItem('type', response.data.type);
                 localStorage.setItem('userId', response.data._id);
                 localStorage.setItem('action', response.data.action);
+                await fetchName(response.data._id);
                 navigate("/admin-panel");
             } catch (error) {
                 setLoading(false);

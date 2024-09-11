@@ -11,6 +11,7 @@ import In from './adminPages/Inventory/In';
 import Out from './adminPages/Inventory/Out';
 import PrjCollab from './pages/PrjCollab';
 import StockAdjustment from './adminPages/Inventory/StockAdjustment';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/inventory_in" element={<ProtectedRoute element={<In />} />} />
         <Route path="/inventory_out" element={<ProtectedRoute element={<Out />} />} />
         <Route path="/stock-adjustment" element={<ProtectedRoute element={<StockAdjustment />} />} />
+        <Route path="/profile/:id" element={<ProtectedRoute element={<ProfilePage />} />} />
 
         <Route path="/test" element={<ProtectedRoute element={<Test />} />} />
       </Routes>

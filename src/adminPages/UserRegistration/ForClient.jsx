@@ -77,7 +77,7 @@ const ForClient = () => {
             toast.error("Can't submit empty form or check password!"); setOpen(false); setSaveLoader(false);
         }
 
-        if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0 && (editMode || formData.password.length >= 8)) {
+        if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0) {
             try {
                 const response = editMode
                     ? await axios.put(`${backendServer}/api/clients/${currentUserId}`, formData)
@@ -164,17 +164,19 @@ const ForClient = () => {
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="name" id="name" />
                     </div>
-                    <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="code">Code:</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                    {
+                        !editMode && <div className="w-full flex flex-col items-start gap-1 text-base">
+                            <div className="w-full flex items-center justify-start gap-2">
+                                <label htmlFor="code">Code:</label>
+                                <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                            </div>
+                            <input
+                                value={formData.code}
+                                onChange={handleInputChange}
+                                className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                                type="text" placeholder='Type here...' name="code" id="code" />
                         </div>
-                        <input
-                            value={formData.code}
-                            onChange={handleInputChange}
-                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="code" id="code" />
-                    </div>
+                    }
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
                             <label htmlFor="email">Email:</label>
@@ -188,8 +190,8 @@ const ForClient = () => {
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
-                            <label htmlFor="password">Password: {editMode ? '(Leave blank to keep current password)' : '(Minimum of 8 characters)'}</label>
-                            <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>
+                            <label htmlFor="password">Password: {editMode ? '(Leave blank to keep current password)' : ''}</label>
+                            {!editMode && <sup className='-ml-2 mt-2 text-lg text-red-600 font-medium'>*</sup>}
                         </div>
                         {
                             isChecked ?
