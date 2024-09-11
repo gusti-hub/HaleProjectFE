@@ -7,14 +7,14 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Install all dependencies including devDependencies
+# Install all dependencies, including devDependencies
 RUN npm install
 
 # Copy the rest of the application code
 COPY . .
 
-# Build the application
-RUN npx vite build
+# Build the application using Vite
+RUN ./node_modules/.bin/vite build
 
 # Stage 2: Serve the application using Nginx
 FROM nginx:alpine
