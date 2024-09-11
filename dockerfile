@@ -9,6 +9,8 @@ COPY package.json package-lock.json ./
 
 RUN npm cache clean --force
 
+RUN npm install vite --save-dev
+
 # Install dependencies
 RUN npm install
 
