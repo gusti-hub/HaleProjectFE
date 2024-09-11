@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:16-alpine AS build
+FROM node:14 as build
 
 # Set working directory
 WORKDIR /app
@@ -7,16 +7,18 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Install all dependencies, including devDependencies
+# Install dependencies
 RUN npm install
+
+ENV PATH /app/node_modules/.bin:$PATH
 
 # Copy the rest of the application code
 COPY . .
 
-# Build the application using Vite
-RUN ./node_modules/.bin/vite build
+# Build the application
+RUN npm run build
 
-# Stage 2: Serve the application using Nginx
+# Stage 2: Serve the application
 FROM nginx:alpine
 
 # Copy built files from the previous stage
