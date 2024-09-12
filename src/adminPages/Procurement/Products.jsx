@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import ViewHardware from '../../components/view/hardware';
 import ViewArtwork from '../../components/view/artwork';
 import ViewCasegood from '../../components/view/casegood';
@@ -28,7 +29,6 @@ import ViewUpholstery from '../../components/view/upholstery';
 import ViewWindowTreatment from '../../components/view/windowtreatment';
 import GlobalVariable from '../../utils/GlobalVariable';
 import Product from '../../../models/products';
-import html2canvas from 'html2canvas';
 
 //PO
 
@@ -1214,6 +1214,7 @@ const RFQ = ({ fetchAllProductsMain, projectDetails }) => {
             Item_status: item.status,
             Quantity: item.qty ? item.qty.toString() : '',
             Item_price: item.price ? item.price.toString() : '',
+            Image_URL: item.imageUrl || '',
         }));
     };
 
@@ -1243,33 +1244,82 @@ const RFQ = ({ fetchAllProductsMain, projectDetails }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            const flattenedData = flattenData(response.data);
-            generatePDF();
-            
-            // const doc = new jsPDF();
+            const data = flattenData(response.data);
 
-            // doc.setFontSize(12);
+            const doc = new jsPDF();
 
-            flattenedData.forEach((item, index) => {
-                if (index > 0) {
-                    doc.addPage();
+            // Variables for common details (shown only once)
+            const { RFQ_No, RFQ_Deadline, Vendor, Currency_unit, RFQ_Status } = data[0];
+
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+
+                // Add RFQ details only on the first page
+                if (i === 0) {
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`RFQ No: ${RFQ_No}`, 15, 20);
+                    doc.text(`RFQ Deadline: ${RFQ_Deadline}`, 15, 30);
+                    doc.text(`Vendor: ${Vendor}`, 15, 40);
+                    doc.text(`Currency unit: ${Currency_unit}`, 15, 50);
+                    doc.text(`RFQ Status: ${RFQ_Status}`, 15, 60);
                 }
 
-                const x = 10;
-                let y = 20;
+                // Reset font to normal
+                doc.setFont('helvetica', 'normal');
 
-                Object.keys(item).forEach((key) => {
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${key.replace(/_/g, ' ')}: `, x, y);
-                    const keyWidth = doc.getTextWidth(`${key.replace(/_/g, ' ')}: `);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text(item[key], x + keyWidth, y);
-                    y += 10;
-                });
-            });
+                // Add product title and item code in bold
+                doc.setFontSize(12);
+                doc.text(`Title: ${item.Title}`, 15, i === 0 ? 80 : 20); // Adjust y-position for first page
+                doc.text(`Item Code: ${item.Item_Code}`, 15, i === 0 ? 90 : 30);
+
+                // Add image if it exists
+                if (item.Image_URL) {
+                    const img = new Image();
+                    img.src = item.Image_URL;
+                    img.crossOrigin = 'anonymous'; // Enable cross-origin loading
+
+                    // Load the image and wait for it to be processed by html2canvas
+                    await new Promise((resolve) => {
+                        img.onload = async () => {
+                            const imgData = await html2canvas(img).then((canvas) => canvas.toDataURL('image/png'));
+                            doc.addImage(imgData, 'PNG', 15, i === 0 ? 100 : 40, 180, 100); // Adjust position and size
+                            resolve();
+                        };
+
+                        img.onerror = () => {
+                            resolve(); // Proceed even if image fails to load
+                        };
+                    });
+                }
+
+                // Add the rest of the product specifications below the image
+                const yPos = i === 0 ? 210 : 150; // Adjust position for first page
+                doc.setFontSize(10);
+                doc.text(`Description: ${item.Description}`, 15, yPos);
+                doc.text(`Measuring unit: ${item.Measuring_unit}`, 15, yPos + 10);
+                doc.text(`Length: ${item.Length}`, 15, yPos + 20);
+                doc.text(`Width: ${item.Width}`, 15, yPos + 30);
+                doc.text(`Diameter: ${item.Diameter}`, 15, yPos + 40);
+                doc.text(`Color: ${item.Color}`, 15, yPos + 50);
+                doc.text(`Material: ${item.Material}`, 15, yPos + 60);
+                doc.text(`Insert: ${item.Insert}`, 15, yPos + 70);
+                doc.text(`Finish: ${item.Finish}`, 15, yPos + 80);
+                doc.text(`Item Status: ${item.Item_status}`, 15, yPos + 90);
+                doc.text(`Quantity: ${item.Quantity}`, 15, yPos + 100);
+                doc.text(`Item Price: ${item.Item_price}`, 15, yPos + 110);
+
+                // Add page number at the bottom
+                const totalPages = data.length;
+                doc.text(`Page ${i + 1} of ${totalPages}`, 180, 290);
+
+                // Add a new page if not the last product
+                if (i < data.length - 1) {
+                    doc.addPage();
+                }
+            }
 
             doc.save(`RFQ_Details_${name}.pdf`);
-
             setRfqMenuLoader(false);
         } catch (error) {
             console.log(error);
@@ -1389,7 +1439,7 @@ const RFQ = ({ fetchAllProductsMain, projectDetails }) => {
                                                 {
                                                     current.map(rfq => {
                                                         return (
-                                                            <tr>
+                                                            <tr key={rfq._id}>
                                                                 <td>
                                                                     <div className='flex items-center justify-center relative'>
                                                                         {

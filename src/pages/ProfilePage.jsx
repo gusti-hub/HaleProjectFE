@@ -99,6 +99,13 @@ const ProfilePage = () => {
 
         if ((formData.oldPass.length === 0 && formData.newPass.length === 0) || (formData.oldPass.length > 0 && formData.newPass.length > 0)) {
 
+            if (formData.oldPass.length > 0 && formData.newPass.length > 0) {
+                if (formData.oldPass === formData.newPass) {
+                    toast.error("The new password must not match the old one!");
+                    return;
+                }
+            }
+
             setSaveLoader(true);
 
             try {
