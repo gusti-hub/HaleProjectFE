@@ -276,14 +276,6 @@ const PO = ({ fetchAllProductsMain }) => {
 
     const flattenData = (data) => {
         return data.map(item => ({
-            PO_No: item.orgPOId,
-            PO_Sent_Date: item.orgPODate.split('T')[0],
-            RFQ_No: item.orgRFQ,
-            Vendor: item.orgVendor,
-            Total_Price: item.orgTP,
-            Est_Delivery: item.orgEstDel,
-            Est_Received: item.orgEstRec,
-            PO_Status: item.orgPOStatus,
             Title: item.title,
             Item_Code: item.productDetails.code,
             Description: item.desc,
@@ -295,30 +287,171 @@ const PO = ({ fetchAllProductsMain }) => {
             Material: item.productDetails.material,
             Insert: item.productDetails.insert,
             Finish: item.productDetails.finish,
-            Item_status: item.status
+            Item_status: item.status,
+            Image_URL: item.imageUrl || '',
+            Qty: item.qty ? item.qty.toString() : '',
+            Price: item.price ? item.price.toString() : '',
+            Total: (item.qty * item.price).toString()
         }));
     };
 
-    const handleDownload = async (id) => {
+    const handleDownload = async (id, name) => {
         setPoMenuLoader(true);
         try {
             const response = await axios.get(`${backendServer}/api/getPOPdts/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            const flattenedData = flattenData(response.data);
+            const data = flattenData(response.data);
+            const doc = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape
 
-            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+            const formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            });
 
-            XLSX.writeFile(workbook, 'PO_Details.xlsx');
-            setPoMenuLoader(false);
+            const margin = 10; // Margin from the edge of the page
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+
+            const addFooter = () => {
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(128, 128, 128);
+                doc.text("Henderson", pageWidth / 2, pageHeight - margin, { align: 'center' });
+            };
+
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+
+                // Add header
+                doc.setFontSize(8);
+                doc.setTextColor(0, 0, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.text("HALE by HENDERSON", pageWidth / 2, margin + 10, { align: 'center' }); // Adjusted for landscape
+
+                // Add title
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.text(item.Title.toUpperCase(), pageWidth / 2, margin + 25, { align: 'center' });
+
+                // Add specification sheet text
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(128, 128, 128);
+                doc.text("SPECIFICATION SHEET", pageWidth / 2, margin + 35, { align: 'center' });
+
+                // Draw line
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(1);
+                doc.line(margin, margin + 40, pageWidth - margin, margin + 40); // Adjusted for landscape
+
+                // Image
+                const maxWidth = 70; // Maximum width of the image
+                const maxHeight = 50; // Maximum height of the image
+                if (item.Image_URL) {
+                    const img = new Image();
+                    img.src = item.Image_URL;
+                    img.crossOrigin = 'anonymous';
+
+                    await new Promise((resolve) => {
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            const aspectRatio = img.width / img.height;
+
+                            let imgWidth = maxWidth;
+                            let imgHeight = maxWidth / aspectRatio;
+
+                            if (imgHeight > maxHeight) {
+                                imgHeight = maxHeight;
+                                imgWidth = maxHeight * aspectRatio;
+                            }
+
+                            canvas.width = imgWidth * 2; // Increase the canvas size to maintain resolution
+                            canvas.height = imgHeight * 2; // Increase the canvas size to maintain resolution
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                            const imgData = canvas.toDataURL('image/png');
+                            doc.addImage(imgData, 'PNG', margin, margin + 50, imgWidth, imgHeight);
+                            resolve();
+                        };
+
+                        img.onerror = () => {
+                            resolve(); // Resolve even if image fails to load to avoid hanging
+                        };
+                    });
+                }
+
+                // x offsets for the columns
+                const xDesc = margin + maxWidth; // Position for DESCRIPTION
+                const xSpecs = xDesc + 50; // Position for SPECS
+                const xPrice = xSpecs + 50; // Position for UNIT COST
+                const xTotal = xPrice + 50;
+
+                // DESCRIPTION
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'bold');
+                doc.text("DESCRIPTION", xDesc, margin + 50);
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(item.Description || "N/A", xDesc, margin + 60);
+
+                // SPECS
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text("SPECS", xSpecs, margin + 50);
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Quantity: ${item.Qty}`, xSpecs, margin + 60);
+                doc.text(`Measuring Unit: ${item.Measuring_unit}`, xSpecs, margin + 70);
+                doc.text(`Length: ${item.Length}`, xSpecs, margin + 75);
+                doc.text(`Width: ${item.Width}`, xSpecs, margin + 80);
+                doc.text(`Diameter: ${item.Diameter}`, xSpecs, margin + 85);
+                doc.text(`Color: ${item.Color}`, xSpecs, margin + 90);
+                doc.text(`Material: ${item.Material}`, xSpecs, margin + 95);
+
+                // UNIT COST
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text("UNIT COST", xPrice, margin + 50);
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`${formatter.format(item.Price)}`, xPrice, margin + 60);
+
+                // TOTAL COST
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'bold');
+                doc.text("TOTAL COST", xTotal, margin + 50);
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`${formatter.format(item.Total)}`, xTotal, margin + 60);
+
+                // Add footer
+                addFooter();
+
+                // Add a new page if not the last item
+                if (i < data.length - 1) {
+                    doc.addPage();
+                    addFooter(); // Add footer on the new page as well
+                }
+            }
+
+            doc.save(`PO_Details_${name}.pdf`);
         } catch (error) {
-            console.log(error);
+            console.error("Error generating PDF:", error);
+        } finally {
             setPoMenuLoader(false);
         }
     };
+
 
     if (rfqs.length === 0 || receivedRFQs.length === 0) {
         return (
@@ -410,7 +543,7 @@ const PO = ({ fetchAllProductsMain }) => {
 
                                                                                             <div className="w-full h-[2px] bg-gray-300"></div>
 
-                                                                                            <button onClick={() => handleDownload(po._id)}
+                                                                                            <button onClick={() => handleDownload(po._id, po.poId)}
                                                                                                 className='w-full text-left'>Download PO</button>
                                                                                         </div>
                                                                                 }
@@ -1094,7 +1227,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                 const item = data[i];
 
                 doc.setFontSize(8);
-                doc.setTextColor(0, 0, 255); 
+                doc.setTextColor(0, 0, 255);
                 doc.setFont('helvetica', 'bold');
                 doc.text("HALE by HENDERSON", 105, 10, { align: 'center' });
 
@@ -1105,11 +1238,11 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
-                doc.setTextColor(128, 128, 128); 
+                doc.setTextColor(128, 128, 128);
                 doc.text("SPECIFICATION SHEET", 105, 35, { align: 'center' });
 
-                doc.setDrawColor(0, 0, 0); 
-                doc.setLineWidth(1); 
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(1);
                 doc.line(10, 40, 200, 40);
 
                 if (item.Image_URL) {
@@ -1131,18 +1264,18 @@ const RFQ = ({ fetchAllProductsMain }) => {
                             const width = maxWidth;
                             const height = maxWidth / aspectRatio;
 
-                            doc.addImage(imgData, 'PNG', 45, 50, width, height); 
+                            doc.addImage(imgData, 'PNG', 45, 50, width, height);
                             resolve();
                         };
 
                         img.onerror = () => {
-                            resolve(); 
+                            resolve();
                         };
                     });
                 }
 
-                const yPosAfterImage = 200; 
-                doc.setLineWidth(0.5); 
+                const yPosAfterImage = 200;
+                doc.setLineWidth(0.5);
                 doc.line(10, yPosAfterImage + 10, 200, yPosAfterImage + 10);
 
                 const yPos = yPosAfterImage + 20;
@@ -1171,8 +1304,8 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
-                doc.setTextColor(128, 128, 128); 
-                doc.text("Henderson", 105, 290, { align: 'center' }); 
+                doc.setTextColor(128, 128, 128);
+                doc.text("Henderson", 105, 290, { align: 'center' });
 
 
                 if (i < data.length - 1) {
