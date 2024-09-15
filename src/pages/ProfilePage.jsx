@@ -196,13 +196,6 @@ const ProfilePage = () => {
                                             }
                                         </div>
                                         {
-                                            selectedFile &&
-                                            <div className="w-full flex items-center justify-start gap-2 text-sm">
-                                                <div className='text-nowrap font-medium'>Selected image:</div>
-                                                <div>{fileName}</div>
-                                            </div>
-                                        }
-                                        {
                                             buttonLoader ? <div className="w-full flex items-center justify-start pl-32"><CircularProgress /></div>
                                                 :
                                                 <div className="w-full flex items-center justify-center gap-4 mt-2">

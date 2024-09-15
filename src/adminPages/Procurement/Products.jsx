@@ -1079,25 +1079,6 @@ const RFQ = ({ fetchAllProductsMain }) => {
         }));
     };
 
-    // const handleDownload = async (id) => {
-    //     try {
-
-    //         const response = await axios.get(`${backendServer}/api/getDwdRFQPdts/${id}`, {
-    //             headers: { Authorization: `Bearer ${token}` },
-    //         });
-
-    //         const flattenedData = flattenData(response.data);
-
-    //         const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-    //         const workbook = XLSX.utils.book_new();
-    //         XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    //         XLSX.writeFile(workbook, 'RFQ_Details.xlsx');
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // };
-
     const handleDownload = async (id, name) => {
         setRfqMenuLoader(true);
         try {
@@ -1109,72 +1090,91 @@ const RFQ = ({ fetchAllProductsMain }) => {
 
             const doc = new jsPDF();
 
-            // Variables for common details (shown only once)
-            const { RFQ_No, RFQ_Deadline, Vendor, Currency_unit, RFQ_Status } = data[0];
-
             for (let i = 0; i < data.length; i++) {
                 const item = data[i];
 
-                // Add RFQ details only on the first page
-                if (i === 0) {
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`RFQ No: ${RFQ_No}`, 15, 20);
-                    doc.text(`RFQ Deadline: ${RFQ_Deadline}`, 15, 30);
-                    doc.text(`Vendor: ${Vendor}`, 15, 40);
-                    doc.text(`Currency unit: ${Currency_unit}`, 15, 50);
-                    doc.text(`RFQ Status: ${RFQ_Status}`, 15, 60);
-                }
+                doc.setFontSize(8);
+                doc.setTextColor(0, 0, 255); 
+                doc.setFont('helvetica', 'bold');
+                doc.text("HALE by HENDERSON", 105, 10, { align: 'center' });
 
-                // Reset font to normal
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.text(item.Title.toUpperCase(), 105, 25, { align: 'center' });
+
+                doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
+                doc.setTextColor(128, 128, 128); 
+                doc.text("SPECIFICATION SHEET", 105, 35, { align: 'center' });
 
-                // Add product title and item code in bold
-                doc.setFontSize(12);
-                doc.text(`Title: ${item.Title}`, 15, i === 0 ? 80 : 20); // Adjust y-position for first page
-                doc.text(`Item Code: ${item.Item_Code}`, 15, i === 0 ? 90 : 30);
+                doc.setDrawColor(0, 0, 0); 
+                doc.setLineWidth(1); 
+                doc.line(10, 40, 200, 40);
 
-                // Add image if it exists
                 if (item.Image_URL) {
                     const img = new Image();
                     img.src = item.Image_URL;
-                    img.crossOrigin = 'anonymous'; // Enable cross-origin loading
+                    img.crossOrigin = 'anonymous';
 
-                    // Load the image and wait for it to be processed by html2canvas
                     await new Promise((resolve) => {
-                        img.onload = async () => {
-                            const imgData = await html2canvas(img).then((canvas) => canvas.toDataURL('image/png'));
-                            doc.addImage(imgData, 'PNG', 15, i === 0 ? 100 : 40, 180, 100); // Adjust position and size
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+
+                            const imgData = canvas.toDataURL('image/png');
+                            const maxWidth = 120;
+                            const aspectRatio = img.width / img.height;
+                            const width = maxWidth;
+                            const height = maxWidth / aspectRatio;
+
+                            doc.addImage(imgData, 'PNG', 45, 50, width, height); 
                             resolve();
                         };
 
                         img.onerror = () => {
-                            resolve(); // Proceed even if image fails to load
+                            resolve(); 
                         };
                     });
                 }
 
-                // Add the rest of the product specifications below the image
-                const yPos = i === 0 ? 210 : 150; // Adjust position for first page
+                const yPosAfterImage = 200; 
+                doc.setLineWidth(0.5); 
+                doc.line(10, yPosAfterImage + 10, 200, yPosAfterImage + 10);
+
+                const yPos = yPosAfterImage + 20;
+
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'bold');
+                doc.text("DESCRIPTION", 15, yPos);
+
                 doc.setFontSize(10);
-                doc.text(`Description: ${item.Description}`, 15, yPos);
-                doc.text(`Measuring unit: ${item.Measuring_unit}`, 15, yPos + 10);
-                doc.text(`Length: ${item.Length}`, 15, yPos + 20);
-                doc.text(`Width: ${item.Width}`, 15, yPos + 30);
-                doc.text(`Diameter: ${item.Diameter}`, 15, yPos + 40);
-                doc.text(`Color: ${item.Color}`, 15, yPos + 50);
-                doc.text(`Material: ${item.Material}`, 15, yPos + 60);
-                doc.text(`Insert: ${item.Insert}`, 15, yPos + 70);
-                doc.text(`Finish: ${item.Finish}`, 15, yPos + 80);
-                doc.text(`Item Status: ${item.Item_status}`, 15, yPos + 90);
-                doc.text(`Quantity: ${item.Quantity}`, 15, yPos + 100);
-                doc.text(`Item Price: ${item.Item_price}`, 15, yPos + 110);
+                doc.setFont('helvetica', 'normal');
+                doc.text(item.Description || "N/A", 15, yPos + 10);
 
-                // Add page number at the bottom
-                const totalPages = data.length;
-                doc.text(`Page ${i + 1} of ${totalPages}`, 180, 290);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text("SPECS", 120, yPos);
 
-                // Add a new page if not the last product
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Measuring Unit: ${item.Measuring_unit}`, 120, yPos + 10);
+                doc.text(`Length: ${item.Length}`, 120, yPos + 15);
+                doc.text(`Width: ${item.Width}`, 120, yPos + 20);
+                doc.text(`Diameter: ${item.Diameter}`, 120, yPos + 25);
+                doc.text(`Color: ${item.Color}`, 120, yPos + 30);
+                doc.text(`Material: ${item.Material}`, 120, yPos + 35);
+
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(128, 128, 128); 
+                doc.text("Henderson", 105, 290, { align: 'center' }); 
+
+
                 if (i < data.length - 1) {
                     doc.addPage();
                 }
@@ -1187,6 +1187,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
             setRfqMenuLoader(false);
         }
     };
+
 
     return (
         <div className="w-full flex flex-col items-center p-4 bg-white rounded-lg gap-4">
