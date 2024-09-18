@@ -12,10 +12,12 @@ import Out from './adminPages/Inventory/Out';
 import PrjCollab from './pages/PrjCollab';
 import StockAdjustment from './adminPages/Inventory/StockAdjustment';
 import ProfilePage from './pages/ProfilePage';
+import AutoLogout from './utils/AutoLogout';
 
 function App() {
   return (
     <AppProvider>
+      <AutoLogout />
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/admin-panel" element={<ProtectedRoute element={<AdminPanel />} />} />

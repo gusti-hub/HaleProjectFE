@@ -183,24 +183,22 @@ const ProfilePage = () => {
                                 </div> :
                                 <div className="w-[90%] flex items-start justify-start">
                                     <input type="file" onChange={handleFileChange} ref={fileInputRef} name='file' accept="image/*" style={{ display: 'none' }} />
-                                    <div className="w-full flex flex-col items-center justify-start gap-4">
+                                    <div className="w-full max-w-[30%] flex flex-col items-center justify-start gap-4">
                                         <div className="w-full text-left font-medium text-gray-800">Profile Picture:</div>
-                                        <div className="w-full flex items-center justify-start">
-                                            <img className='w-[10rem] rounded-[50%] aspect-square'
-                                                src={!data.imageUrl ? '/images/blankProfile.jpg' : data.imageUrl} alt="" />
+                                        <div className="w-full flex items-center justify-center">
+                                            {
+                                                selectedFile ?
+                                                    <img className='w-[10rem] rounded-[50%] aspect-square'
+                                                        src={fileURL} alt="" />
+                                                    :
+                                                    <img className='w-[10rem] rounded-[50%] aspect-square'
+                                                        src={!data.imageUrl ? '/images/blankProfile.jpg' : data.imageUrl} alt="" />
+                                            }
                                         </div>
-                                        {
-                                            selectedFile &&
-                                            <div className="w-full flex items-start justify-start gap-2 text-sm">
-                                                <div className='text-nowrap font-medium'>Selected image:</div>
-                                                <img className='w-[5rem] rounded-[50%] aspect-square' src={fileURL} alt="" />
-                                                <div>{fileName}</div>
-                                            </div>
-                                        }
                                         {
                                             buttonLoader ? <div className="w-full flex items-center justify-start pl-32"><CircularProgress /></div>
                                                 :
-                                                <div className="w-full flex items-center justify-start gap-4">
+                                                <div className="w-full flex items-center justify-center gap-4 mt-2">
                                                     <button onClick={handleButtonClick}
                                                         className='bg-[#7F55DE] p-2 px-4 text-white text-sm font-medium rounded-lg'>Change Picture</button>
                                                     <button onClick={() => handleDeleteProfilePhoto(data.imageUrl)}
