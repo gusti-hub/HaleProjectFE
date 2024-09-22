@@ -1,5 +1,5 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -15,6 +15,22 @@ import ProfilePage from './pages/ProfilePage';
 import AutoLogout from './utils/AutoLogout';
 
 function App() {
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    const currentPath = window.location.pathname;
+
+    if (token && currentPath === '/') {
+      navigate('/admin-panel');
+    }
+    else if (!token && currentPath !== '/') {
+      navigate('/');
+    }
+  }, [navigate]);
+
   return (
     <AppProvider>
       <AutoLogout />
