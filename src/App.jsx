@@ -13,6 +13,7 @@ import PrjCollab from './pages/PrjCollab';
 import StockAdjustment from './adminPages/Inventory/StockAdjustment';
 import ProfilePage from './pages/ProfilePage';
 import AutoLogout from './utils/AutoLogout';
+import TE from './adminPages/Time&Expenses/TE';
 
 function App() {
 
@@ -44,6 +45,7 @@ function App() {
         <Route path="/inventory_out" element={<ProtectedRoute element={<Out />} />} />
         <Route path="/stock-adjustment" element={<ProtectedRoute element={<StockAdjustment />} />} />
         <Route path="/profile/:id" element={<ProtectedRoute element={<ProfilePage />} />} />
+        <Route path="/time-expenses" element={<ProtectedRoute element={<TE />} />} />
 
         <Route path="/test" element={<ProtectedRoute element={<Test />} />} />
       </Routes>

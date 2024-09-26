@@ -27,3 +27,7 @@ table th {
 .minHeight {
     min-height: calc(100vh);
 }
+
+.dashHeight {
+    max-height: calc(100vh - 7rem);
+}

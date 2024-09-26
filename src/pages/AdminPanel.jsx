@@ -10,7 +10,7 @@ import { FaArrowLeft, FaArrowRight, FaRegBuilding, FaRegUser, FaUserCircle, FaUs
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiUsers } from 'react-icons/fi';
 import SalesOrder from '../adminPages/SalesOrder/SalesOrder';
-import { RiCollageLine, RiShieldUserLine, RiUserSettingsLine } from 'react-icons/ri';
+import { RiBillLine, RiCollageLine, RiShieldUserLine, RiUserSettingsLine } from 'react-icons/ri';
 import { GrBusinessService } from 'react-icons/gr';
 import Procurement from '../adminPages/Procurement/Procurement';
 import Inventory from '../adminPages/Inventory/Inventory';
@@ -21,6 +21,7 @@ import { IoClose, IoNotificationsCircle } from 'react-icons/io5';
 import Notification from '../components/Notification';
 import axios from 'axios';
 import { backendServer } from '../utils/info';
+import TimeExpenses from '../adminPages/Time&Expenses/TimeExpenses';
 
 const AdminPanel = () => {
 
@@ -93,7 +94,7 @@ const AdminPanel = () => {
                                     onClick={() => handleMenuID(2)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 2 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
                                     <AiOutlineProduct className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 2 ? 'text-black' : 'text-gray-800'}`} />
-                                    <div className={`font-medium text-base text-nowrap ${menuID === 2 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Project Management</div>
+                                    <div className={`font-medium text-base text-nowrap ${menuID === 2 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Project Management</div>
                                 </div>
                                 <div
                                     onClick={() => handleMenuID(9)}
@@ -136,6 +137,14 @@ const AdminPanel = () => {
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 8 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
                                     <MdOutlineInventory2 className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 8 ? 'text-black' : 'text-gray-800'}`} />
                                     <div className={`font-medium text-base text-nowrap ${menuID === 8 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Inventory</div>
+                                </div>
+                                <div
+                                    onClick={() => handleMenuID(10)}
+                                    className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 10 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                    <RiBillLine className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 10 ? 'text-black' : 'text-gray-800'}`} />
+                                    <div className={`font-medium text-base text-nowrap ${menuID === 10 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>
+                                        Time & Expenses
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -213,7 +222,8 @@ const AdminPanel = () => {
                                                 : menuID === 6 ? ''
                                                     : menuID === 7 ? <Procurement />
                                                         : menuID === 8 ? <Inventory />
-                                                            : menuID === 9 ? <ClientCollabEmp /> : ''
+                                                            : menuID === 9 ? <ClientCollabEmp />
+                                                                : menuID === 10 ? <TimeExpenses /> : ''
                         }
                     </div>
                 }

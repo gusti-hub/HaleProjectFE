@@ -299,7 +299,6 @@ const SalesOrder = () => {
                         <div className="w-full flex items-center justify-center text-red-600 font-medium">
                             Error: {error}
                         </div> :
-
                         <div className="w-full flex flex-col items-center">
                             <div className="w-full flex items-center justify-between">
                                 <button onClick={handleOpen}

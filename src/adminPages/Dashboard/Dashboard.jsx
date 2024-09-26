@@ -148,7 +148,7 @@ const Dashboard = () => {
                         <div className="w-full flex items-center justify-center text-red-600 font-medium">
                             Error: {error}
                         </div> :
-                        <div className="w-full flex flex-col items-center justify-start gap-4 max-h-[36rem] overflow-x-hidden overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                        <div className="w-full flex flex-col items-center justify-start gap-4 dashHeight overflow-x-hidden overflow-y-scroll scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
                             <div className="w-full flex items-start justify-center gap-4">
                                 <div className="w-full flex flex-col items-center gap-4">
                                     <div className="w-full flex items-start justify-start gap-4">
