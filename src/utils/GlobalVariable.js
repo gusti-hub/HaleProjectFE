@@ -1,3 +1,5 @@
+import TimeExpenses from "../adminPages/Time&Expenses/TimeExpenses"
+
 export default class GlobalVariable {
 
     static ActionRole = {
@@ -11,6 +13,7 @@ export default class GlobalVariable {
         ProcurementNavigation: 'Procurement Navigation',
         InventoryNavigation : 'Inventory Navigation',
         ConfigurationNavigation : 'Configuration Navigation',
+        TimeExpensesNavigation : 'Time Expnses Navigation',
         ApproveDesign : 'Approve Design',
         RejectDesign : 'Reject Design',
         ApproveProposal : 'Approve Proposal',

@@ -176,9 +176,17 @@ const AdminPanel = () => {
                                     onClick={() => handleMenuID(10)}
                                     className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 10 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
                                     <RiSafeLine className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 10 ? 'text-black' : 'text-gray-800'}`} />
-                                    <div className={`font-medium text-base text-nowrap ${menuID === 8 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Configuration</div>
+                                    <div className={`font-medium text-base text-nowrap ${menuID === 10 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Configuration</div>
                                 </div> 
-                            )}                                                         
+                            )} 
+                            {action.includes(GlobalVariable.ActionRole.ProjectManagementNavigation) && (
+                                <div
+                                    onClick={() => handleMenuID(12)}
+                                    className={`w-full flex items-center gap-4 p-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 12 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                    <RiSafeLine className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 12? 'text-black' : 'text-gray-800'}`} />
+                                    <div className={`font-medium text-base text-nowrap ${menuID === 12 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Time & Expenses</div>
+                                </div> 
+                            )}                                                                                           
                             </div>
                         }
                     </div>
@@ -257,7 +265,8 @@ const AdminPanel = () => {
                                                         : menuID === 8 ? <Inventory />
                                                         : menuID === 9 ? <RoleRegistration />
                                                             : menuID === 10 ? <Configurations />
-                                                                : menuID === 11 ? <ClientCollabEmp /> : ""
+                                                                : menuID === 11 ? <ClientCollabEmp /> 
+                                                                    : menuID === 12 ? <TimeExpenses /> : ""
                         }
                     </div>
                 }

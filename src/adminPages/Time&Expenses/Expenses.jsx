@@ -297,8 +297,18 @@ const Expenses = () => {
                                                     <select value={formData.type} onChange={handleInputChange}
                                                         name="type" className='w-[15rem] outline-none p-2 border border-solid border-gray-300 -mt-1'>
                                                         <option value="" disabled>Select an option</option>
-                                                        <option value="travel">Travel Allowance</option>
-                                                        <option value="shift">Shift Allowance</option>
+                                                        <option value="admin">Admin</option>
+                                                        <option value="business_development">Business Development</option>
+                                                        <option value="design_services">Design Services</option>
+                                                        <option value="finance">Finance</option>
+                                                        <option value="holiday">Holiday</option>
+                                                        <option value="logistics">Logistics</option>
+                                                        <option value="management">Management</option>
+                                                        <option value="marketing">Marketing</option>
+                                                        <option value="nohie">Nohie</option>
+                                                        <option value="pm">Project Management</option>
+                                                        <option value="pto">PTO</option>
+                                                        <option value="travel">Travel</option>
                                                     </select>
                                                 </div>
                                                 <div className="flex flex-col items-start text-sm">
