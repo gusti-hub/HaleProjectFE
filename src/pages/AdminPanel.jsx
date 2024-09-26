@@ -11,7 +11,7 @@ import { FaArrowLeft, FaArrowRight, FaRegBuilding, FaRegUser, FaUserCircle, FaUs
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiUsers } from 'react-icons/fi';
 import SalesOrder from '../adminPages/SalesOrder/SalesOrder';
-import { RiCollageLine, RiShieldUserLine, RiUserSettingsLine, RiSafeLine } from 'react-icons/ri';
+import { RiBillLine, RiCollageLine, RiShieldUserLine, RiUserSettingsLine, RiSafeLine } from 'react-icons/ri';
 import { GrBusinessService } from 'react-icons/gr';
 import GlobalVariable from '../utils/GlobalVariable';
 import Procurement from '../adminPages/Procurement/Procurement';
@@ -23,6 +23,7 @@ import { IoClose, IoNotificationsCircle } from 'react-icons/io5';
 import Notification from '../components/Notification';
 import axios from 'axios';
 import { backendServer } from '../utils/info';
+import TimeExpenses from '../adminPages/Time&Expenses/TimeExpenses';
 
 const AdminPanel = () => {
 
