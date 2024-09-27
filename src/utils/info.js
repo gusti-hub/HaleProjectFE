@@ -2,4 +2,4 @@
 
 // export const backendServer = "https://haleprojectbe.onrender.com";
 
-export const backendServer = "https://hale-project-be.vercel.app";
+export const backendServer = "https://hale-project-be.vercel.app";  
