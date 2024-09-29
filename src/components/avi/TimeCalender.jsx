@@ -1,269 +1,370 @@
-import React, { useEffect, useState } from 'react';
-import { format, addDays, subDays, isFuture, startOfWeek } from 'date-fns';
-import { CiCirclePlus } from 'react-icons/ci';
-import { TiDeleteOutline } from 'react-icons/ti';
-import { GrLinkPrevious, GrLinkNext } from 'react-icons/gr';
-import axios from 'axios';
-import { backendServer } from '../../utils/info';
-import toast from 'react-hot-toast';
+import React, { useContext, useEffect, useState } from "react";
+import { format, addDays, subDays, isFuture, startOfWeek } from "date-fns";
+import { TiDeleteOutline } from "react-icons/ti";
+import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
+import axios from "axios";
+import { backendServer } from "../../utils/info";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useNavigate } from "react-router-dom";
+import { AppContext } from "../../context/CommonContext";
+import toast from "react-hot-toast";
 
-const userId = localStorage.getItem('userId');
-const token = localStorage.getItem('token');
+const userId = localStorage.getItem("userId");
+const token = localStorage.getItem("token");
 
-export const getDaysRange = (currentDate, numberOfDays = 15) => {
-  const daysRange = [];
-  for (let i = 0; i < numberOfDays; i++) {
-    daysRange.push(addDays(currentDate, i));
-  }
-  return daysRange;
+const getDaysRange = (currentDate, numberOfDays = 15) => {
+	const daysRange = [];
+	for (let i = 0; i < numberOfDays; i++) {
+		daysRange.push(addDays(currentDate, i));
+	}
+	return daysRange;
 };
 
-const TimeCalender = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [projectData, setProjectData] = useState([]);
-  const [hours, setHours] = useState([{ projectCode: '', projectName: '', hours: {} }]); // Single row initially
-  const [timeData, setTimeData] = useState(null); // Store fetched time data
-  const [changesMade, setChangesMade] = useState(false); // Track changes to show Save button
+const TimeCalendar = () => {
+	const navigate = useNavigate();
+	const { handleMenuID } = useContext(AppContext);
 
-  // Fetch project data from backend
-  const fetchProjectData = async () => {
-    try {
-      const response = await axios.get(`${backendServer}/api/sales`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setProjectData(response.data.salesData); // Assume projects array is in response
-    } catch (error) {
-      console.log(error);
-    }
-  };
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
+	const [saveLoader, setSaveLoader] = useState(false);
+	const [projectData, setProjectData] = useState([]); // Project list from backend
+	const [currentDate, setCurrentDate] = useState(new Date());
+	const [hours, setHours] = useState(Array(4).fill({ name: "", hours: {} })); // 4 rows for projects
+	const today = new Date();
+	const daysRange = getDaysRange(currentDate, 15); // 15-day range
 
-  // Fetch user's time data from backend
-  const fetchTimeData = async () => {
-    try {
-      const response = await axios.get(`${backendServer}/api/times/${userId}`);
-      setTimeData(response.data.timeData); // Set the time data
-      populateTimeData(response.data.timeData); // Populate the calendar
-    } catch (error) {
-      console.error('Error fetching time data:', error);
-    }
-  };
 
-  useEffect(() => {
-    fetchProjectData();
-    fetchTimeData(); // Fetch the time data when the component loads
-  }, []);
+	// Fetch the list of projects (e.g., sales data)
+	const fetchSalesData = async () => {
+		try {
+			setLoading(true);
+			const response = await axios.get(`${backendServer}/api/sales`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			console.log("salesData", response.data.salesData);
 
-  const populateTimeData = (data) => {
-    if (!data || !data.time) return;
+			setProjectData(response.data.salesData);
+			setLoading(false);
+		} catch (error) {
+			setError(error.message);
+		}
+	};
 
-    // Populate the hours state with the fetched data
-    const fetchedHours = data.time.map((entry) => {
-      const projectHours = {};
+	// Fetch the existing time entries for the user and selected project
+	const fetchTimeData = async () => {
+		try {
+			const response = await axios.get(`${backendServer}/api/times/${userId}`);
+			console.log("timedata", response.data.timeData);
 
-      entry.projects.forEach((project) => {
-        projectHours[entry.date] = project.hours;
-      });
 
-      return {
-        projectCode: entry.projects[0].projectCode,
-        projectName: projectData.find((p) => p.code === entry.projects[0].projectCode)?.name,
-        hours: projectHours,
-      };
-    });
+		} catch (error) {
+			setError(error.message);
+		}
+	};
 
-    setHours(fetchedHours);
-  };
+	useEffect(() => {
+		fetchSalesData();
+		fetchTimeData();
+	}, []);
 
-  const today = new Date();
-  const daysRange = getDaysRange(currentDate, 15);
+	// Handle changing work hours for each project on each date
+	const handleHourChange = (rowIndex, day, value) => {
+		const updatedHours = [...hours];
+		updatedHours[rowIndex].hours[day] = value;
+		setHours(updatedHours);
+	};
 
-  // Handle changing work hours for each project on each date
-  const handleHourChange = (rowIndex, day, value) => {
-    const updatedHours = [...hours];
-    updatedHours[rowIndex].hours[day] = value;
-    setHours(updatedHours);
-    setChangesMade(true); // Set changesMade to true to show Save button
-  };
+	// Handle selecting a project from the dropdown
+	const handleSelectProject = (rowIndex, projectName) => {
+		const updatedHours = [...hours];
+		updatedHours[rowIndex] = { name: projectName, hours: {} };
+		setHours(updatedHours);
+	};
+	
+	const isProjectSelected = (projectName) => {
+		return hours.some((row) => row.name === projectName);
+	};
 
-  // Handle selecting a project from the dropdown
-  const handleSelectProject = (rowIndex, projectId) => {
-    const selectedProject = projectData.find((project) => project._id === projectId);
+	// Handle removing a project
+	const handleRemoveProject = (rowIndex) => {
+		const updatedHours = [...hours];
+		updatedHours[rowIndex] = { name: "", hours: {} };
+		setHours(updatedHours);
+	};
 
-    // Check if project is already selected
-    if (hours.some((row) => row.projectCode === selectedProject.code)) {
-      toast.error('Project already selected!');
-      return;
-    }
+	// Move to the next or previous 15-day range
+	const nextDays = () => setCurrentDate(addDays(currentDate, 15));
+	const previousDays = () => setCurrentDate(subDays(currentDate, 15));
 
-    const updatedHours = [...hours];
-    updatedHours[rowIndex] = { projectCode: selectedProject.code, projectName: selectedProject.name, hours: {} };
-    setHours(updatedHours);
-    setChangesMade(true); // Set changesMade to true to show Save button
-  };
+	// Handle setting currentDate to today
+	const handleToday = () => setCurrentDate(new Date());
 
-  // Add a new project row with a limit of 4
-  const handleAddProject = () => {
-    if (hours.length >= 4) {
-      toast.error('You can only select up to 4 projects.');
-      return;
-    }
-    setHours([...hours, { projectCode: '', projectName: '', hours: {} }]);
-  };
+	// Handle selecting a week starting with a specific date from the calendar
+	const handleDateChange = (e) => {
+		const selectedDate = new Date(e.target.value);
+		const weekStartDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
+		setCurrentDate(weekStartDate);
+	};
 
-  // Handle removing a project
-  const handleRemoveProject = (rowIndex) => {
-    const updatedHours = [...hours];
-    updatedHours.splice(rowIndex, 1); // Remove the selected row
-    setHours(updatedHours);
-    setChangesMade(true); // Set changesMade to true to show Save button
-  };
+	// Calculate total hours per row
+	const calculateTotalHours = (row) => {
+		return Object.values(row.hours).reduce(
+			(total, value) => total + (parseFloat(value) || 0),
+			0
+		);
+	};
 
-  // Move to the next or previous 15-day range
-  const nextDays = () => setCurrentDate(addDays(currentDate, 15));
-  const previousDays = () => setCurrentDate(subDays(currentDate, 15));
-  const handleToday = () => setCurrentDate(new Date());
-  const handleDateChange = (e) => {
-    const selectedDate = new Date(e.target.value);
-    const weekStartDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
-    setCurrentDate(weekStartDate);
-  };
+	// Calculate total hours per column (per day)
+	const calculateDailyTotal = (day) => {
+		return hours.reduce(
+			(total, row) => total + (parseFloat(row.hours[day]) || 0),
+			0
+		);
+	};
 
-  // Calculate total hours per row
-  const calculateTotalHours = (row) => {
-    return Object.values(row.hours).reduce((total, value) => total + (parseFloat(value) || 0), 0);
-  };
+	// Calculate work schedule (static 8 hours per day for now)
+	const calculateWorkSchedule = () => 8;
 
-  // Calculate total hours per column (per day)
-  const calculateDailyTotal = (day) => {
-    return hours.reduce((total, row) => total + (parseFloat(row.hours[day]) || 0), 0);
-  };
+	// Calculate daily overtime (hours beyond 8)
+	const calculateDailyOvertime = (day) => {
+		const totalHours = calculateDailyTotal(day);
+		return totalHours > 8 ? totalHours - 8 : 0;
+	};
 
-  // Save the updated hours to the backend
-  const handleSave = async () => {
-    const timeEntries = daysRange.map((day) => ({
-      date: format(day, 'yyyy-MM-dd'),
-      projects: hours.map((row) => ({
-        projectCode: row.projectCode,
-        hours: row.hours[day] || 0,
-      })),
-    }));
+	// Handle save functionality
+	const handleSave = async () => {
+		setSaveLoader(true);
 
-    try {
-      await axios.post(
-        `${backendServer}/api/times/${userId}`,
-        { time: timeEntries }
-      );
-      toast.success('Time data saved successfully!');
-      setChangesMade(false); // Reset changesMade after successful save
-    } catch (error) {
-      toast.error('Error saving time data!');
-      console.error('Error saving time data:', error);
-    }
-  };
+		try {
+			// Iterate over the days and send one request per day
+			for (let day of daysRange) {
+				// Filter out projects where there are no hours for the specific day
+				const projectsForDay = hours
+					.filter((row) => row.name) // Only save rows with project names
+					.map((row) => {
+						const project = projectData.find((p) => p.name === row.name);
+						const hoursForDay = row.hours[day]; // Get hours for the specific day
 
-  return (
-    <div className="overflow-x-auto p-4">
-      {/* Navigation */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-        <span className="text-lg font-bold text-center w-full">
-          {format(daysRange[0], 'MMM dd')} - {format(daysRange[14], 'MMM dd')}
-        </span>
-        <div className="flex items-center gap-2">
-          {/* Add Project Button */}
-          <button onClick={handleAddProject} className="bg-[#7F55DE] text-white rounded p-2.5 flex items-center">
-            <CiCirclePlus className="font-bold text-xl" />
-          </button>
-          {changesMade && (
-            <button onClick={handleSave} className="bg-[#7F55DE] text-white p-2 rounded">
-              Save
-            </button>
-          )}
-          <button onClick={handleToday} className="bg-[#7F55DE] text-white p-2 rounded">
-            Today
-          </button>
-          <input type="date" className="border p-2 text-[#7F55DE] rounded" onChange={handleDateChange} />
-          <button onClick={previousDays} className="bg-gray-300 text-[#7F55DE] p-2 rounded">
-            <GrLinkPrevious />
-          </button>
-          <button onClick={nextDays} className="bg-gray-300 text-[#7F55DE] p-2 rounded">
-            <GrLinkNext />
-          </button>
-        </div>
-      </div>
+						if (hoursForDay && parseFloat(hoursForDay) > 0) {
+							// Only include if hours exist and are greater than 0
+							return {
+								code: project.code, // Ensure the project code is sent
+								hours: parseFloat(hoursForDay), // Parse the hours to a float value
+							};
+						}
+						return null;
+					})
+					.filter(Boolean); // Remove null values from the array
 
-      {/* Table */}
-      <table className="min-w-full table-auto border-collapse border border-gray-200">
-        <thead>
-          <tr>
-            <th className="border p-2">Project</th>
-            {daysRange.map((day, index) => (
-              <th key={index} className={`border p-2 text-center ${[0, 6].includes(day.getDay()) ? 'bg-gray-100' : ''}`}>
-                {format(day, 'EEE dd')}
-              </th>
-            ))}
-            <th className="border p-2 text-center">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {hours.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {/* Project Selection */}
-              <td className="border flex items-center justify-between p-2">
-                <select
-                  value={row.projectCode}
-                  onChange={(e) => handleSelectProject(rowIndex, e.target.value)}
-                  className=" border p-2"
-                >
-                  <option value="">Select Project</option>
-                  {projectData.map((project) => (
-                    <option key={project._id} value={project._id}>
-                      {project.name}
-                    </option>
-                  ))}
-                </select>
-                <button onClick={() => handleRemoveProject(rowIndex)} className="text-red-500">
-                  <TiDeleteOutline size={20} />
-                </button>
-              </td>
+				// Only send the request if there are projects with hours for the day
+				if (projectsForDay.length > 0) {
+					const payload = {
+						date: format(day, "yyyy-MM-dd"), // Format date as string
+						projects: projectsForDay,
+					};
 
-              {/* Hours per day */}
-              {daysRange.map((day, index) => (
-                <td key={index} className="border p-2 text-center">
-                  {!isFuture(day) ? (
-                    <input
-                      type="number"
-                      value={row.hours[day] || ''}
-                      onChange={(e) => handleHourChange(rowIndex, day, e.target.value)}
-                      className="w-12 border text-center"
-                      min="0"
-                    />
-                  ) : (
-                    <span>--</span> // Disable input for future dates
-                  )}
-                </td>
-              ))}
+					console.log(payload);
 
-              {/* Total Hours for the row */}
-              <td className="border p-2 text-center">{calculateTotalHours(row)}</td>
-            </tr>
-          ))}
+					// Send the payload for each day
+					await axios.put(`${backendServer}/api/times/${userId}`, payload);
+				}
+			}
 
-          {/* Total Hours row */}
-          <tr>
-            <td className="border p-2 font-bold text-center">Total</td>
-            {daysRange.map((day, index) => (
-              <td key={index} className="border p-2 text-center">
-                {calculateDailyTotal(day)}
-              </td>
-            ))}
-            <td className="border p-2 text-center">
-              {hours.reduce((total, row) => total + calculateTotalHours(row), 0)}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
+			setSaveLoader(false);
+			toast.success("Hours saved successfully");
+		} catch (error) {
+			setSaveLoader(false);
+			setError(error.message);
+			alert("Failed to save hours");
+		}
+	};
+
+	// Handle cancel action
+	const handleCancel = () => {
+		navigate("/admin-panel");
+		handleMenuID(10);
+	};
+
+	return (
+		<div className="overflow-x-auto p-4 text-sm w-full flx flex-col items-center justify-start">
+			<div
+				className="w-full flex items-center justify-between px-4 pb-4 mb-6"
+				style={{ boxShadow: "0px 6px 4px -3px rgba(201,195,201,1)" }}
+			>
+				<div className="text-gray-900 text-2xl font-medium">Time</div>
+				<div className="flex items-center justify-center gap-4 text-base">
+					<button
+						onClick={handleCancel}
+						className="bg-gray-200 hover:bg-gray-300 py-1.5 px-4 cursor-pointer"
+					>
+						Cancel
+					</button>
+					{saveLoader ? (
+						<div className="flex items-center justify-center px-4">
+							<CircularProgress />
+						</div>
+					) : (
+						<button
+							onClick={handleSave}
+							className={`bg-[#7F55DE] py-1.5 px-5 text-white ${
+								loading || error ? "cursor-not-allowed" : "cursor-pointer"
+							}`}
+						>
+							Save
+						</button>
+					)}
+				</div>
+			</div>
+
+			{/* Navigation */}
+			<div className="flex items-center justify-between mb-4">
+				<span className="text-base font-bold text-center w-full">
+					{format(daysRange[0], "MMM dd")} -{" "}
+					{format(daysRange[daysRange.length - 1], "MMM dd")}
+				</span>
+				<div className="flex items-center justify-between gap-2 text-lg">
+					<input
+						type="date"
+						className="p-0.5 rounded border border-solid text-center text-[#7F55DE]"
+						onChange={handleDateChange}
+					/>
+					<GrLinkPrevious
+						className="cursor-pointer  text-[#7F55DE]  rounded "
+						onClick={previousDays}
+					/>
+					<button
+						className="bg-gray-300 hover:bg-gray-400  text-[#7F55DE] rounded text-sm px-2 py-1"
+						onClick={handleToday}
+					>
+						Today
+					</button>
+					<GrLinkNext
+						className="cursor-pointer text-[#7F55DE]"
+						onClick={nextDays}
+					/>
+				</div>
+			</div>
+
+			{/* Calendar Table */}
+			<div className="overflow-x-auto">
+				<table className="table-auto border-collapse w-full">
+					<thead>
+						<tr>
+							<th className="px-4 py-2 w-48">Project</th>
+							{daysRange.map((day, index) => (
+								<th
+									key={index}
+									className={`px-4 py-2 ${
+										isFuture(day) ? "bg-gray-200" : "bg-[#7F55DE] text-white"
+									}`}
+								>
+									{format(day, "dd/MM")}
+								</th>
+							))}
+							<th className="px-4 py-2">Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						{/* Render fixed rows for projects */}
+						{hours.map((row, rowIndex) => (
+							<tr key={rowIndex} className="border-t border-gray-400 ">
+								{/* Project name dropdown */}
+								<td className="px-4 py-2">
+									{row.name ? (
+										<div className="flex items-center gap-2">
+											<span className="w-full">{row.name}</span>
+											<TiDeleteOutline
+												className="cursor-pointer text-red-500 text-xl font-bold"
+												onClick={() => handleRemoveProject(rowIndex)}
+											/>
+										</div>
+									) : (
+										<select
+											className="w-full px-2 py-1 border border-gray-300"
+											onChange={(e) =>
+												handleSelectProject(rowIndex, e.target.value)
+											}
+										>
+											<option value="" className="text-center">
+												Project {rowIndex + 1}
+											</option>
+											{projectData.map((project) => (
+												<option
+													key={project._id}
+													value={project.name}
+													disabled={
+														isProjectSelected(project.name) &&
+														hours[rowIndex].name !== project.name
+													}
+												>
+													{project.name}
+												</option>
+											))}
+										</select>
+									)}
+								</td>
+
+								{/* Render each day's input for hours */}
+								{daysRange.map((day, dayIndex) => (
+									<td key={dayIndex} className="px-4 py-2">
+										<input
+											type="number"
+											value={row.hours[day] || ""}
+											onChange={(e) =>
+												handleHourChange(rowIndex, day, e.target.value)
+											}
+											className="w-full px-2 py-1 border border-gray-300"
+											disabled={isFuture(day)} // Disable input for future dates
+										/>
+									</td>
+								))}
+
+								{/* Display total hours for the row */}
+								<td className="px-4 py-2">{calculateTotalHours(row)}</td>
+							</tr>
+						))}
+
+						{/* Totals, Work Schedule, and Overtime rows */}
+						<tr className="border-t border-gray-400">
+							<td className="px-4 py-2 font-bold">Total Hours</td>
+							{daysRange.map((day, index) => (
+								<td key={index} className="px-4 py-2 font-bold">
+									{calculateDailyTotal(day)}
+								</td>
+							))}
+							<td></td>
+						</tr>
+
+						<tr>
+							<td className="px-4 py-2 font-bold">Work Schedule</td>
+							{daysRange.map((day, index) => (
+								<td key={index} className="px-4 py-2 font-bold">
+									{calculateWorkSchedule()}
+								</td>
+							))}
+							<td></td>
+						</tr>
+
+						<tr>
+							<td className="px-4 py-2 font-bold">Overtime</td>
+							{daysRange.map((day, index) => (
+								<td key={index} className="px-4 py-2 font-bold">
+									{calculateDailyOvertime(day)}
+								</td>
+							))}
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			{error && (
+				<div className="text-red-500 text-center mt-4">
+					{error} (Check console for details)
+				</div>
+			)}
+		</div>
+	);
 };
 
-export default TimeCalender;
+export default TimeCalendar;
