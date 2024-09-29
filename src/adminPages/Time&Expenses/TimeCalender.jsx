@@ -10,6 +10,8 @@ import { AppContext } from "../../context/CommonContext";
 import toast from "react-hot-toast";
 
 const userId = localStorage.getItem("userId");
+console.log(userId);
+
 const token = localStorage.getItem("token");
 
 const getDaysRange = (currentDate, numberOfDays = 15) => {
@@ -33,7 +35,6 @@ const TimeCalendar = () => {
 	const today = new Date();
 	const daysRange = getDaysRange(currentDate, 15); // 15-day range
 
-
 	// Fetch the list of projects (e.g., sales data)
 	const fetchSalesData = async () => {
 		try {
@@ -55,8 +56,6 @@ const TimeCalendar = () => {
 		try {
 			const response = await axios.get(`${backendServer}/api/times/${userId}`);
 			console.log("timedata", response.data.timeData);
-
-
 		} catch (error) {
 			setError(error.message);
 		}
@@ -80,7 +79,7 @@ const TimeCalendar = () => {
 		updatedHours[rowIndex] = { name: projectName, hours: {} };
 		setHours(updatedHours);
 	};
-	
+
 	const isProjectSelected = (projectName) => {
 		return hours.some((row) => row.name === projectName);
 	};
@@ -95,6 +94,11 @@ const TimeCalendar = () => {
 	// Move to the next or previous 15-day range
 	const nextDays = () => setCurrentDate(addDays(currentDate, 15));
 	const previousDays = () => setCurrentDate(subDays(currentDate, 15));
+	function isWeekend(date) {
+		const day = new Date(date).getDay();
+		// 0 is Sunday, 6 is Saturday
+		return day === 0 || day === 6;
+	}
 
 	// Handle setting currentDate to today
 	const handleToday = () => setCurrentDate(new Date());
@@ -297,7 +301,7 @@ const TimeCalendar = () => {
 														hours[rowIndex].name !== project.name
 													}
 												>
-													{project.name}
+													{project.code}-{project.name}
 												</option>
 											))}
 										</select>
@@ -306,14 +310,21 @@ const TimeCalendar = () => {
 
 								{/* Render each day's input for hours */}
 								{daysRange.map((day, dayIndex) => (
-									<td key={dayIndex} className="px-4 py-2">
+									<td
+										key={dayIndex}
+										className={`px-4 py-2 ${
+											isWeekend(day) ? "bg-gray-100" : ""
+										}`}
+									>
 										<input
 											type="number"
 											value={row.hours[day] || ""}
 											onChange={(e) =>
 												handleHourChange(rowIndex, day, e.target.value)
 											}
-											className="w-full px-2 py-1 border border-gray-300"
+											className={`w-full px-2 py-1 border rounded  ${
+												isWeekend(day) ? "bg-gray-100" : ""
+											} `}
 											disabled={isFuture(day)} // Disable input for future dates
 										/>
 									</td>
@@ -328,7 +339,7 @@ const TimeCalendar = () => {
 						<tr className="border-t border-gray-400">
 							<td className="px-4 py-2 font-bold">Total Hours</td>
 							{daysRange.map((day, index) => (
-								<td key={index} className="px-4 py-2 font-bold">
+								<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
 									{calculateDailyTotal(day)}
 								</td>
 							))}
@@ -338,7 +349,7 @@ const TimeCalendar = () => {
 						<tr>
 							<td className="px-4 py-2 font-bold">Work Schedule</td>
 							{daysRange.map((day, index) => (
-								<td key={index} className="px-4 py-2 font-bold">
+								<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
 									{calculateWorkSchedule()}
 								</td>
 							))}
@@ -348,7 +359,7 @@ const TimeCalendar = () => {
 						<tr>
 							<td className="px-4 py-2 font-bold">Overtime</td>
 							{daysRange.map((day, index) => (
-								<td key={index} className="px-4 py-2 font-bold">
+								<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
 									{calculateDailyOvertime(day)}
 								</td>
 							))}
