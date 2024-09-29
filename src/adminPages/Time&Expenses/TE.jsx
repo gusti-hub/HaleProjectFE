@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import Expenses from './Expenses';
+import TimeCalender from "./TimeCalender";
 
 const TE = () => {
 
@@ -34,7 +35,7 @@ const TE = () => {
                 <div className="w-full flex text-center justify-center px-4"><div className="w-full h-[2px] bg-gray-400"></div></div>
 
                 {
-                    menuId === 1 ? '' :
+                    menuId === 1 ? <TimeCalender /> :
                         menuId === 2 ? <Expenses /> : ''
                 }
 
