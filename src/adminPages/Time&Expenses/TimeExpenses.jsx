@@ -26,7 +26,7 @@ const TimeExpenses = () => {
                         <div className="w-full flex flex-col items-center">
                             <div className="w-full flex items-center justify-between">
                                 <button onClick={() => navigate("/time-expenses")}
-                                    className='flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
+                                    className='flex items-center justify-center gap-1 pl-5 pr-6 py-2 rounded-lg bg-[#7F55DE] text-white text-lg'>
                                     <IoMdAdd className='text-xl' />
                                     <div>ADD</div>
                                 </button>

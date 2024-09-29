@@ -31,3 +31,11 @@ table th {
 .dashHeight {
     max-height: calc(100vh - 7rem);
 }
+@layer base {
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+  
