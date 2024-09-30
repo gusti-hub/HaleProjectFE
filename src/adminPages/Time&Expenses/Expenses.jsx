@@ -6,20 +6,19 @@ import toast from 'react-hot-toast';
 import DragNDrop from '../../components/DragNDrop';
 import { FaCamera } from 'react-icons/fa';
 import { Dialog } from '@material-tailwind/react';
+import { useNavigate } from 'react-router-dom';
 
 const Expenses = () => {
 
     const token = localStorage.getItem('token');
+    const loggedInUser = localStorage.getItem('name');
 
-    const [isAdd, setIsAdd] = useState(false);
+    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const [saveLoader, setSaveLoader] = useState(false);
-
-    const [loader, setLoader] = useState(true);
-    const [loadError, setLoadError] = useState(null);
 
     const [formData, setFormData] = useState({
         prj: '',
@@ -85,6 +84,7 @@ const Expenses = () => {
         setDaysDiff(0);
         setError(null);
         setSelectedFile(null);
+        setSaveLoader(false);
     };
 
     const [sales, setSales] = useState([]);
@@ -102,24 +102,24 @@ const Expenses = () => {
         }
     };
 
-    const [expenses, setExpenses] = useState([]);
+    const [teDocsLen, setTEDocsLen] = useState(0);
 
-    const fetchExpenses = async () => {
+    const fetchTEDocs = async () => {
         try {
-            const response = await axios.get(`${backendServer}/api/expenses`, {
+            const response = await axios.get(`${backendServer}/api/te-docs`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setExpenses(response.data);
-            setLoader(false);
+            setTEDocsLen(response.data.length);
+            setLoading(false);
         } catch (error) {
-            setLoadError(error.response.data.message);
-            setLoader(false);
+            setError(error.response.data.message);
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchSales();
-        fetchExpenses();
+        fetchTEDocs();
     }, []);
 
     const handleUpload = async () => {
@@ -171,16 +171,16 @@ const Expenses = () => {
                     amount: Number(formData.amount),
                     totalAmount: Number(daysDiff * formData.amount),
                     comment: formData.comment,
-                    imageUrl: uploadedImageUrl
+                    imageUrl: uploadedImageUrl,
+                    docid: `TE-00${teDocsLen + 1}` , 
+                    user: loggedInUser
                 });
 
                 toast.success(response.data.message);
-
-                await fetchExpenses();
-
                 resetForm();
-                setIsAdd(false);
                 setSaveLoader(false);
+                navigate("/admin-panel");
+                handleMenuID(10);
             } catch (error) {
                 toast.error(error.response.data.message);
                 setSaveLoader(false);
@@ -188,36 +188,17 @@ const Expenses = () => {
         }
     };
 
-    const [open, setOpen] = useState(false);
-    const [img, setImg] = useState(null);
-
-    const handleOpen = (url) => { setOpen(!open); setImg(url); };
-
-    const formatDate = (dateString) => {
-        const months = [
-            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-        ];
-
-        const suffixes = { 1: "st", 2: "nd", 3: "rd", default: "th" };
-
-        const date = new Date(dateString);
-
-        const day = date.getDate();
-        const month = months[date.getMonth()];
-        const year = date.getFullYear();
-
-        const daySuffix = suffixes[day] || suffixes.default;
-
-        return `${day}${daySuffix} ${month}, ${year}`;
-    }
-
+	const handleCancel = () => {
+		navigate("/admin-panel");
+		handleMenuID(10);
+	};
 
     return (
         <div className="w-full flex flex-col items-center justify-start gap-2 p-4 pb-0">
             <div className="w-full flex items-center justify-between px-4 pb-4" style={{ boxShadow: "0px 6px 4px -3px rgba(201,195,201,1)" }}>
                 <div className="text-gray-900 text-2xl font-medium">Expenses</div>
                 <div className="flex items-center justify-center gap-4">
-                    <button onClick={() => setIsAdd(false)}
+                    <button onClick={handleCancel}
                         className={`bg-gray-200 hover:bg-gray-300 py-1.5 px-4 cursor-pointer'`}>Cancel</button>
                     {
                         saveLoader ? <div className="flex items-center justify-center px-4"><CircularProgress /></div> :

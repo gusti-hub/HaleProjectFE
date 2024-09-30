@@ -1,4 +1,4 @@
-import  { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { format, addDays, subDays, isFuture, startOfWeek } from "date-fns";
 import { TiDeleteOutline } from "react-icons/ti";
 import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
@@ -9,19 +9,6 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "../../context/CommonContext";
 import toast from "react-hot-toast";
 
-const userId = localStorage.getItem("userId");
-console.log(userId);
-
-const token = localStorage.getItem("token");
-
-const getDaysRange = (currentDate, numberOfDays = 15) => {
-	const daysRange = [];
-	for (let i = 0; i < numberOfDays; i++) {
-		daysRange.push(addDays(currentDate, i));
-	}
-	return daysRange;
-};
-
 const TimeCalendar = () => {
 	const navigate = useNavigate();
 	const { handleMenuID } = useContext(AppContext);
@@ -29,6 +16,19 @@ const TimeCalendar = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [saveLoader, setSaveLoader] = useState(false);
+
+	const userId = localStorage.getItem("userId");
+	const loggedInUser = localStorage.getItem('name');
+	const token = localStorage.getItem("token");
+
+	const getDaysRange = (currentDate, numberOfDays = 15) => {
+		const daysRange = [];
+		for (let i = 0; i < numberOfDays; i++) {
+			daysRange.push(addDays(currentDate, i));
+		}
+		return daysRange;
+	};
+
 	const [projectData, setProjectData] = useState([]); // Project list from backend
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [hours, setHours] = useState(Array(4).fill({ name: "", hours: {} })); // 4 rows for projects
@@ -42,7 +42,7 @@ const TimeCalendar = () => {
 			const response = await axios.get(`${backendServer}/api/sales`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
-			console.log("salesData", response.data.salesData);
+			// console.log("salesData", response.data.salesData);
 
 			setProjectData(response.data.salesData);
 			setLoading(false);
@@ -55,21 +55,43 @@ const TimeCalendar = () => {
 	const fetchTimeData = async () => {
 		try {
 			const response = await axios.get(`${backendServer}/api/times/${userId}`);
-			console.log("timedata", response.data.timeData);
+			// console.log("timedata", response.data.timeData);
 		} catch (error) {
 			setError(error.message);
 		}
 	};
 
+	const [teDocsLen, setTEDocsLen] = useState(0);
+
+	const fetchTEDocs = async () => {
+		setLoading(true);
+		try {
+			const response = await axios.get(`${backendServer}/api/te-docs`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			setTEDocsLen(response.data.length);
+			setLoading(false);
+		} catch (error) {
+			setError(error.response.data.message);
+			setLoading(false);
+		}
+	};
+
 	useEffect(() => {
 		fetchSalesData();
-		fetchTimeData();
+		// fetchTimeData();
+		fetchTEDocs();
 	}, []);
 
 	// Handle changing work hours for each project on each date
 	const handleHourChange = (rowIndex, day, value) => {
 		const updatedHours = [...hours];
-		updatedHours[rowIndex].hours[day] = value;
+
+		if (updatedHours[rowIndex].name !== "") {
+			updatedHours[rowIndex].hours[day] = value;
+		} else {
+			toast.error("Select project to input hour details!");
+		}
 		setHours(updatedHours);
 	};
 
@@ -138,10 +160,10 @@ const TimeCalendar = () => {
 	// Handle save functionality
 	const handleSave = async () => {
 		setSaveLoader(true);
-	
+
 		try {
 			const allProjectsForDays = [];
-	
+
 			// Iterate over the days and accumulate all project data
 			for (let day of daysRange) {
 				// Filter out projects where there are no hours for the specific day
@@ -150,7 +172,7 @@ const TimeCalendar = () => {
 					.map((row) => {
 						const project = projectData.find((p) => p.name === row.name);
 						const hoursForDay = row.hours[day]; // Get hours for the specific day
-	
+
 						if (hoursForDay && parseFloat(hoursForDay) > 0) {
 							// Only include if hours exist and are greater than 0
 							return {
@@ -161,7 +183,7 @@ const TimeCalendar = () => {
 						return null;
 					})
 					.filter(Boolean); // Remove null values from the array
-	
+
 				// Only include the day if there are projects with hours for the day
 				if (projectsForDay.length > 0) {
 					allProjectsForDays.push({
@@ -170,31 +192,35 @@ const TimeCalendar = () => {
 					});
 				}
 			}
-	
+
 			// Send all accumulated project data in a single request
 			if (allProjectsForDays.length > 0) {
 				const payload = {
 					timeEntries: allProjectsForDays, // All the time entries for each day
+					docid: `TE-00${teDocsLen + 1}`,
+					user: loggedInUser
 				};
-	
-				console.log(payload); // Log the final payload
-	
+
+				// console.log(payload); // Log the final payload
+
 				// Send the payload once
 				await axios.put(`${backendServer}/api/times/${userId}`, payload);
-	
+
 				setSaveLoader(false);
 				toast.success('Hours saved successfully');
+				navigate("/admin-panel");
+				handleMenuID(10);
 			} else {
 				setSaveLoader(false);
-				alert('No data to save');
+				toast.error('No data to save');
 			}
 		} catch (error) {
 			setSaveLoader(false);
 			setError(error.message);
-			alert('Failed to save hours');
+			toast.error('Failed to save hours');
 		}
 	};
-	
+
 
 	// Handle cancel action
 	const handleCancel = () => {
@@ -223,9 +249,8 @@ const TimeCalendar = () => {
 					) : (
 						<button
 							onClick={handleSave}
-							className={`bg-[#7F55DE] py-1.5 px-5 text-white ${
-								loading || error ? "cursor-not-allowed" : "cursor-pointer"
-							}`}
+							className={`bg-[#7F55DE] py-1.5 px-5 text-white ${loading || error ? "cursor-not-allowed" : "cursor-pointer"
+								}`}
 						>
 							Save
 						</button>
@@ -233,154 +258,157 @@ const TimeCalendar = () => {
 				</div>
 			</div>
 
-			{/* Navigation */}
-			<div className="flex items-center justify-between mb-4">
-				<span className="text-base font-bold text-center w-full">
-					{format(daysRange[0], "MMM dd")} -{" "}
-					{format(daysRange[daysRange.length - 1], "MMM dd")}
-				</span>
-				<div className="flex items-center justify-between gap-2 text-lg">
-					<input
-						type="date"
-						className="p-0.5 rounded border border-solid text-center text-[#7F55DE]"
-						onChange={handleDateChange}
-					/>
-					<GrLinkPrevious
-						className="cursor-pointer  text-[#7F55DE]  rounded "
-						onClick={previousDays}
-					/>
-					<button
-						className="bg-gray-300 hover:bg-gray-400  text-[#7F55DE] rounded text-sm px-2 py-1"
-						onClick={handleToday}
-					>
-						Today
-					</button>
-					<GrLinkNext
-						className="cursor-pointer text-[#7F55DE]"
-						onClick={nextDays}
-					/>
-				</div>
-			</div>
-
-			{/* Calendar Table */}
-			<div className="overflow-x-auto">
-				<table className="table-auto border-collapse w-full">
-					<thead>
-						<tr>
-							<th className="px-4 py-2 w-48">Project</th>
-							{daysRange.map((day, index) => (
-								<th
-									key={index}
-									className={`px-4 py-2 ${
-										isFuture(day) ? "bg-gray-200" : "bg-[#7F55DE] text-white"
-									}`}
+			{
+				loading ? <div className='w-full flex items-center justify-center mt-16'><CircularProgress /></div> :
+					<div className="w-full flex flex-col items-center justify-start">
+						{/* Navigation */}
+						<div className="w-full flex items-center justify-between mb-4">
+							<span className="text-base font-bold text-center w-full">
+								{format(daysRange[0], "MMM dd")} -{" "}
+								{format(daysRange[daysRange.length - 1], "MMM dd")}
+							</span>
+							<div className="flex items-center justify-between gap-3 text-lg">
+								<input
+									type="date"
+									className="p-0.5 rounded border border-solid text-center text-base border-gray-400 pr-2 mr-2"
+									onChange={handleDateChange}
+								/>
+								<GrLinkPrevious
+									className="cursor-pointer text-[#7F55DE]"
+									onClick={previousDays}
+								/>
+								<button
+									className="hover:bg-gray-100 text-[#7F55DE] rounded text-sm px-2.5 py-1.5 border border-solid border-[#7F55DE]"
+									onClick={handleToday}
 								>
-									{format(day, "dd/MM")}
-								</th>
-							))}
-							<th className="px-4 py-2">Total</th>
-						</tr>
-					</thead>
-					<tbody>
-						{/* Render fixed rows for projects */}
-						{hours.map((row, rowIndex) => (
-							<tr key={rowIndex} className="border-t border-gray-400 ">
-								{/* Project name dropdown */}
-								<td className="px-4 py-2">
-									{row.name ? (
-										<div className="flex items-center gap-2">
-											<span className="w-full">{row.name}</span>
-											<TiDeleteOutline
-												className="cursor-pointer text-red-500 text-xl font-bold"
-												onClick={() => handleRemoveProject(rowIndex)}
-											/>
-										</div>
-									) : (
-										<select
-											className="w-full px-2 py-1 border border-gray-300"
-											onChange={(e) =>
-												handleSelectProject(rowIndex, e.target.value)
-											}
-										>
-											<option value="" className="text-center">
-												Project {rowIndex + 1}
-											</option>
-											{projectData.map((project) => (
-												<option
-													key={project._id}
-													value={project.name}
-													disabled={
-														isProjectSelected(project.name) &&
-														hours[rowIndex].name !== project.name
-													}
+									Today
+								</button>
+								<GrLinkNext
+									className="cursor-pointer text-[#7F55DE]"
+									onClick={nextDays}
+								/>
+							</div>
+						</div>
+
+						{/* Calendar Table */}
+						<div className="w-full overflow-x-auto">
+							<table className="w-full table-auto border-collapse">
+								<thead>
+									<tr>
+										<th className="px-4 py-2 w-48">Project</th>
+										{daysRange.map((day, index) => (
+											<th
+												key={index}
+												className={`px-4 py-2 text-nowrap ${isFuture(day) ? "bg-gray-200" : "bg-[#7F55DE] text-white"
+													}`}
+											>
+												{format(day, "eee dd")}
+											</th>
+										))}
+										<th className="px-4 py-2">Total</th>
+									</tr>
+								</thead>
+								<tbody>
+									{/* Render fixed rows for projects */}
+									{hours.map((row, rowIndex) => (
+										<tr key={rowIndex} className="border-t border-gray-400 ">
+											{/* Project name dropdown */}
+											<td className="px-4 py-2">
+												{row.name ? (
+													<div className="flex items-center gap-2">
+														<span className="w-full">{row.name}</span>
+														<TiDeleteOutline
+															className="cursor-pointer text-red-500 text-xl font-bold"
+															onClick={() => handleRemoveProject(rowIndex)}
+														/>
+													</div>
+												) : (
+													<select
+														className="w-full px-2 py-1 border border-gray-300 outline-none"
+														onChange={(e) =>
+															handleSelectProject(rowIndex, e.target.value)
+														}
+													>
+														<option value="" className="text-center">
+															Project {rowIndex + 1}
+														</option>
+														{projectData.map((project) => (
+															<option
+																key={project._id}
+																value={project.name}
+																disabled={
+																	isProjectSelected(project.name) &&
+																	hours[rowIndex].name !== project.name
+																}
+																className="p-2"
+															>
+																{project.code}-{project.name}
+															</option>
+														))}
+													</select>
+												)}
+											</td>
+
+											{/* Render each day's input for hours */}
+											{daysRange.map((day, dayIndex) => (
+												<td
+													key={dayIndex}
+													className={`px-2 py-2 w-[3rem] ${isWeekend(day) ? "bg-gray-50" : ""
+														}`}
 												>
-													{project.code}-{project.name}
-												</option>
+													<input
+														type="number"
+														value={row.hours[day] || ""}
+														onChange={(e) =>
+															handleHourChange(rowIndex, day, e.target.value)
+														}
+														className={`w-[2.5rem] px-2 py-1 border rounded  ${isWeekend(day) ? "bg-gray-100" : ""
+															} `}
+														disabled={isFuture(day)} // Disable input for future dates
+													/>
+												</td>
 											))}
-										</select>
-									)}
-								</td>
 
-								{/* Render each day's input for hours */}
-								{daysRange.map((day, dayIndex) => (
-									<td
-										key={dayIndex}
-										className={`px-4 py-2 ${
-											isWeekend(day) ? "bg-gray-100" : ""
-										}`}
-									>
-										<input
-											type="number"
-											value={row.hours[day] || ""}
-											onChange={(e) =>
-												handleHourChange(rowIndex, day, e.target.value)
-											}
-											className={`w-full px-2 py-1 border rounded  ${
-												isWeekend(day) ? "bg-gray-100" : ""
-											} `}
-											disabled={isFuture(day)} // Disable input for future dates
-										/>
-									</td>
-								))}
+											{/* Display total hours for the row */}
+											<td className="px-4 py-2">{calculateTotalHours(row)}</td>
+										</tr>
+									))}
 
-								{/* Display total hours for the row */}
-								<td className="px-4 py-2">{calculateTotalHours(row)}</td>
-							</tr>
-						))}
+									{/* Totals, Work Schedule, and Overtime rows */}
+									<tr className="border-t border-gray-400">
+										<td className="px-4 py-2 font-bold">Total Hours</td>
+										{daysRange.map((day, index) => (
+											<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
+												{calculateDailyTotal(day)}
+											</td>
+										))}
+										<td></td>
+									</tr>
 
-						{/* Totals, Work Schedule, and Overtime rows */}
-						<tr className="border-t border-gray-400">
-							<td className="px-4 py-2 font-bold">Total Hours</td>
-							{daysRange.map((day, index) => (
-								<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
-									{calculateDailyTotal(day)}
-								</td>
-							))}
-							<td></td>
-						</tr>
+									<tr>
+										<td className="px-4 py-2 font-bold">Work Schedule</td>
+										{daysRange.map((day, index) => (
+											<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
+												{calculateWorkSchedule()}
+											</td>
+										))}
+										<td></td>
+									</tr>
 
-						<tr>
-							<td className="px-4 py-2 font-bold">Work Schedule</td>
-							{daysRange.map((day, index) => (
-								<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
-									{calculateWorkSchedule()}
-								</td>
-							))}
-							<td></td>
-						</tr>
-
-						<tr>
-							<td className="px-4 py-2 font-bold">Overtime</td>
-							{daysRange.map((day, index) => (
-								<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
-									{calculateDailyOvertime(day)}
-								</td>
-							))}
-							<td></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+									<tr>
+										<td className="px-4 py-2 font-bold">Overtime</td>
+										{daysRange.map((day, index) => (
+											<td key={index} className={`px-4 py-2 font-bold ${isWeekend(day) ? "bg-gray-100" : ""}`}>
+												{calculateDailyOvertime(day)}
+											</td>
+										))}
+										<td></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+			}
 
 			{error && (
 				<div className="text-red-500 text-center mt-4">
