@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import  { useContext, useEffect, useState } from "react";
 import { format, addDays, subDays, isFuture, startOfWeek } from "date-fns";
 import { TiDeleteOutline } from "react-icons/ti";
 import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
@@ -32,7 +32,7 @@ const TimeCalendar = () => {
 	const [projectData, setProjectData] = useState([]); // Project list from backend
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [hours, setHours] = useState(Array(4).fill({ name: "", hours: {} })); // 4 rows for projects
-	const today = new Date();
+
 	const daysRange = getDaysRange(currentDate, 15); // 15-day range
 
 	// Fetch the list of projects (e.g., sales data)
@@ -138,9 +138,11 @@ const TimeCalendar = () => {
 	// Handle save functionality
 	const handleSave = async () => {
 		setSaveLoader(true);
-
+	
 		try {
-			// Iterate over the days and send one request per day
+			const allProjectsForDays = [];
+	
+			// Iterate over the days and accumulate all project data
 			for (let day of daysRange) {
 				// Filter out projects where there are no hours for the specific day
 				const projectsForDay = hours
@@ -148,7 +150,7 @@ const TimeCalendar = () => {
 					.map((row) => {
 						const project = projectData.find((p) => p.name === row.name);
 						const hoursForDay = row.hours[day]; // Get hours for the specific day
-
+	
 						if (hoursForDay && parseFloat(hoursForDay) > 0) {
 							// Only include if hours exist and are greater than 0
 							return {
@@ -159,29 +161,40 @@ const TimeCalendar = () => {
 						return null;
 					})
 					.filter(Boolean); // Remove null values from the array
-
-				// Only send the request if there are projects with hours for the day
+	
+				// Only include the day if there are projects with hours for the day
 				if (projectsForDay.length > 0) {
-					const payload = {
-						date: format(day, "yyyy-MM-dd"), // Format date as string
-						projects: projectsForDay,
-					};
-
-					console.log(payload);
-
-					// Send the payload for each day
-					await axios.put(`${backendServer}/api/times/${userId}`, payload);
+					allProjectsForDays.push({
+						date: format(day, 'yyyy-MM-dd'), // Format date as string
+						projects: projectsForDay, // Projects for this specific day
+					});
 				}
 			}
-
-			setSaveLoader(false);
-			toast.success("Hours saved successfully");
+	
+			// Send all accumulated project data in a single request
+			if (allProjectsForDays.length > 0) {
+				const payload = {
+					timeEntries: allProjectsForDays, // All the time entries for each day
+				};
+	
+				console.log(payload); // Log the final payload
+	
+				// Send the payload once
+				await axios.put(`${backendServer}/api/times/${userId}`, payload);
+	
+				setSaveLoader(false);
+				toast.success('Hours saved successfully');
+			} else {
+				setSaveLoader(false);
+				alert('No data to save');
+			}
 		} catch (error) {
 			setSaveLoader(false);
 			setError(error.message);
-			alert("Failed to save hours");
+			alert('Failed to save hours');
 		}
 	};
+	
 
 	// Handle cancel action
 	const handleCancel = () => {
