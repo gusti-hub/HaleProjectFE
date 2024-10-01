@@ -54,7 +54,9 @@ const TimeCalendar = () => {
 	// Fetch the existing time entries for the user and selected project
 	const fetchTimeData = async () => {
 		try {
-			const response = await axios.get(`${backendServer}/api/times/${userId}`);
+			const response = await axios.get(`${backendServer}/api/times/${userId}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			// console.log("timedata", response.data.timeData);
 		} catch (error) {
 			setError(error.message);

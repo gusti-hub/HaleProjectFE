@@ -14,7 +14,7 @@ import StockAdjustment from './adminPages/Inventory/StockAdjustment';
 import ProfilePage from './pages/ProfilePage';
 import AutoLogout from './utils/AutoLogout';
 import TE from './adminPages/Time&Expenses/TE';
-import FetchTime from './adminPages/Time&Expenses/FetchTime';
+import ViewDoc from './adminPages/Time&Expenses/ViewDoc';
 
 function App() {
 
@@ -47,7 +47,7 @@ function App() {
         <Route path="/stock-adjustment" element={<ProtectedRoute element={<StockAdjustment />} />} />
         <Route path="/profile/:id" element={<ProtectedRoute element={<ProfilePage />} />} />
         <Route path="/time-expenses" element={<ProtectedRoute element={<TE />} />} />
-        <Route path="/time" element={<ProtectedRoute element={<FetchTime />} />} />
+        <Route path="/view-doc/:type/:id" element={<ProtectedRoute element={<ViewDoc />} />} />
 
         <Route path="/test" element={<ProtectedRoute element={<Test />} />} />
       </Routes>

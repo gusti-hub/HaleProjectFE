@@ -94,7 +94,7 @@ const Expenses = () => {
             const response = await axios.get(`${backendServer}/api/sales`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setSales(response.data.salesData);
+            setSales(response.data.salesData.filter(sale => sale.invitedUsers.includes(loggedInUser)));
             setLoading(false);
         } catch (error) {
             setError(error.response.data.message);

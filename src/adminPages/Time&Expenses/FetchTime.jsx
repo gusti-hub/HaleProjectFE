@@ -3,21 +3,28 @@ import { useEffect, useState } from "react";
 import { backendServer } from "../../utils/info";
 import dayjs from "dayjs";
 import { GrLinkPrevious, GrLinkNext } from "react-icons/gr";
+import CircularProgress from '@mui/material/CircularProgress';
 
-const FetchTime = () => {
+const FetchTime = ({ id }) => {
 	const userId = localStorage.getItem("userId");
+	const token = localStorage.getItem('token');
+
 	const [timeData, setTimeData] = useState([]);
 	const [projects, setProjects] = useState([]);
 	const [startDate, setStartDate] = useState(dayjs().startOf("day")); // Start with today's date
 	const [page, setPage] = useState(0); // Page index for navigation (each page shows 15 days)
 	const daysPerPage = 15;
+	const [workSchedule, setWorkSchedule] = useState(8);
 
-	const id = "66fafb0e05bc0fd49f785bd2";
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
 
 	// Fetch the time data from the backend
 	const fetchTimeData = async () => {
 		try {
-			const response = await axios.get(`${backendServer}/api/fetch-times/${id}`);
+			const response = await axios.get(`${backendServer}/api/fetch-times/${id}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			const timeEntries = response.data.timeData.time;
 			setTimeData(timeEntries);
 
@@ -31,8 +38,11 @@ const FetchTime = () => {
 				});
 			});
 			setProjects(uniqueProjects);
+			setLoading(false);
 		} catch (error) {
 			console.log(error.message);
+			setError(error.response.data.message);
+			setLoading(false);
 		}
 	};
 
@@ -60,6 +70,18 @@ const FetchTime = () => {
 		return 0;
 	};
 
+	// Calculate total hours for a specific day
+	const calculateTotalHours = (date) => {
+		return projects.reduce((total, project) => {
+			return total + getHoursForProjectOnDate(project.projectCode, date);
+		}, 0);
+	};
+
+	// Calculate overtime for a specific day
+	const calculateOvertime = (totalHours) => {
+		return totalHours > workSchedule ? totalHours - workSchedule : 0;
+	};
+
 	// Function to move to the next 15-day window
 	const handleNextPage = () => {
 		setPage((prev) => prev + 1);
@@ -83,48 +105,103 @@ const FetchTime = () => {
 		setPage(0); // Reset page navigation when a specific date is selected
 	};
 
+	if (loading) {
+		return (
+			<div className='w-full flex items-center justify-center mt-24'>
+				<CircularProgress />
+			</div>
+		)
+	}
+
+	if (error) {
+		return (
+			<div className="w-full flex items-center justify-center text-red-600 font-medium mt-24">
+				Error: {error}
+			</div>
+		)
+	}
+
 	return (
-		<div className="p-4">
-			<h2>Work Hours Calendar</h2>
-			<div className="flex items-center justify-end gap-2 py-2">
+		<div className="w-full flex flex-col items-center justify-start p-6 gap-6">
+
+			<div className="w-full flex items-center justify-end gap-3">
 				<input
 					type="date"
 					onChange={handleCalendarSelect}
-					className="border p-1 rounded text-[#7F55DE]"
+					className="p-0.5 rounded border border-solid text-center text-base border-gray-400 pr-2 mr-2"
 				/>
-				<button onClick={handlePrevPage} className="p-2 bg-gray-200 rounded text-[#7F55DE]">
+				<button onClick={handlePrevPage} className="cursor-pointer text-[#7F55DE]">
 					<GrLinkPrevious />
 				</button>
-				<button onClick={handleToday} className="p-2 bg-gray-200 text-[#7F55DE] text-sm rounded">
+				<button onClick={handleToday} className="hover:bg-gray-100 text-[#7F55DE] rounded text-sm px-2.5 py-1.5 border border-solid border-[#7F55DE]">
 					Today
 				</button>
-				<button onClick={handleNextPage} className="p-2 bg-gray-200 rounded text-[#7F55DE]">
+				<button onClick={handleNextPage} className="cursor-pointer text-[#7F55DE]">
 					<GrLinkNext />
 				</button>
 			</div>
 
-			<table className="table-auto border-collapse w-full">
+			<table className="table-auto border-collapse w-full text-sm">
 				<thead>
 					<tr>
 						<th className="border px-4 py-2">Project Code</th>
 						{getDisplayedDates().map((date) => (
-							<th key={date} className="border px-4 py-2">
-								{date.format("MMM DD, YYYY")}
+							<th key={date} className={`border px-4 py-2 ${date.day() === 0 ? 'text-red-600' : date.day() === 6 ? 'text-orange-600' : ''}`}>
+								{date.format("MMM DD")}
 							</th>
 						))}
+						<th className="border px-4 py-2">Total</th>
 					</tr>
 				</thead>
 				<tbody>
 					{projects.map((project) => (
 						<tr key={project.projectCode}>
-							<td className="border px-4 py-2">{project.projectCode}</td>
+							<td className="border px-4 py-2 text-nowrap">{project.projectCode}</td>
 							{getDisplayedDates().map((date) => (
-								<td key={date} className="border px-4 py-2">
+								<td key={date} className={`border px-4 py-2 ${date.day() === 0 || date.day() === 6 ? 'bg-gray-100' : ''}`}>
 									{getHoursForProjectOnDate(project.projectCode, date)}
 								</td>
 							))}
+							<td className="border px-4 py-2">
+								{getDisplayedDates().reduce((total, date) => total + getHoursForProjectOnDate(project.projectCode, date), 0)}
+							</td>
 						</tr>
 					))}
+
+					{/* Total Hours Row */}
+					<tr>
+						<td className="border px-4 py-2 font-bold">Total Hours</td>
+						{getDisplayedDates().map((date) => (
+							<td key={date} className={`border px-4 py-2 ${date.day() === 0 || date.day() === 6 ? 'bg-gray-100' : ''}`}>
+								{calculateTotalHours(date)}
+							</td>
+						))}
+						<td className="border px-4 py-2 font-bold">
+							{getDisplayedDates().reduce((total, date) => total + calculateTotalHours(date), 0)}
+						</td>
+					</tr>
+
+					{/* Work Schedule Row */}
+					<tr>
+						<td className="border px-4 py-2 font-bold">Work Schedule</td>
+						{getDisplayedDates().map((date) => (
+							<td key={date} className={`border px-4 py-2 ${date.day() === 0 || date.day() === 6 ? 'bg-gray-100' : ''}`}>
+								{workSchedule}
+							</td>
+						))}
+						<td className="border px-4 py-2 font-bold">-</td>
+					</tr>
+
+					{/* Daily Overtime Row */}
+					<tr>
+						<td className="border px-4 py-2 font-bold">Daily Overtime</td>
+						{getDisplayedDates().map((date) => (
+							<td key={date} className={`border px-4 py-2 ${date.day() === 0 || date.day() === 6 ? 'bg-gray-100' : ''}`}>
+								{calculateOvertime(calculateTotalHours(date))}
+							</td>
+						))}
+						<td className="border px-4 py-2 font-bold">-</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
