@@ -44,7 +44,7 @@ const TimeCalendar = () => {
 			});
 			// console.log("salesData", response.data.salesData);
 
-			setProjectData(response.data.salesData);
+			setProjectData(response.data.salesData.filter(sale => sale.invitedUsers.includes(loggedInUser)));
 			setLoading(false);
 		} catch (error) {
 			setError(error.message);
@@ -331,9 +331,7 @@ const TimeCalendar = () => {
 															handleSelectProject(rowIndex, e.target.value)
 														}
 													>
-														<option value="" className="text-center">
-															Project {rowIndex + 1}
-														</option>
+														<option value="" className="text-center"></option>
 														{projectData.map((project) => (
 															<option
 																key={project._id}

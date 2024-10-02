@@ -4,6 +4,8 @@ import { backendServer } from '../../utils/info'
 import CircularProgress from '@mui/material/CircularProgress';
 import { MdEditDocument } from 'react-icons/md';
 import DragNDrop from '../../components/DragNDrop';
+import { Dialog } from '@material-tailwind/react';
+import toast from 'react-hot-toast';
 
 const ViewExpense = ({ id, status }) => {
 
@@ -120,6 +122,105 @@ const ViewExpense = ({ id, status }) => {
         await fetchExpense();
     };
 
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = () => { setOpen(!open) };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return formData.imageurl;
+
+        const uploadData = new FormData();
+        uploadData.append('image', selectedFile);
+
+        try {
+            const response = await axios.post(`${backendServer}/api/upload`, uploadData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data.imageUrl;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Error uploading image');
+            return null;
+        }
+    };
+
+    const handleDeletePhoto = async (url) => {
+        if (!url) {
+            toast.error("No image url found!");
+        } else {
+            setSaveLoader(true);
+            try {
+                await axios.put(`${backendServer}/api/delete-image`, { fileUrl: url });
+                toast.success("Receipt updated!")
+                setSaveLoader(false);
+            } catch (error) {
+                toast.error(error.response.data.message);
+                setSaveLoader(false);
+            }
+        }
+    };
+
+    const handleSave = async () => {
+
+        setSaveLoader(true);
+
+        if (!formData.prj || !formData.frmDate || !formData.toDate || !formData.type || !formData.amount) {
+            toast.error("Please fill all the mandatory details.");
+            setSaveLoader(false);
+        } else {
+            try {
+                let uploadedImageUrl = '';
+
+                if (selectedFile) {
+                    if (formData.imageurl) {
+
+                        await handleDeletePhoto(formData.imageurl);
+
+                        setSaveLoader(true);
+
+                        const uploadedUrl = await handleUpload();
+                        if (uploadedUrl) {
+                            uploadedImageUrl = uploadedUrl;
+                        } else {
+                            setSaveLoader(false);
+                            return;
+                        }
+                    } else {
+                        const uploadedUrl = await handleUpload();
+                        if (uploadedUrl) {
+                            uploadedImageUrl = uploadedUrl;
+                        } else {
+                            setSaveLoader(false);
+                            return;
+                        }
+                    }
+                }
+
+                const response = await axios.put(`${backendServer}/api/update-expense/${id}`, {
+                    prj: formData.prj,
+                    frmDate: formData.frmDate,
+                    toDate: formData.toDate,
+                    type: formData.type,
+                    amount: Number(formData.amount),
+                    totalAmount: Number(daysDiff * formData.amount),
+                    comment: formData.comment,
+                    imageUrl: uploadedImageUrl
+                });
+
+                toast.success(response.data.message);
+                setSelectedFile(null);
+                setSaveLoader(false);
+                setIsEdit(false);
+                fetchExpense();
+            } catch (error) {
+                toast.error(error.response.data.message);
+                setSaveLoader(false);
+            }
+        }
+    };
+
     return (
         <div className="w-full flex items-center justify-start">
             {
@@ -145,8 +246,11 @@ const ViewExpense = ({ id, status }) => {
                                         isEdit && <div className="flex items-center justify-center gap-4">
                                             <button onClick={handleCancel}
                                                 className={`bg-gray-200 hover:bg-gray-300 py-1.5 px-4 cursor-pointer'`}>Cancel</button>
-                                            <button disabled={loading || error}
-                                                className={`bg-[#7F55DE] py-1.5 px-5 text-white ${loading || error ? 'cursor-not-allowed' : 'cursor-pointer'}`}>Update</button>
+                                            {
+                                                saveLoader ? <div className="flex items-center justify-center px-6"><CircularProgress /></div>
+                                                    : <button disabled={loading || error} onClick={handleSave}
+                                                        className={`bg-[#7F55DE] py-1.5 px-5 text-white ${loading || error ? 'cursor-not-allowed' : 'cursor-pointer'}`}>Update</button>
+                                            }
                                         </div>
                                     }
                                 </div>
@@ -159,16 +263,32 @@ const ViewExpense = ({ id, status }) => {
                                         <div className="w-[50%] flex flex-col items-center gap-6 text-sm">
                                             <div className="w-full text-left font-semibold">Upload receipt <span className='text-gray-500'>(Optional)</span>:</div>
                                             <DragNDrop selectedFile={selectedFile} handleSetSelectedFile={handleSetSelectedFile} />
+                                            <div className="w-full flex items-center justify-start gap-1.5 text-xs">
+                                                <div className="font-semibold">Uploaded receipt:</div>
+                                                {
+                                                    formData.imageurl ? <div onClick={handleOpen} className="text-blue-700 font-semibold cursor-pointer">View</div>
+                                                        : <div className="text-xs text-gray-800">No uploaded receipt found!</div>
+                                                }
+                                            </div>
                                         </div>
                                         :
                                         <div className='w-[50%] flex flex-col items-center justify-start gap-4'>
                                             <div className="w-full text-left font-semibold">Uploaded receipt:</div>
                                             {
                                                 formData.imageurl ? <img className='w-full' src={formData.imageurl} /> :
-                                                <div className="w-full text-left text-xs text-gray-800">No uploaded receipt found!</div>
+                                                    <div className="w-full text-left text-xs text-gray-800">No uploaded receipt found!</div>
                                             }
                                         </div>
                                 }
+
+                                <Dialog
+                                    size="md"
+                                    open={open}
+                                    handler={handleOpen}
+                                    className="bg-transparent shadow-none w-full flex items-center justify-center bg-white p-4"
+                                >
+                                    <img className='w-full' src={formData.imageurl} alt="" />
+                                </Dialog>
 
                                 <div className="w-full flex items-start justify-between">
                                     <div className='flex flex-col items-start gap-4'>
