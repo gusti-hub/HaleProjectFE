@@ -364,7 +364,6 @@ const TimeCalendar = () => {
 														}
 														className={`w-[2.5rem] px-2 py-1 border rounded  ${isWeekend(day) ? "bg-gray-100" : ""
 															} `}
-														disabled={isFuture(day)} // Disable input for future dates
 													/>
 												</td>
 											))}

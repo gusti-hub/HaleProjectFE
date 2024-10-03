@@ -325,7 +325,7 @@ const ForVendor = () => {
                                 <MdOutlineKeyboardArrowLeft className='text-xl' />
                             </button>
 
-                            <div className='text-gray-700'>
+                            <div className='text-gray-800 text-sm'>
                                 Page {currentPage} of {totalPages}
                             </div>
 
