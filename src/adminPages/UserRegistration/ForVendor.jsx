@@ -17,7 +17,7 @@ const ForVendor = () => {
     const [error, setError] = useState(null);
 
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState({ name: '', code: '', email: '', title: '', address: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state:'', zip: '', note: '' });
     const [editMode, setEditMode] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -30,7 +30,7 @@ const ForVendor = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', code: '', email: '', title: '', address: '' });
+        setFormData({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state:'', zip: '', note: '' });
         setEditMode(false);
         setCurrentUserId(null);
     };
@@ -55,7 +55,7 @@ const ForVendor = () => {
     };
 
     const handleEditClick = (user) => {
-        setFormData({ name: user.name, code: user.code, email: user.email, title: user.title, address: user.address });
+        setFormData({ name: user.name, code: user.code, email: user.email, pic: user.pic, phone: user.phone, street: user.street, city: user.city, state: user.state, zip: user.zip, note: user.note });
         setCurrentUserId(user._id);
         setEditMode(true);
         setOpen(true);
@@ -67,11 +67,11 @@ const ForVendor = () => {
         e.preventDefault();
         setSaveLoader(true);
 
-        if (formData.name.length === 0 || formData.code.length === 0 || formData.email.length === 0) {
+        if (formData.name.length === 0 || formData.code.length === 0) {
             toast.error("Can't submit empty form!"); setOpen(false); setSaveLoader(false);
         }
 
-        if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0) {
+        if (formData.name.length > 0 && formData.code.length > 0) {
             try {
                 const response = editMode
                     ? await axios.put(`${backendServer}/api/vendors/${currentUserId}`, formData)
@@ -139,14 +139,14 @@ const ForVendor = () => {
 
     return (
         <div className="w-full flex flex-col items-center justify-start bg-white p-4 rounded-lg gap-8">
-            <Dialog
+          <Dialog
                 size="sm"
                 open={open}
                 handler={handleOpen}
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
                 <form onSubmit={handleSubmit}
-                    className='w-full flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
+                    className='w-full max-h-[80vh] overflow-y-auto flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
                             <label htmlFor="name">Name:</label>
@@ -183,21 +183,61 @@ const ForVendor = () => {
                             type="email" placeholder='Type here...' name="email" id="email" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="title">Title:</label>
+                        <label htmlFor="PIC">PIC:</label>
                         <input
-                            value={formData.title}
+                            value={formData.pic}
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="title" id="title" />
+                            type="text" placeholder='Type here...' name="pic" id="pic" />
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="address">Address:</label>
+                        <label htmlFor="phone">Phone:</label>
                         <input
-                            value={formData.address}
+                            value={formData.phone}
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="address" id="address" />
+                            type="text" placeholder='Type here...' name="phone" id="phone" />
                     </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="street">Street:</label>
+                        <input
+                            value={formData.street}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="street" id="street" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="city">City:</label>
+                        <input
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="city" id="city" />
+                    </div>  
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="state">State:</label>
+                        <input
+                            value={formData.state}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="state" id="state" />
+                    </div>                       
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="zip">Zip:</label>
+                        <input
+                            value={formData.zip}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="zip" id="zip" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="note">Note:</label>
+                        <input
+                            value={formData.note}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="note" id="note" />
+                    </div>                                                                                                           
                     <div className="w-full flex items-center justify-center">
                         {
                             saveLoader ? <CircularProgress /> :
@@ -241,8 +281,13 @@ const ForVendor = () => {
                                     <th>Code</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Title</th>
-                                    <th>Address</th>
+                                    <th>PIC</th>
+                                    <th>Phone</th>
+                                    <th>Street</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Zip</th>
+                                    <th>Note</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -262,8 +307,13 @@ const ForVendor = () => {
                                             <td>{user.code}</td>
                                             <td>{user.name}</td>
                                             <td>{user.email}</td>
-                                            <td>{user.title}</td>
-                                            <td>{user.address}</td>
+                                            <td>{user.pic}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.street}</td>
+                                            <td>{user.city}</td>
+                                            <td>{user.state}</td>
+                                            <td>{user.zip}</td>
+                                            <td>{user.note}</td>
                                         </tr>
                                     ))
                                 }

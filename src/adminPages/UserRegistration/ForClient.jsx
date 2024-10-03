@@ -18,7 +18,7 @@ const ForClient = () => {
 
     const [open, setOpen] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
-    const [formData, setFormData] = useState({ name: '', code: '', email: '', password: '', title: '', address: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', email: '', password: '', address: '', city: '', state:'', zip:'', phone:'', notes:''});
     const [editMode, setEditMode] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +35,7 @@ const ForClient = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', code: '', email: '', password: '', title: '', address: '' });
+        setFormData({ name: '', code: '', email: '', password: '', address: '', city: '', state:'', zip:'', phone:'', notes:'' });
         setIsChecked(false);
         setEditMode(false);
         setCurrentUserId(null);
@@ -61,7 +61,7 @@ const ForClient = () => {
     };
 
     const handleEditClick = (user) => {
-        setFormData({ name: user.name, code: user.code, email: user.email, password: '', title: user.title, address: user.address });
+        setFormData({ name: user.name, code: user.code, email: user.email, password: '', address: user.address, city: user.city, state: user.state, zip: user.zip, phone: user.phone, notes: user.notes  });
         setCurrentUserId(user._id);
         setEditMode(true);
         setOpen(true);
@@ -152,7 +152,7 @@ const ForClient = () => {
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
                 <form onSubmit={handleSubmit}
-                    className='w-full flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
+                    className='w-full max-h-[80vh] overflow-y-auto flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
                             <label htmlFor="name">Name:</label>
@@ -217,14 +217,6 @@ const ForClient = () => {
                         <div className='text-sm'>Show password</div>
                     </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
-                        <label htmlFor="title">Title:</label>
-                        <input
-                            value={formData.title}
-                            onChange={handleInputChange}
-                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
-                            type="text" placeholder='Type here...' name="title" id="title" />
-                    </div>
-                    <div className="w-full flex flex-col items-start gap-1 text-base">
                         <label htmlFor="address">Address:</label>
                         <input
                             value={formData.address}
@@ -232,6 +224,46 @@ const ForClient = () => {
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="address" id="address" />
                     </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="city">City:</label>
+                        <input
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="city" id="city" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="state">State:</label>
+                        <input
+                            value={formData.state}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="state" id="state" />
+                    </div>         
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="zip">Zip:</label>
+                        <input
+                            value={formData.zip}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="zip" id="zip" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="phone">Phone:</label>
+                        <input
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="phone" id="phone" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="notes">notes:</label>
+                        <input
+                            value={formData.notes}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="notes" id="notes" />
+                    </div>                                                                                                            
                     <div className="w-full flex items-center justify-center">
                         {
                             saveLoader ? <CircularProgress /> :
@@ -275,8 +307,12 @@ const ForClient = () => {
                                     <th>Code</th>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Title</th>
                                     <th>Address</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Zip</th>
+                                    <th>Phone</th>
+                                    <th>Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -296,8 +332,12 @@ const ForClient = () => {
                                             <td>{user.code}</td>
                                             <td>{user.name}</td>
                                             <td>{user.email}</td>
-                                            <td>{user.title}</td>
                                             <td>{user.address}</td>
+                                            <td>{user.city}</td>
+                                            <td>{user.state}</td>
+                                            <td>{user.zip}</td>
+                                            <td>{user.phone}</td>
+                                            <td>{user.notes}</td>
                                         </tr>
                                     ))
                                 }
