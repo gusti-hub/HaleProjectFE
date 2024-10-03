@@ -190,7 +190,7 @@ const AdminPanel = () => {
 
                         <div
                             onClick={handleLogout}
-                            className={`w-full flex items-center justify-start gap-3 my-4 p-4 pt-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
+                            className={`w-full flex items-center justify-start gap-3 mt-2.5 mb-4 p-4 pt-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
                             <TbLogout2 className='text-2xl text-red-600' />
                             <div className={`font-medium text-base text-red-600 ${isExpanded ? "block" : "hidden"}`}>Logout</div>
                         </div>

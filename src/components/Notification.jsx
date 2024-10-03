@@ -54,53 +54,56 @@ const Notification = () => {
             <div className="w-full text-left text-gray-900 text-2xl font-medium">Your Notification(s)</div>
             <div className="w-full h-[2px] bg-gray-300"></div>
             {
-                ntfLoader ? 
+                ntfLoader ?
                     <div className='w-full flex items-center justify-center'>
                         <CircularProgress />
                     </div> :
-                    ntfError ? 
+                    ntfError ?
                         <div className="w-full flex items-center justify-center text-red-600 font-medium text-sm">
                             Error: {ntfError}
                         </div> :
-                        <div className="w-full flex flex-col items-center justify-start gap-3">
-                            {
-                                ntfs.length === 0 ? 
-                                    <div className="w-full text-left font-medium">No new notification for you.</div> :
-                                    <>
-                                        {
-                                            currentNotifications.map((ntf, index) => (
-                                                <div key={index} className="w-full flex items-center justify-start gap-1">
-                                                    <AiTwotoneNotification className='text-lg' />
-                                                    <div className="w-full text-left">
-                                                        {
-                                                            ntf.type === "RFQ" ?
-                                                                `The Deadline for the ${ntf.id} is ${new Date(ntf.date).toLocaleDateString('en-US', options)}.` :
-                                                                `The Estimation received date for the ${ntf.id} is ${new Date(ntf.date).toLocaleDateString('en-US', options)}.`
-                                                        }
-                                                    </div>
-                                                </div>
-                                            ))
-                                        }
+                        <div className="w-full flex flex-col items-center justify-start">
 
-                                        <div className="w-full flex justify-end items-center gap-2 mt-4">
-                                            <button 
-                                                onClick={handlePreviousPage} 
-                                                disabled={currentPage === 1}
-                                                className={`flex items-center justify-center ${currentPage === 1 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                            >
-                                                <MdOutlineKeyboardArrowLeft className='text-xl' />
-                                            </button>
-                                            <div className='text-sm text-gray-800'>Page {currentPage} of {totalPages}</div>
-                                            <button 
-                                                onClick={handleNextPage} 
-                                                disabled={currentPage === totalPages}
-                                                className={`flex items-center justify-center ${currentPage === totalPages ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                            >
-                                                <MdOutlineKeyboardArrowRight className='text-xl' />
-                                            </button>
-                                        </div>
-                                    </>
-                            }
+                            <div className="w-full flex flex-col items-center justify-start gap-3 h-[35rem]">
+                                {
+                                    ntfs.length === 0 ?
+                                        <div className="w-full text-left font-medium">No new notification for you.</div> :
+                                        <>
+                                            {
+                                                currentNotifications.map((ntf, index) => (
+                                                    <div key={index} className="w-full flex items-center justify-start gap-1">
+                                                        <AiTwotoneNotification className='text-lg' />
+                                                        <div className="w-full text-left">
+                                                            {
+                                                                ntf.type === "RFQ" ?
+                                                                    `The Deadline for the ${ntf.id} is ${new Date(ntf.date).toLocaleDateString('en-US', options)}.` :
+                                                                    `The Estimation received date for the ${ntf.id} is ${new Date(ntf.date).toLocaleDateString('en-US', options)}.`
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            }
+                                        </>
+                                }
+                            </div>
+
+                            <div className="w-full flex justify-end items-center gap-2 mt-4">
+                                <button
+                                    onClick={handlePreviousPage}
+                                    disabled={currentPage === 1}
+                                    className={`flex items-center justify-center ${currentPage === 1 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                >
+                                    <MdOutlineKeyboardArrowLeft className='text-xl' />
+                                </button>
+                                <div className='text-sm text-gray-800'>Page {currentPage} of {totalPages}</div>
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={currentPage === totalPages}
+                                    className={`flex items-center justify-center ${currentPage === totalPages ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                >
+                                    <MdOutlineKeyboardArrowRight className='text-xl' />
+                                </button>
+                            </div>
                         </div>
             }
         </div>

@@ -152,7 +152,7 @@ const FetchTime = ({ id }) => {
 	}
 
 	return (
-		<div className="w-full flex flex-col items-center justify-center p-6 gap-6">
+		<div className="w-full flex flex-col items-center justify-center p-6 gap-6 mt-8">
 
 			{/* Navigation Controls */}
 			<div className="w-full flex items-center justify-between">
@@ -250,7 +250,7 @@ const FetchTime = ({ id }) => {
 
 					{/* Total Hours Row */}
 					<tr>
-						<td className="border px-4 py-2 font-bold">Total Hours</td>
+						<td className="border px-4 py-2 font-bold text-nowrap">Total Hours</td>
 						{getDisplayedDates().map((date) => (
 							<td key={date} className="border px-4 py-2 bg-gray-100">
 								{calculateTotalHours(date)}
@@ -266,7 +266,7 @@ const FetchTime = ({ id }) => {
 
 					{/* Work Schedule Row */}
 					<tr>
-						<td className="border px-4 py-2 font-bold">Work Schedule</td>
+						<td className="border px-4 py-2 font-bold text-nowrap">Work Schedule</td>
 						{getDisplayedDates().map((date) => (
 							<td key={date} className="border px-4 py-2 bg-gray-100">
 								{workSchedule}
@@ -277,7 +277,7 @@ const FetchTime = ({ id }) => {
 
 					{/* Overtime Row */}
 					<tr>
-						<td className="border px-4 py-2 font-bold">Overtime</td>
+						<td className="border px-4 py-2 font-bold text-nowrap">Overtime</td>
 						{getDisplayedDates().map((date) => (
 							<td key={date} className="border px-4 py-2 ">
 								{calculateOvertime(calculateTotalHours(date))}
