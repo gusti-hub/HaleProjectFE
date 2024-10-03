@@ -159,15 +159,15 @@ const FetchTime = ({ id }) => {
 				{/* Legend for Color Coding */}
 				<div className="flex gap-4 items-center">
 					<div className="flex items-center">
-						<div className="w-8 h-4 bg-red-600 mr-2"></div>
+						<div className="w-8 h-4 bg-red-600 mr-2 rounded-sm"></div>
 						<span className="text-sm">Sunday</span>
 					</div>
 					<div className="flex items-center">
-						<div className="w-8 h-4 bg-orange-600 mr-2"></div>
+						<div className="w-8 h-4 bg-orange-600 mr-2 rounded-sm"></div>
 						<span className="text-sm">Saturday</span>
 					</div>
 					<div className="flex items-center">
-						<div className="w-8 h-4 bg-[#7F55DE] mr-2"></div>
+						<div className="w-8 h-4 bg-[#7F55DE] mr-2 rounded-sm"></div>
 						<span className="text-sm">Today</span>
 					</div>
 				</div>
