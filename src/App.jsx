@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import  { useEffect } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
@@ -14,6 +14,7 @@ import StockAdjustment from './adminPages/Inventory/StockAdjustment';
 import ProfilePage from './pages/ProfilePage';
 import AutoLogout from './utils/AutoLogout';
 import TE from './adminPages/Time&Expenses/TE';
+import ViewDoc from './adminPages/Time&Expenses/ViewDoc';
 
 function App() {
 
@@ -46,6 +47,7 @@ function App() {
         <Route path="/stock-adjustment" element={<ProtectedRoute element={<StockAdjustment />} />} />
         <Route path="/profile/:id" element={<ProtectedRoute element={<ProfilePage />} />} />
         <Route path="/time-expenses" element={<ProtectedRoute element={<TE />} />} />
+        <Route path="/view-doc/:type/:id" element={<ProtectedRoute element={<ViewDoc />} />} />
 
         <Route path="/test" element={<ProtectedRoute element={<Test />} />} />
       </Routes>

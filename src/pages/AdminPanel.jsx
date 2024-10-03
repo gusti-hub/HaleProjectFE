@@ -217,7 +217,7 @@ const AdminPanel = () => {
                             </div>
                         }
 
-                        {userType === "Employee" && <div className="w-[90%] h-[2px] bg-gray-300 my-2.5"></div>}
+                        {userType === "Employee" && <div className="w-[90%] h-[2px] bg-gray-300 my-1.5"></div>}
 
                         {
                             nameLoader ?
@@ -237,7 +237,7 @@ const AdminPanel = () => {
                                                     <FaRegUser className={`text-lg`} />
                                                 </div> :
                                                 <div className="flex items-center justify-center">
-                                                    <img className='w-[2.25rem] aspect-square rounded-[50%]' src={loggedInUserPP} />
+                                                    <img className='w-[2rem] aspect-square rounded-[50%]' src={loggedInUserPP} />
                                                 </div>
                                         }
                                         <div className={`${isExpanded ? "block" : "hidden"}`}>{loggedInUserName}</div>
@@ -246,7 +246,7 @@ const AdminPanel = () => {
 
                         <div
                             onClick={handleLogout}
-                            className={`w-full flex items-center justify-start gap-3 p-4 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
+                            className={`w-full flex items-center justify-start gap-3 mt-4 p-4 pt-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
                             <TbLogout2 className='text-2xl text-red-600' />
                             <div className={`font-medium text-base text-red-600 ${isExpanded ? "block" : "hidden"}`}>Logout</div>
                         </div>
