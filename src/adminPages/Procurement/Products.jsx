@@ -580,7 +580,7 @@ const PO = ({ fetchAllProductsMain }) => {
                         <MdOutlineKeyboardArrowLeft className='text-xl' />
                     </button>
 
-                    <div className='text-gray-700'>
+                    <div className='text-gray-800 text-sm'>
                         Page {currentPage} of {totalPages}
                     </div>
 
@@ -1426,7 +1426,7 @@ const RFQ = ({ fetchAllProductsMain }) => {
                         <MdOutlineKeyboardArrowLeft className='text-xl' />
                     </button>
 
-                    <div className='text-gray-700'>
+                    <div className='text-gray-800 text-sm'>
                         Page {currentPage} of {totalPages}
                     </div>
 
@@ -1879,7 +1879,7 @@ const Products = () => {
                                                     <MdOutlineKeyboardArrowLeft className='text-xl' />
                                                 </button>
 
-                                                <div className='text-gray-700'>
+                                                <div className='text-gray-800 text-sm'>
                                                     Page {currentPage} of {totalPages}
                                                 </div>
 

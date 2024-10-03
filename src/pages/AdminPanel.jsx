@@ -22,6 +22,7 @@ import Notification from '../components/Notification';
 import axios from 'axios';
 import { backendServer } from '../utils/info';
 import TimeExpenses from '../adminPages/Time&Expenses/TimeExpenses';
+import toast from 'react-hot-toast';
 
 const AdminPanel = () => {
 
@@ -42,22 +43,14 @@ const AdminPanel = () => {
 
     const [isExpanded, setExpanded] = useState(true);
 
-    const [notification, setNotification] = useState(false);
     const [ntfs, setNtfs] = useState([]);
-    const [ntfLoader, setNtfLoader] = useState(false);
-    const [ntfError, setNtfError] = useState(null);
 
     const fetchNotifications = async () => {
-
-        setNtfLoader(true);
-
         try {
             const response = await axios.get(`${backendServer}/api/getApproachingRFQsPOs`);
             setNtfs(response.data);
-            setNtfLoader(false);
         } catch (error) {
-            setNtfError(error.response.data.message);
-            setNtfLoader(false);
+            toast.error(error.response.data.message);
         }
     };
 
@@ -155,7 +148,7 @@ const AdminPanel = () => {
                         {
                             userType === "Employee" &&
                             <div className="w-full flex items-end justify-center">
-                                <div onClick={() => setNotification(true)}
+                                <div onClick={() => handleMenuID(11)}
                                     className={`w-full flex items-center cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} px-4 gap-3 relative`}>
                                     <div className="flex items-start justify-center">
                                         <IoNotificationsCircle className='text-[34px] text-gray-800' />
@@ -164,14 +157,6 @@ const AdminPanel = () => {
                                         }
                                     </div>
                                     <div className={`${isExpanded ? 'block' : 'hidden'}`}>Notification</div>
-                                </div>
-                                <div style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px" }}
-                                    className={`w-[30rem] flex flex-col items-center justify-center absolute ${isExpanded ? 'ml-[15.875rem] mb-4' : 'ml-[30rem] mb-4'} ${notification ? 'block' : 'hidden'} bg-white rounded-md p-2 gap-2`}>
-                                    <div className="w-full flex items-center justify-between">
-                                        <div className='text-gray-800 font-medium'>Notification(s) for you</div>
-                                        <IoClose onClick={() => setNotification(false)} className='text-2xl cursor-pointer' />
-                                    </div>
-                                    <Notification data={ntfs} loader={ntfLoader} error={ntfError} />
                                 </div>
                             </div>
                         }
@@ -205,7 +190,7 @@ const AdminPanel = () => {
 
                         <div
                             onClick={handleLogout}
-                            className={`w-full flex items-center justify-start gap-3 mt-4 p-4 pt-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
+                            className={`w-full flex items-center justify-start gap-3 my-4 p-4 pt-3 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'}`}>
                             <TbLogout2 className='text-2xl text-red-600' />
                             <div className={`font-medium text-base text-red-600 ${isExpanded ? "block" : "hidden"}`}>Logout</div>
                         </div>
@@ -223,7 +208,8 @@ const AdminPanel = () => {
                                                     : menuID === 7 ? <Procurement />
                                                         : menuID === 8 ? <Inventory />
                                                             : menuID === 9 ? <ClientCollabEmp />
-                                                                : menuID === 10 ? <TimeExpenses /> : ''
+                                                                : menuID === 10 ? <TimeExpenses />
+                                                                    : menuID === 11 ? <Notification /> : ''
                         }
                     </div>
                 }
