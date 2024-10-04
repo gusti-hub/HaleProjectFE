@@ -11,7 +11,7 @@ import { FaArrowLeft, FaArrowRight, FaRegBuilding, FaRegUser, FaUserCircle, FaUs
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import { FiUsers } from 'react-icons/fi';
 import SalesOrder from '../adminPages/SalesOrder/SalesOrder';
-import { RiBillLine, RiCollageLine, RiShieldUserLine, RiUserSettingsLine, RiSafeLine } from 'react-icons/ri';
+import { RiBillLine, RiCollageLine, RiShieldUserLine, RiUserSettingsLine, RiSafeLine, RiCustomerService2Line } from 'react-icons/ri';
 import { GrBusinessService } from 'react-icons/gr';
 import GlobalVariable from '../utils/GlobalVariable';
 import Procurement from '../adminPages/Procurement/Procurement';
@@ -25,6 +25,7 @@ import axios from 'axios';
 import { backendServer } from '../utils/info';
 import TimeExpenses from '../adminPages/Time&Expenses/TimeExpenses';
 import toast from 'react-hot-toast';
+import CRM from '../adminPages/CRM/CRM';
 
 const AdminPanel = () => {
 
@@ -83,7 +84,7 @@ const AdminPanel = () => {
                         <div className="w-full h-[2px] bg-gray-300"></div>
                         {
                             userType === 'Employee' &&
-                            <div className="w-full flex flex-col items-center justify-start m-6 h-[25rem] scroll-smooth overflow-y-scroll pr-1" style={{scrollbarWidth: 'thin'}}>
+                            <div className="w-full flex flex-col items-center justify-start m-6 h-[25rem] scroll-smooth overflow-y-scroll pr-1" style={{ scrollbarWidth: 'thin' }}>
                                 {action.includes(GlobalVariable.ActionRole.DashboardNavigation) && (
                                     <div
                                         onClick={() => handleMenuID(1)}
@@ -181,6 +182,14 @@ const AdminPanel = () => {
                                         <div className={`font-medium text-base text-nowrap ${menuID === 12 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>Time & Expenses</div>
                                     </div>
                                 )}
+                                {action.includes(GlobalVariable.ActionRole.ProjectManagementNavigation) && (
+                                    <div
+                                        onClick={() => handleMenuID(14)}
+                                        className={`w-full flex items-center gap-4 p-3 py-2 cursor-pointer ${isExpanded ? 'justify-start' : 'justify-center'} ${menuID === 14 ? 'bg-[#E9ECF5] rounded-[30px]' : 'bg-transparent'}`}>
+                                        <RiCustomerService2Line className={`text-2xl ${!isExpanded ? 'ml-0' : 'ml-2'} ${menuID === 14 ? 'text-black' : 'text-gray-800'}`} />
+                                        <div className={`font-medium text-base text-nowrap ${menuID === 14 ? 'text-black' : 'text-gray-800'} ${isExpanded ? "block" : "hidden"}`}>CRM</div>
+                                    </div>
+                                )}
                             </div>
                         }
                     </div>
@@ -203,7 +212,7 @@ const AdminPanel = () => {
                             </div>
                         }
 
-                        {userType === "Employee" && <div className="w-[90%] h-[2px] bg-gray-300 my-2.5"></div>}
+                        {userType === "Employee" && <div className="w-[90%] h-[2px] bg-gray-300 my-2"></div>}
 
                         {
                             nameLoader ?
@@ -253,7 +262,8 @@ const AdminPanel = () => {
                                                                 : menuID === 10 ? <Configurations />
                                                                     : menuID === 11 ? <ClientCollabEmp />
                                                                         : menuID === 12 ? <TimeExpenses />
-                                                                            : menuID === 13 ? <Notification /> : ''
+                                                                            : menuID === 13 ? <Notification />
+                                                                                : menuID === 14 ? <CRM /> : ''
                         }
                     </div>
                 }
