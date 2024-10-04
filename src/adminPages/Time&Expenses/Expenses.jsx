@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import axios from 'axios';
 import { backendServer } from '../../utils/info';
@@ -7,11 +7,14 @@ import DragNDrop from '../../components/DragNDrop';
 import { FaCamera } from 'react-icons/fa';
 import { Dialog } from '@material-tailwind/react';
 import { useNavigate } from 'react-router-dom';
+import { AppContext } from '../../context/CommonContext';
 
 const Expenses = () => {
 
     const token = localStorage.getItem('token');
     const loggedInUser = localStorage.getItem('name');
+
+    const { handleMenuID } = useContext(AppContext);
 
     const navigate = useNavigate();
 
@@ -180,7 +183,7 @@ const Expenses = () => {
                 resetForm();
                 setSaveLoader(false);
                 navigate("/admin-panel");
-                handleMenuID(10);
+                handleMenuID(12);
             } catch (error) {
                 toast.error(error.response.data.message);
                 setSaveLoader(false);
@@ -190,7 +193,7 @@ const Expenses = () => {
 
 	const handleCancel = () => {
 		navigate("/admin-panel");
-		handleMenuID(10);
+		handleMenuID(12);
 	};
 
     return (

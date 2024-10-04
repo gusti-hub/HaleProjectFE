@@ -17,7 +17,7 @@ const ForVendor = () => {
     const [error, setError] = useState(null);
 
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state:'', zip: '', note: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state: '', zip: '', note: '' });
     const [editMode, setEditMode] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -30,7 +30,7 @@ const ForVendor = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state:'', zip: '', note: '' });
+        setFormData({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state: '', zip: '', note: '' });
         setEditMode(false);
         setCurrentUserId(null);
     };
@@ -67,11 +67,11 @@ const ForVendor = () => {
         e.preventDefault();
         setSaveLoader(true);
 
-        if (formData.name.length === 0 || formData.code.length === 0) {
+        if (formData.name.length === 0 || formData.code.length === 0 || formData.email.length === 0) {
             toast.error("Can't submit empty form!"); setOpen(false); setSaveLoader(false);
         }
 
-        if (formData.name.length > 0 && formData.code.length > 0) {
+        if (formData.name.length > 0 && formData.code.length > 0 && formData.email.length > 0) {
             try {
                 const response = editMode
                     ? await axios.put(`${backendServer}/api/vendors/${currentUserId}`, formData)
@@ -138,8 +138,8 @@ const ForVendor = () => {
     );
 
     return (
-        <div className="w-full flex flex-col items-center justify-start bg-white p-4 rounded-lg gap-8">
-          <Dialog
+        <div className="w-full flex flex-col items-center justify-start bg-white p-4 rounded-lg gap-4">
+            <Dialog
                 size="sm"
                 open={open}
                 handler={handleOpen}
@@ -213,7 +213,7 @@ const ForVendor = () => {
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="city" id="city" />
-                    </div>  
+                    </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <label htmlFor="state">State:</label>
                         <input
@@ -221,7 +221,7 @@ const ForVendor = () => {
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="state" id="state" />
-                    </div>                       
+                    </div>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <label htmlFor="zip">Zip:</label>
                         <input
@@ -237,7 +237,7 @@ const ForVendor = () => {
                             onChange={handleInputChange}
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="note" id="note" />
-                    </div>                                                                                                           
+                    </div>
                     <div className="w-full flex items-center justify-center">
                         {
                             saveLoader ? <CircularProgress /> :
@@ -273,52 +273,54 @@ const ForVendor = () => {
                     <div className="w-full flex items-center justify-start text-lg font-medium">
                         No records found!
                     </div> :
-                    <div className="w-full flex flex-col items-center">
-                        <table className='border-collapse w-full'>
-                            <thead>
-                                <tr className='text-gray-700 text-lg'>
-                                    <th>Actions</th>
-                                    <th>Code</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>PIC</th>
-                                    <th>Phone</th>
-                                    <th>Street</th>
-                                    <th>City</th>
-                                    <th>State</th>
-                                    <th>Zip</th>
-                                    <th>Note</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    current.map(user => (
-                                        <tr key={user._id} className='text-base text-center text-gray-700'>
-                                            <td>
-                                                <div className='w-full flex items-center justify-center gap-4'>
-                                                    <FaEdit
-                                                        className='text-lg cursor-pointer'
-                                                        onClick={() => handleEditClick(user)} />
-                                                    <MdDeleteOutline
-                                                        className='text-xl text-red-600 cursor-pointer'
-                                                        onClick={() => handleDeleteClick(user._id)} />
-                                                </div>
-                                            </td>
-                                            <td>{user.code}</td>
-                                            <td>{user.name}</td>
-                                            <td>{user.email}</td>
-                                            <td>{user.pic}</td>
-                                            <td>{user.phone}</td>
-                                            <td>{user.street}</td>
-                                            <td>{user.city}</td>
-                                            <td>{user.state}</td>
-                                            <td>{user.zip}</td>
-                                            <td>{user.note}</td>
-                                        </tr>
-                                    ))
-                                }
-                            </tbody>
-                        </table>
+                    <div className="w-full flex flex-col items-start justify-start">
+                        <div className="w-full flex items-start justify-start max-w-[68rem] overflow-x-scroll scroll-smooth pb-2" style={{ scrollbarWidth: 'thin' }}>
+                            <table className='border-collapse w=full'>
+                                <thead>
+                                    <tr className='text-gray-700 text-lg'>
+                                        <th>Actions</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>PIC</th>
+                                        <th>Phone</th>
+                                        <th>Street</th>
+                                        <th>City</th>
+                                        <th>State</th>
+                                        <th>Zip</th>
+                                        <th>Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        current.map(user => (
+                                            <tr key={user._id} className='text-base text-center text-gray-700 text-nowrap'>
+                                                <td>
+                                                    <div className='w-full flex items-center justify-center gap-2 px-2'>
+                                                        <FaEdit
+                                                            className='text-lg cursor-pointer'
+                                                            onClick={() => handleEditClick(user)} />
+                                                        <MdDeleteOutline
+                                                            className='text-xl text-red-600 cursor-pointer'
+                                                            onClick={() => handleDeleteClick(user._id)} />
+                                                    </div>
+                                                </td>
+                                                <td>{user.code}</td>
+                                                <td>{user.name}</td>
+                                                <td>{user.email}</td>
+                                                <td>{user.pic}</td>
+                                                <td>{user.phone}</td>
+                                                <td>{user.street}</td>
+                                                <td>{user.city}</td>
+                                                <td>{user.state}</td>
+                                                <td>{user.zip}</td>
+                                                <td>{user.note}</td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                         <div className='w-full flex items-center justify-end gap-2 mt-4'>
 
                             <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center cursor-pointer">

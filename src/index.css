@@ -24,6 +24,10 @@ table th {
     background: #F9FAFC;
 }
 
+table td {
+    min-width: 5rem;
+}
+
 .minHeight {
     min-height: calc(100vh);
 }
