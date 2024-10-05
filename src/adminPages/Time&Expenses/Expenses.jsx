@@ -25,8 +25,7 @@ const Expenses = () => {
 
     const [formData, setFormData] = useState({
         prj: '',
-        frmDate: '',
-        toDate: '',
+        date: '',
         type: '',
         amount: '',
         totalAmount: '',
@@ -44,47 +43,17 @@ const Expenses = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({ ...prevData, [name]: value }));
-
-        if (name === "frmDate" || name === "toDate") {
-            const updatedFormData = { ...formData, [name]: value };
-            const { frmDate, toDate } = updatedFormData;
-
-            if (frmDate && toDate && new Date(toDate) < new Date(frmDate)) {
-                toast.error('The "To" date cannot be earlier than the "From" date.');
-                setFormData((prevData) => ({ ...prevData, toDate: '' }));
-                setDaysDiff(0);
-            } else {
-                if (frmDate && toDate) {
-                    calculateDaysDiff(frmDate, toDate);
-                }
-            }
-        }
-    };
-
-    const calculateDaysDiff = (frmDate, toDate) => {
-        const startDate = new Date(frmDate);
-        const endDate = new Date(toDate);
-
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(0, 0, 0, 0);
-
-        const timeDiff = endDate - startDate;
-        const days = timeDiff / (1000 * 60 * 60 * 24);
-
-        setDaysDiff(days);
     };
 
     const resetForm = () => {
         setFormData({
             prj: '',
-            frmDate: '',
-            toDate: '',
+            date: '',
             type: '',
             amount: '',
             totalAmount: '',
             comment: ''
         });
-        setDaysDiff(0);
         setError(null);
         setSelectedFile(null);
         setSaveLoader(false);
@@ -139,7 +108,6 @@ const Expenses = () => {
             });
             return response.data.imageUrl;
         } catch (error) {
-            console.error('Error uploading image:', error);
             toast.error('Error uploading image');
             return null;
         }
@@ -149,7 +117,7 @@ const Expenses = () => {
 
         setSaveLoader(true);
 
-        if (!formData.prj || !formData.frmDate || !formData.toDate || !formData.type || !formData.amount) {
+        if (!formData.prj || !formData.date || !formData.type || !formData.amount) {
             toast.error("Please fill all the mandatory details.");
             setSaveLoader(false);
         } else {
@@ -168,14 +136,13 @@ const Expenses = () => {
 
                 const response = await axios.post(`${backendServer}/api/add-expense`, {
                     prj: formData.prj,
-                    frmDate: formData.frmDate,
-                    toDate: formData.toDate,
+                    date: formData.date,
                     type: formData.type,
                     amount: Number(formData.amount),
-                    totalAmount: Number(daysDiff * formData.amount),
+                    totalAmount: Number(formData.amount),
                     comment: formData.comment,
                     imageUrl: uploadedImageUrl,
-                    docid: `TE-00${teDocsLen + 1}` , 
+                    docid: `TE-00${teDocsLen + 1}`,
                     user: loggedInUser
                 });
 
@@ -191,10 +158,10 @@ const Expenses = () => {
         }
     };
 
-	const handleCancel = () => {
-		navigate("/admin-panel");
-		handleMenuID(12);
-	};
+    const handleCancel = () => {
+        navigate("/admin-panel");
+        handleMenuID(12);
+    };
 
     return (
         <div className="w-full flex flex-col items-center justify-start gap-2 p-4 pb-0">
@@ -242,25 +209,12 @@ const Expenses = () => {
                                     <div className="w-full flex items-center justify-start gap-6">
                                         <div className="flex flex-col items-start text-sm">
                                             <div className="flex items-start justify-start gap-0.5">
-                                                <label htmlFor="frmDate">From:</label>
+                                                <label htmlFor="date">Date:</label>
                                                 <sup className='mt-1 text-lg text-red-600 font-medium'>*</sup>
                                             </div>
-                                            <input value={formData.frmDate} onChange={handleInputChange}
+                                            <input value={formData.date} onChange={handleInputChange}
                                                 className='-mt-1 outline-none p-1 border border-solid border-gray-300'
-                                                type="date" name="frmDate" />
-                                        </div>
-                                        <div className="flex flex-col items-start text-sm">
-                                            <div className="flex items-start justify-start gap-0.5">
-                                                <label htmlFor="toDate">To:</label>
-                                                <sup className='mt-1 text-lg text-red-600 font-medium'>*</sup>
-                                            </div>
-                                            <input value={formData.toDate} onChange={handleInputChange} disabled={!formData.frmDate}
-                                                className='-mt-1 outline-none p-1 border border-solid border-gray-300'
-                                                type="date" name="toDate" />
-                                        </div>
-                                        <div className="flex flex-col items-start text-sm gap-2.5">
-                                            <div>Number of days:</div>
-                                            <div className='w-[8rem] p-1 border border-solid border-gray-300'>{daysDiff}</div>
+                                                type="date" name="date" />
                                         </div>
                                     </div>
 
@@ -269,7 +223,7 @@ const Expenses = () => {
                                     <div className="flex items-center justify-start gap-8">
                                         <div className="flex flex-col items-start text-sm">
                                             <div className="w-full flex items-start justify-start gap-0.5">
-                                                <label htmlFor="type">Allowance Type:</label>
+                                                <label htmlFor="type">Expense Type:</label>
                                                 <sup className='mt-1 text-lg text-red-600 font-medium'>*</sup>
                                             </div>
                                             <select value={formData.type} onChange={handleInputChange}
@@ -291,11 +245,11 @@ const Expenses = () => {
                                         </div>
                                         <div className="flex flex-col items-start text-sm">
                                             <div className="w-full flex items-start justify-start gap-0.5">
-                                                <label htmlFor="amount">Allowance amount ($):</label>
+                                                <label htmlFor="amount">Expense amount ($):</label>
                                                 <sup className='mt-1 text-lg text-red-600 font-medium'>*</sup>
                                             </div>
                                             <input value={formData.amount} onChange={handleInputChange} disabled={!formData.type}
-                                                className='-mt-1 outline-none p-1 border border-solid border-gray-300' min={0}
+                                                className='-mt-1 outline-none p-2 border border-solid border-gray-300' min={0}
                                                 type="number" name="amount" />
                                         </div>
                                     </div>
@@ -315,7 +269,7 @@ const Expenses = () => {
                                         {new Intl.NumberFormat('en-US', {
                                             style: 'currency',
                                             currency: 'USD',
-                                        }).format(daysDiff * Number(formData.amount))}
+                                        }).format(Number(formData.amount))}
                                     </div>
                                 </div>
 
