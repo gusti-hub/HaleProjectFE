@@ -18,7 +18,9 @@ const ForClient = () => {
 
     const [open, setOpen] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
-    const [formData, setFormData] = useState({ name: '', code: '', email: '', password: '', address: '', city: '', state: '', zip: '', phone: '', notes: '' });
+    const [formData, setFormData] = useState({ 
+        name: '', code: '', email: '', password: '', address: '', city: '', state: '', zip: '', phone: '', notes: '', mailAddress: '', siteAddress: ''
+    });
     const [editMode, setEditMode] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +37,7 @@ const ForClient = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', code: '', email: '', password: '', address: '', city: '', state: '', zip: '', phone: '', notes: '' });
+        setFormData({ name: '', code: '', email: '', password: '', address: '', city: '', state: '', zip: '', phone: '', notes: '', mailAddress: '', siteAddress: '' });
         setIsChecked(false);
         setEditMode(false);
         setCurrentUserId(null);
@@ -61,7 +63,7 @@ const ForClient = () => {
     };
 
     const handleEditClick = (user) => {
-        setFormData({ name: user.name, code: user.code, email: user.email, password: '', address: user.address, city: user.city, state: user.state, zip: user.zip, phone: user.phone, notes: user.notes });
+        setFormData({ name: user.name, code: user.code, email: user.email, password: '', address: user.address, city: user.city, state: user.state, zip: user.zip, phone: user.phone, notes: user.notes, mailAddress: user.mailAddress, siteAddress: user.siteAddress });
         setCurrentUserId(user._id);
         setEditMode(true);
         setOpen(true);
@@ -152,7 +154,7 @@ const ForClient = () => {
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
                 <form onSubmit={handleSubmit}
-                    className='w-full max-h-[80vh] overflow-y-auto flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
+                    className='w-full max-h-[80vh] overflow-y-scroll scroll-smooth flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg' style={{scrollbarWidth: 'thin'}}>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
                             <label htmlFor="name">Name:</label>
@@ -264,6 +266,22 @@ const ForClient = () => {
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="notes" id="notes" />
                     </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="mailAddress">Mailing Address:</label>
+                        <input
+                            value={formData.mailAddress}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="mailAddress" id="mailAddress" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="siteAddress">Site Address:</label>
+                        <input
+                            value={formData.siteAddress}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="siteAddress" id="siteAddress" />
+                    </div>
                     <div className="w-full flex items-center justify-center">
                         {
                             saveLoader ? <CircularProgress /> :
@@ -303,7 +321,7 @@ const ForClient = () => {
                         <div className="w-full flex items-start justify-start max-w-[69rem] overflow-x-scroll scroll-smooth pb-2" style={{ scrollbarWidth: 'thin' }}>
                             <table className='border-collapse w-full'>
                                 <thead>
-                                    <tr className='text-gray-700 text-lg'>
+                                    <tr className='text-gray-700 text-lg text-nowrap'>
                                         <th>Actions</th>
                                         <th>Code</th>
                                         <th>Name</th>
@@ -314,6 +332,8 @@ const ForClient = () => {
                                         <th>Zip</th>
                                         <th>Phone</th>
                                         <th>Notes</th>
+                                        <th>Mailing Address</th>
+                                        <th>Site Address</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -339,6 +359,8 @@ const ForClient = () => {
                                                 <td>{user.zip}</td>
                                                 <td>{user.phone}</td>
                                                 <td>{user.notes}</td>
+                                                <td>{user.mailAddress}</td>
+                                                <td>{user.siteAddress}</td>
                                             </tr>
                                         ))
                                     }

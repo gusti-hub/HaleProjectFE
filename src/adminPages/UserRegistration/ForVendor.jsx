@@ -17,7 +17,9 @@ const ForVendor = () => {
     const [error, setError] = useState(null);
 
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state: '', zip: '', note: '' });
+    const [formData, setFormData] = useState({ 
+        name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state: '', zip: '', note: '', mailAddress: '', siteAddress: ''
+    });
     const [editMode, setEditMode] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -30,7 +32,7 @@ const ForVendor = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state: '', zip: '', note: '' });
+        setFormData({ name: '', code: '', email: '', pic: '', phone: '', street: '', city: '', state: '', zip: '', note: '', mailAddress: '', siteAddress: '' });
         setEditMode(false);
         setCurrentUserId(null);
     };
@@ -55,7 +57,7 @@ const ForVendor = () => {
     };
 
     const handleEditClick = (user) => {
-        setFormData({ name: user.name, code: user.code, email: user.email, pic: user.pic, phone: user.phone, street: user.street, city: user.city, state: user.state, zip: user.zip, note: user.note });
+        setFormData({ name: user.name, code: user.code, email: user.email, pic: user.pic, phone: user.phone, street: user.street, city: user.city, state: user.state, zip: user.zip, note: user.note, mailAddress: user.mailAddress, siteAddress: user.siteAddress });
         setCurrentUserId(user._id);
         setEditMode(true);
         setOpen(true);
@@ -146,7 +148,7 @@ const ForVendor = () => {
                 className="bg-transparent shadow-none w-full flex items-center justify-center"
             >
                 <form onSubmit={handleSubmit}
-                    className='w-full max-h-[80vh] overflow-y-auto flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg'>
+                    className='w-full max-h-[80vh] overflow-y-scroll scroll-smooth flex flex-col items-center justify-start gap-4 bg-white p-4 text-black rounded-lg' style={{scrollbarWidth: 'thin'}}>
                     <div className="w-full flex flex-col items-start gap-1 text-base">
                         <div className="w-full flex items-center justify-start gap-2">
                             <label htmlFor="name">Name:</label>
@@ -238,6 +240,22 @@ const ForVendor = () => {
                             className='w-full border-b-2 border-solid border-black p-2 outline-none'
                             type="text" placeholder='Type here...' name="note" id="note" />
                     </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="mailAddress">Mailing Address:</label>
+                        <input
+                            value={formData.mailAddress}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="mailAddress" id="mailAddress" />
+                    </div>
+                    <div className="w-full flex flex-col items-start gap-1 text-base">
+                        <label htmlFor="siteAddress">Site Address:</label>
+                        <input
+                            value={formData.siteAddress}
+                            onChange={handleInputChange}
+                            className='w-full border-b-2 border-solid border-black p-2 outline-none'
+                            type="text" placeholder='Type here...' name="siteAddress" id="siteAddress" />
+                    </div>
                     <div className="w-full flex items-center justify-center">
                         {
                             saveLoader ? <CircularProgress /> :
@@ -277,7 +295,7 @@ const ForVendor = () => {
                         <div className="w-full flex items-start justify-start max-w-[68rem] overflow-x-scroll scroll-smooth pb-2" style={{ scrollbarWidth: 'thin' }}>
                             <table className='border-collapse w=full'>
                                 <thead>
-                                    <tr className='text-gray-700 text-lg'>
+                                    <tr className='text-gray-700 text-lg text-nowrap'>
                                         <th>Actions</th>
                                         <th>Code</th>
                                         <th>Name</th>
@@ -289,6 +307,8 @@ const ForVendor = () => {
                                         <th>State</th>
                                         <th>Zip</th>
                                         <th>Note</th>
+                                        <th>Mailing Address</th>
+                                        <th>Site Address</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -315,6 +335,8 @@ const ForVendor = () => {
                                                 <td>{user.state}</td>
                                                 <td>{user.zip}</td>
                                                 <td>{user.note}</td>
+                                                <td>{user.mailAddress}</td>
+                                                <td>{user.siteAddress}</td>
                                             </tr>
                                         ))
                                     }
