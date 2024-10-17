@@ -4,6 +4,7 @@
 
 html {
     font-family: "Inter", sans-serif;
+    scrollbar-width: thin;
 }
 
 .textured-bg {
@@ -22,6 +23,10 @@ tr {
 
 table th {
     background: #F9FAFC;
+}
+
+table td {
+    min-width: 5rem;
 }
 
 .minHeight {

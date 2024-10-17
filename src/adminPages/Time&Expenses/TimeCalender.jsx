@@ -211,7 +211,7 @@ const TimeCalendar = () => {
 				setSaveLoader(false);
 				toast.success('Hours saved successfully');
 				navigate("/admin-panel");
-				handleMenuID(10);
+				handleMenuID(12);
 			} else {
 				setSaveLoader(false);
 				toast.error('No data to save');
@@ -227,7 +227,7 @@ const TimeCalendar = () => {
 	// Handle cancel action
 	const handleCancel = () => {
 		navigate("/admin-panel");
-		handleMenuID(10);
+		handleMenuID(12);
 	};
 
 	return (

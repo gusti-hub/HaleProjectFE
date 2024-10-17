@@ -71,7 +71,7 @@ const EmpSales = () => {
                                                     {
                                                         currentSales.map(sale => {
                                                             return (
-                                                                <tr className='text-base text-center text-gray-700'>
+                                                                <tr key={sale._id} className='text-base text-center text-gray-700'>
                                                                     <td>{sale.name}</td>
                                                                     <td>{sale.salesCount}</td>
                                                                 </tr>
