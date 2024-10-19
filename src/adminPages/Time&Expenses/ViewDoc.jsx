@@ -76,7 +76,7 @@ const ViewDoc = () => {
                                     </div>
                                 </div>
                                 {
-                                    address.type === "time" ? <FetchTime id={doc.teid} />
+                                    address.type === "time" ? <FetchTime id={doc.teid} status={doc.status} />
                                         : address.type === "expense" ? <ViewExpense id={doc.teid} status={doc.status} /> : ''
                                 }
                             </div>

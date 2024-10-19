@@ -136,8 +136,8 @@ const TimeExpenses = () => {
                                                                                     <div className="w-full flex flex-col items-start gap-1">
                                                                                         <button onClick={() => navigate(`/view-doc/${doc.type.toLowerCase()}/${doc._id}`)}
                                                                                             className="w-full text-left font-normal">
-                                                                                                {doc.type === 'Time' ? 'View' : 'View / Edit'}
-                                                                                            </button>
+                                                                                            View / Edit
+                                                                                        </button>
                                                                                         {doc.status === "Draft on Approval" && <div className={`w-full h-[2px] bg-gray-300`}></div>}
                                                                                         {
                                                                                             doc.status === "Draft on Approval" && <button onClick={() => updateStatus(doc._id, "Approved")}
